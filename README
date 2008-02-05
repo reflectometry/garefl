@@ -1,0 +1,57 @@
+  GArefl is a reflectometry fitting program in C which allows simultaneous
+  fitting of neutron and X-ray data.
+
+  The source software is available as a download from
+
+       http://www.ncnr.nist.gov/reflpak
+
+  or directly from the svn repository:
+
+	$ svn svn://danse.us/reflectometry/branches/garefl garefl
+
+  Once you have downloaded the particular version you are
+  interested in and extracted the files, change to the
+  garefl subdirectory.
+
+  The next step(s) are operating system specific.
+
+  <MacOSX>
+    For OS X 10.4 you will need to have a fortran compiler to fit
+    magnetic systems.  E.g., the following version of the gfortran 
+    compiler builds universal binaries:
+
+        http://r.research.att.com/tools
+
+    On Mac OS X you may need to use one of the following:
+
+	./configure --disable-magnetic  # No fortran compiler
+	./configure FLIBS=-lg2c         # g77 fortran compiler
+        ./configure FLIBS=/usr/local/lib/libgfortran.a  # gfortran compiler
+
+  </MacOSX>
+  <Windows>
+        ./configure
+  </Windows>
+  <Unix>
+	./configure
+  </Unix>
+
+  Once configure has completed, use
+
+	make
+
+  to build the code.
+
+  Next switch to examples/volfrac and type
+
+	make
+	./fit
+
+  You should now be running an example of a simultaneous fit.
+
+  See doc/ga_refl.pdf for instructions on setting up your models 
+  and fitting with them.
+
+Paul Kienzle
+2007-11-08
+

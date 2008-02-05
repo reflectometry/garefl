@@ -1,0 +1,106 @@
+/* -*- mode: C -*- */
+
+#if BKGD
+#define NPAR 4
+#else
+#define NPAR 3
+#endif
+
+inline double gaussian(const double x, const double p[])
+{
+  const double dx = (p[1]-x)/p[2];
+#if BKGD
+  return p[0]*exp(-dx*dx) + p[3];
+#else
+  return p[0]*exp(-dx*dx);
+#endif
+}
+
+void fn(const double p[], double fx[], int n, int k, void *data)
+{
+  int i;
+  const double *x = (double *)data;
+  const double *dy = x + k;
+
+  for (i=0; i < k; i++) fx[i] = gaussian(x[i],p)/dy[i];
+}
+
+void initp(int k, const double x[], const double y[], double p[],
+	   double bounds[])
+{
+  const double *dy = x + k;
+  double minx, maxx;
+  double peakx, peaky;
+  int i;
+
+  /* Locate peak */
+  peakx = x[0];
+  peaky = y[0];
+  for (i=1; i<k; i++) {
+    if (y[i]*dy[i] > peaky) {
+      peakx = x[i];
+      peaky = y[i]*dy[i];
+    }
+  }
+
+  /* Determine x range */
+  minx = maxx = x[0];
+  for (i=1; i<k; i++) {
+    const double v = x[i];
+    if (v < minx) minx = v;
+    else if (v > maxx) maxx = v;
+  }
+
+  p[0] = 2*peaky;
+  p[1] = 2*peakx;
+  p[2] = 2*(maxx-minx)/4.;
+#if BKGD
+  p[3] = 0.;
+#endif
+
+  /* Set bounds */
+  bounds[0]      = peaky*0.8;
+  bounds[0+NPAR] = peaky*1.2;
+  bounds[1]      = peakx - (maxx-minx)/2;
+  bounds[1+NPAR] = peakx + (maxx-minx)/2;
+  bounds[2]      = 0.;
+  bounds[2+NPAR] = (maxx-minx)/2.;
+  if (BKGD) {
+    bounds[3]      = 0.;
+    bounds[3+NPAR] = peaky/2.;
+  }
+
+}
+
+
+void gendata(int k, double x[], double y[], double dy[], double p[])
+{
+  int i;
+
+  /* Set p0 */
+  p[0] = 1000.;
+  p[1] = -0.5;
+  p[2] = 0.8;
+  p[3] = 10.;
+
+  for (i=0; i < k; i++) {
+    x[i] = 6.0*((double)i/(double)(k-1) - 0.5);
+    /* Expected counts */
+    y[i] = gaussian(x[i],p);
+    /* Poisson: variance is equal to counts */
+    dy[i] = y[i]>1.?sqrt(y[i]):1.;
+    /* Simulate counts according to that mean, variance and background */
+#if BKGD
+    y[i] = rint(y[i] + dy[i]*randn() + p[3]*randn());
+#else
+    y[i] = rint(y[i] + dy[i]*randn());
+#endif
+    /* Counts must be greater than zero. */
+    if (y[i] < 0.) y[i] = 0.; 
+    /* Estimate uncertainty from simulated counts */
+    dy[i] = y[i]>1.?sqrt(y[i]):1.;
+    /* Weight counts by uncertainty */
+    y[i] /= dy[i];
+  }
+}
+

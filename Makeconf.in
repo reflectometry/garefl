@@ -1,0 +1,120 @@
+# Variables filled in by ./configure
+
+# Unix path names
+ROOT=@abs_top_srcdir@/..
+BUILDDIR=@abs_builddir@
+SOURCEDIR=@abs_srcdir@
+
+# Windows path names for use as compiler parameters
+WROOT=$(ROOT)
+WBUILDDIR=$(BUILDDIR)
+WSOURCEDIR=$(SOURCEDIR)
+
+SHARED=-fPIC
+ARCHFLAGS=
+CXX=@CXX@
+CXXFLAGS=$(ARCHFLAGS) @CXXFLAGS@ @PROFFLAG@ $(SHARED)
+CC=@CC@
+CFLAGS=$(ARCHFLAGS) @CFLAGS@ @PROFFLAG@ $(SHARED)
+DEFS=@DEFS@
+F77=@F77@
+FFLAGS=$(ARCHFLAGS) @FFLAGS@ @PROFFLAG@ $(SHARED)
+FLIBS=@FLIBS@
+LDFLAGS=$(ARCHFLAGS) @LDFLAGS@ @PROFFLAG@ $(SHARED)
+LIBS=@LIBS@
+AR=@AR@
+ARFLAGS=@ARFLAGS@
+RANLIB=@RANLIB@
+EXE=@EXEEXT@
+DLL=.so
+LN_S=@LN_S@
+SVN2CL=@SVN2CL@ 
+ENABLE_MAGNETIC=@ENABLE_MAGNETIC@
+
+COPY=cp
+MAKEPATH=mkdir -p
+RM=rm -f
+
+
+# PKG_LIBDIR = directory containing the library files for PKG (build)
+# PKG_INCDIR = directory containing the include files for PKG (source)
+# PKGDEP = dependency line for makefile on PKG
+# PKGINC = include statements for compiling against PKG
+# PKGLIB = library statements for linking against PKG
+#          
+# Example C application based on library:
+#     app: app.o $(PKG1DEP) $(PKG2DEP)
+#             $(CC) $(LDFLAGS) app.o $(PKG1LIB) $(PKG2LIB) $(FLIBS) $(LIBS)
+#     app.o: app.c
+#             $(CC) -c $(CFLAGS) $(PKGINC) $(DEFS) app.c -o app.o
+#     $(PKG1DEP) $(PKG2DEP): builddeps ;
+#     builddeps:
+#        cd $(PKG1_LIBDIR) && $(MAKE)
+#        cd $(PKG2_LIBDIR) && $(MAKE)
+#
+# We need to depend on the package dependencies through a phony
+# target because they depend on explicit files with no explicit
+# build rules.  The ';' after builddeps is to suppress any default
+# rules that might otherwise apply for those targets.
+
+MODEL1D_LIBDIR=$(BUILDDIR)/model1d
+MODEL1D_INCDIR=$(SOURCEDIR)/model1d
+MODEL1D_WLIBDIR=$(WBUILDDIR)/model1d
+MODEL1D_WINCDIR=$(WSOURCEDIR)/model1d
+
+MODEL1DDEP=$(MODEL1D_LIBDIR)/librefl.a
+MODEL1DLIB=-L$(MODEL1D_WLIBDIR) -lrefl
+MODEL1DINC=-I$(MODEL1D_WINCDIR)
+
+FIT_LIBDIR=$(BUILDDIR)/boxmin
+FIT_INCDIR=$(SOURCEDIR)/boxmin
+FIT_WLIBDIR=$(WBUILDDIR)/boxmin
+FIT_WINCDIR=$(WSOURCEDIR)/boxmin
+
+FITDEP=$(FIT_LIBDIR)/libboxmin.a
+FITLIB=-L$(FIT_WLIBDIR) -lboxmin
+FITINC=-I$(FIT_WINCDIR)
+
+GAREFL_LIBDIR=$(BUILDDIR)/src
+GAREFL_INCDIR=$(SOURCEDIR)/src
+GAREFL_WLIBDIR=$(WBUILDDIR)/src
+GAREFL_WINCDIR=$(WSOURCEDIR)/src
+
+GAREFLDEP=$(GAREFL_LIBDIR)/ga_simul.o $(GAREFL_LIBDIR)/ga.o
+GAREFLLIB=$(GAREFL_WLIBDIR)/ga_simul.o $(GAREFL_WLIBDIR)/ga.o
+GAREFLINC=-I$(GAREFL_WINCDIR)
+
+# Since the header files are no longer gathered in one place
+# we need to encode the whole path to each on our dependency
+# statements.  Yuck!!
+MODEL_H=$(MODEL1D_INCDIR)/model.h
+INTERFACE_H=$(MODEL1D_INCDIR)/interface.h
+PROFILE_H=$(MODEL1D_INCDIR)/profile.h
+REFLCALC_H=$(MODEL1D_INCDIR)/reflcalc.h
+REFLCONFIG_H=$(MODEL1D_INCDIR)/reflconfig.h
+BSPLINE_H=$(MODEL1D_INCDIR)/bspline.h
+REFL_H=$(MODEL1D_INCDIR)/refl.h
+PBS_H=$(MODEL1D_INCDIR)/pbs.h
+DATA_H=$(MODEL1D_INCDIR)/data.h
+PARS_H=$(MODEL1D_INCDIR)/pars.h
+FIT_H=$(MODEL1D_INCDIR)/fit.h
+AMOEBA_H=$(FIT_INCDIR)/amoeba.h
+GA_H=$(GAREFL_INCDIR)/ga.h
+
+MODEL1DHEADERS=$(FIT_H) $(PROFILE_H) $(MODEL_H) $(INTERFACE_H) \
+	$(REFLCALC_H) $(REFLCONFIG_H) $(REFL_H) $(DATA_H) \
+	$(BSPLINE_H) $(PARS_H)
+FITHEADERS=$(AMOEBA_H) $(GA_H)
+
+# Default compiler commands
+.SUFFIXES: .cc .c .f
+
+INCS=$(FITINC) $(MODEL1DINC) $(GAREFLINC)
+
+.cc.o: ; $(CXX) $(CXXFLAGS) $(DEFS) $(INCS) -c $< -o $@
+
+.c.o: ; $(CC) $(CFLAGS) $(DEFS) $(INCS) -c $< -o $@
+
+.f.o: ; $(F77) $(FFLAGS) $(DEFS) -c $< -o $@
+
+# $Id$

@@ -1,0 +1,76 @@
+/* -*- mode: c -*- */
+/* This program is public domain. */
+
+/* Implementation of matlab-like 'peaks' function for testing fits. */
+
+int fncalls = 0.;
+
+#define NDIM 2
+
+/* Local minima */
+#define MIN_X0 0.2282789256
+#define MIN_Y0 -1.625534951
+
+#define MIN_X1 -1.347396246
+#define MIN_Y1  0.2045188644
+
+#define NOISE (randn()*0.0)
+
+double peaks(double x, double y)
+{
+  const double z=3.*(1.-x)*(1.-x)*exp(-x*x - (y+1.)*(y+1.))
+    - 10.*(x/5. - x*x*x - y*y*y*y*y) * exp(-x*x-y*y)
+    - 1./3.*exp(-(x+1.)*(x+1.) - y*y) + NOISE;
+  /* printf(" eval (%.10g,%.10g) -> %.10g\n",x,y,z); */
+  return z;
+}
+
+double fobjective(int n, const double v[], void *user)
+{
+  ++fncalls;
+  return peaks(v[0],v[1]);
+}
+
+void setbounds(int dims, double bounds[])
+{
+  bounds[0] = -2.;
+  bounds[1] = -2.;
+  bounds[2] = 2.;
+  bounds[3] = 2.;
+}
+
+void targets(void)
+{
+  printf("minimum 1 at (%g,%g) = %g\n", MIN_X0, MIN_Y0, peaks(MIN_X0,MIN_Y0));
+  printf("minimum 2 at (%g,%g) = %g\n", MIN_X1, MIN_Y1, peaks(MIN_X1,MIN_Y1));
+}
+
+void neighbourhood(char *filename, int n, double p[], optimfn f, void *d)
+{
+   double xo = p[0];
+   double yo = p[1];
+   double dx,dy;
+   int i, j;
+   FILE *file;
+
+   if (filename == NULL) file = stdout;
+   else file = fopen(filename,"w");
+   if (file == NULL) return;
+
+   dx = 1e-2;
+   dy = 1e-2;
+   for (i=-20; i < 20; i++) {
+     p[1] = yo + i*dy;
+     for (j=-20; j < 20; j++) {
+       p[0] = xo + j * dx;
+       fprintf(file,"%19.14g ",fobjective(n,p,d));
+     }
+     fprintf(file,"\n");
+   }
+   p[0] = xo;
+   p[1] = yo;
+
+   if (filename != NULL) fclose(file);
+}
+
+/* $Id: peaks.ic 9 2006-02-14 01:44:12Z pkienzle $ */

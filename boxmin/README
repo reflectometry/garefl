@@ -1,0 +1,23 @@
+C fitting library for bounded derivative free fitting routines.
+
+Code:
+
+Makefile:       for compiling the library
+amoeba.h:       for Nelder-Mead simplex with bounds constraints
+amoeba.c:       implementation
+
+
+Example code (in examples):
+
+Makefile:       for compiling the test program
+peaks.ic:       implementation of a matlab-like 'peaks' function
+randmtzig.ic:   uniform and normal generator
+test_amoeba.c:  driver for the amoeba fitter using 'peaks'
+
+test_amoeba:    test program constructed when typing 'make'; run
+		multiple times from random starting points; edit
+		code to control for bounded/unbounded, etc.
+bowl:           output from test program: 2D matrix of values in
+		the neighbourhood of the minimum.
+
+$Id: README 2 2005-08-19 17:42:06Z pkienzle $

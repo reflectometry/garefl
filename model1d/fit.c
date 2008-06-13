@@ -64,6 +64,11 @@ fit_init(fitinfo *fit)
   fit->worksize = 0;
   fit->datatype = FIT_MAGNITUDE;
   fit->weight = 1.;
+
+  /* Parameters to support incoherent sum of models */
+  fit->number_incoherent = 0;
+  fit->incoherent_models = NULL;
+  fit->incoherent_weights = NULL;
 }
 
 static void save_gj2(FILE *fid, const fitinfo *fit)
@@ -495,6 +500,91 @@ void _write_refl(const fitinfo *fit, const char name[])
   fclose(f);
 }
 
+/* Incoherent sum of multiple models for magnetic reflectometry */
+static void incoherent_magnetic_theory(fitinfo *fit)
+{
+	double total_weight; /* Total weight of all models */
+	int i, k;
+	profile p; /* Incoherent model profile */
+	double *A,*B,*C,*D;
+
+	/* Make space for incoherent models. */
+ 	extend_work(fit,4*fit->nQ);
+ 	A = fit->work;
+	B = fit->work + fit->nQ;
+	C = fit->work + 2*fit->nQ;
+	D = fit->work + 3*fit->nQ;
+
+	/* Incoherent sum of the theory functions. */
+  profile_init(&p);
+	for (i=0; i < fit->number_incoherent; i++) {
+	  model_profile(fit->incoherent_models[i], &p);
+	  magnetic_reflectivity(p.n, p.d, p.rho, p.mu, fit->beam.lambda,
+		  p.P, p.expth, fit->beam.Aguide, fit->nQ, fit->fitQ, A,B,C,D);
+	  for (k=0; k < fit->nQ; k++) {
+	  	fit->fitA[k] += A[k] * fit->incoherent_weights[i];
+	  	fit->fitB[k] += B[k] * fit->incoherent_weights[i];
+	  	fit->fitC[k] += C[k] * fit->incoherent_weights[i];
+	  	fit->fitD[k] += D[k] * fit->incoherent_weights[i];
+	  }
+	}
+  profile_destroy(&p);
+
+	/* Incoherent sum of models requires relative model weighting.
+	 * The base model is assumed to have weight 1.  The remaining
+	 * models can have their weights adjusted, with the result
+	 * normalized by the total weight. */
+	total_weight = 1.;
+	for (i=0; i < fit->number_incoherent; i++) {
+		total_weight += fit->incoherent_weights[i];
+	}
+	for (k=0; k < fit->nQ; k++) {
+		fit->fitA[k] /= total_weight;
+		fit->fitB[k] /= total_weight;
+		fit->fitC[k] /= total_weight;
+		fit->fitD[k] /= total_weight;
+	}
+}
+
+/* Incoherent sum of multiple models for magnetic reflectometry */
+static void incoherent_nonmagnetic_theory(fitinfo *fit)
+{
+	double total_weight; /* Total weight of all models */
+	int i, k;
+	profile p; /* Incoherent model profile */
+	double *A;
+
+	/* Make space for incoherent models. */
+ 	extend_work(fit,fit->nQ);
+ 	A = fit->work;
+
+	/* Incoherent sum of the theory functions. */
+  profile_init(&p);
+	for (i=0; i < fit->number_incoherent; i++) {
+		profile_reset(&p);
+	  model_profile(fit->incoherent_models[i], &p);
+	  /* profile_print(&p,NULL); */
+	  reflectivity(p.n, p.d, p.rho, p.mu, fit->beam.lambda,
+		  fit->nQ, fit->fitQ, A);
+	  for (k=0; k < fit->nQ; k++) {
+	  	fit->fitA[k] += A[k] * fit->incoherent_weights[i];
+	  }
+	}
+  profile_destroy(&p);
+
+	/* Incoherent sum of models requires relative model weighting.
+	 * The base model is assumed to have weight 1.  The remaining
+	 * models can have their weights adjusted, with the result
+	 * normalized by the total weight. */
+	total_weight = 1.;
+	for (i=0; i < fit->number_incoherent; i++) {
+		total_weight += fit->incoherent_weights[i];
+	}
+	for (k=0; k < fit->nQ; k++) {
+		fit->fitA[k] /= total_weight;
+	}
+}
+
 static void calc_magnitude(fitinfo *fit)
 {
   /* _write_profile(fit,"prof.out"); */
@@ -507,6 +597,9 @@ static void calc_magnitude(fitinfo *fit)
 			  fit->p.P, fit->p.expth, 
 			  fit->beam.Aguide, fit->nQ, fit->fitQ,  
 			  fit->fitA, fit->fitB, fit->fitC, fit->fitD);
+
+	  if (fit->number_incoherent > 0) incoherent_magnetic_theory(fit);
+
     /* _write_refl(fit,"reflA.out"); */
     apply_beam_parameters(fit,fit->fitA,&fit->dataA);
     apply_beam_parameters(fit,fit->fitB,&fit->dataB);
@@ -520,8 +613,11 @@ static void calc_magnitude(fitinfo *fit)
   } else {
     /* Generate reflectivity amplitude from the profile */
     reflectivity(fit->p.n, fit->p.d, fit->p.rho, 
-		 fit->p.mu, fit->beam.lambda,
-		 fit->nQ, fit->fitQ, fit->fitA);
+				fit->p.mu, fit->beam.lambda,
+				fit->nQ, fit->fitQ, fit->fitA);
+
+	  if (fit->number_incoherent > 0) incoherent_nonmagnetic_theory(fit);
+
     /* _write_refl(fit,"reflA.out"); */
     apply_beam_parameters(fit,fit->fitA,&fit->dataA);
     /* _write_refl(fit,"reflB.out"); */
@@ -536,7 +632,7 @@ static void calc_real(fitinfo *fit)
   /* Generate reflectivity amplitude from the profile */
   reflectivity_real(fit->p.n, fit->p.d, fit->p.rho, 
 		    fit->p.mu, fit->beam.lambda,
-		    fit->nQ, fit->fitQ, fit->fitA);
+		    fit->nQ, fit->fitQ, fit->fitA);	
 
   /* FIXME need to support repeated Q with different resolution. For
      the resolution case, this simply means making sure that enough

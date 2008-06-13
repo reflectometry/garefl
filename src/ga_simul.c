@@ -799,13 +799,34 @@ double partial_update_models(fitinfo *fit, double portion, double best)
 void save_models(fitinfo *fit)
 {
   char name[100];
-  int i;
+  int i, k;
+  int incoh = MODELS; /* Number the incoherent models starting at N */
 
   for (i=0; i < MODELS; i++) {
+  	/* Save the model and profile */
     sprintf(name,"model%d.dat",i);
     model_print(&fit[i].m, name);
     sprintf(name,"profile%d.dat",i);
     profile_print(&fit[i].p, name);
+
+	  /* Save the supplementary incoherent models and profiles. */
+    for (k=0; k < fit[i].number_incoherent; k++) {
+    	profile p;
+    	
+    	/* Save the model */
+    	sprintf(name,"model%d.dat",incoh);
+    	model_print(fit[i].incoherent_models[k], name);
+    	
+    	/* Need to regenerate the profile since it was tossed. */
+    	profile_init(&p);
+    	model_profile(fit[i].incoherent_models[k], &p);
+    	sprintf(name,"profile%d.dat",incoh);
+    	profile_print(&p, name);
+    	profile_destroy(&p);
+    	
+    	incoh++; /* Next incoherent profile goes to next available number */
+    }
+    
     sprintf(name,"fit%d.dat",i);
     /*{int i; for (i=0;i<fit.nQ;i++) printf("Q[%d]: %g\n",i,fit.fitQ[i]);}*/
     if (fit[i].datatype == FIT_POLARIZED) {

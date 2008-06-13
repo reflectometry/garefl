@@ -23,21 +23,35 @@ typedef struct beaminfo_struct {
 #define FIT_IMAGINARY 2
 
 typedef struct fitinfo_struct {
+	/* Reflectometry model */
   model m;           /* Model parameters */
   profile p;         /* Model profile */
   interface rm;      /* Interface shape for model */
+
+  /* Support for incoherent sums across models */
+  int number_incoherent;
+  model **incoherent_models;
+  double *incoherent_weights;
+
+   /* Theory curve */
   int nQ, capacity;  /* Theory function storage */
   double *fitQ;
   double *fitA, *fitB, *fitC, *fitD;
-                     /* Data to fit */
+
+  /* Reflectometry data */
   fitdata dataA, dataB, dataC, dataD;
   int datatype;
   beaminfo beam;     /* Instrument parameters */
   fitpars pars;      /* Fitting parameters */
-  int worksize;      /* Working storage */
-  double *work;
+
+  /* Fitness value */
   double chisq_est;  /* Current chisq */
   double weight;     /* Scale factor for chisq (default 1) */
+
+	/* Working storage */  
+  int worksize;      /* Working storage */
+  double *work;
+  
 } fitinfo;
 void fit_init(fitinfo *fit);
 void fit_destroy(fitinfo *fit);

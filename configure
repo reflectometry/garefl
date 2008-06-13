@@ -4431,7 +4431,7 @@ done
 
 exdir=examples
 exmake=
-for ex in volfrac multimag xray; do
+for ex in volfrac multimag xray incoherent; do
   exmake="$exmake $exdir/$ex/Makefile:$exdir/Makefile.template"
 done
                     ac_config_files="$ac_config_files Makeconf $exmake"
@@ -5570,4 +5570,4 @@ if test "$no_create" != yes; then
 fi
 
 
-# $Id: configure.in 337 2007-11-09 00:04:39Z pkienzle $
+# $Id: configure.in 338 2007-11-09 00:09:38Z pkienzle $

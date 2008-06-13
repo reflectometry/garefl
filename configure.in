@@ -91,7 +91,7 @@ AH_BOTTOM([
 
 exdir=examples
 exmake=
-for ex in volfrac multimag xray; do 
+for ex in volfrac multimag xray incoherent; do 
   exmake="$exmake $exdir/$ex/Makefile:$exdir/Makefile.template"
 done
 AC_CONFIG_FILES([Makeconf $exmake])

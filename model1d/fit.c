@@ -357,32 +357,33 @@ static void find_target_Q(fitinfo *fit)
   int nQ;
 
   if (fit->nQ >= 0) return;
+
+  /* Count unique Q */  
   if (fit->datatype == FIT_POLARIZED) {
     nQ = data_countQ(&fit->dataA,&fit->dataB,&fit->dataC,&fit->dataD);
-    if (5*nQ >= fit->capacity) {
-      if (fit->capacity > 0) free(fit->fitQ);
-      fit->fitQ = malloc(5*nQ*sizeof(double));
-      assert(fit->fitQ != NULL); /* FIXME don't abort */
-      fit->capacity = 5*nQ;
-      fit->fitA = fit->fitQ+nQ;
-      fit->fitB = fit->fitQ+2*nQ;
-      fit->fitC = fit->fitQ+3*nQ;
-      fit->fitD = fit->fitQ+4*nQ;
-    }
-    fit->nQ = nQ;
+  } else {
+    nQ = data_countQ(&fit->dataA,NULL,NULL,NULL);
+  }
+  
+  /* Make room for QABCD even in unpolarized data in case it is
+   * unpolarized magnetic data.
+   */
+	if (5*nQ >= fit->capacity) {
+    if (fit->capacity > 0) free(fit->fitQ);
+    fit->fitQ = malloc(5*nQ*sizeof(double));
+    assert(fit->fitQ != NULL); /* FIXME don't abort */
+    fit->capacity = 5*nQ;
+    fit->fitA = fit->fitQ+nQ;
+    fit->fitB = fit->fitQ+2*nQ;
+    fit->fitC = fit->fitQ+3*nQ;
+    fit->fitD = fit->fitQ+4*nQ;
+  }
+  fit->nQ = nQ;
+
+  /* Generate Q */
+  if (fit->datatype == FIT_POLARIZED) {
     data_mergeQ(&fit->dataA,&fit->dataB,&fit->dataC,&fit->dataD,fit->fitQ);
   } else {
-    /* Need countQ/mergeQ to remove duplicates with same Q, different dQ */
-    nQ = data_countQ(&fit->dataA,NULL,NULL,NULL);
-    if (2*nQ >= fit->capacity) {
-      if (fit->nQ) free(fit->fitQ);
-      fit->fitQ = malloc(2*nQ*sizeof(double)); 
-      assert(fit->fitQ != NULL);
-      fit->capacity = 2*nQ;
-      fit->fitA = fit->fitQ+nQ;
-      fit->fitB = fit->fitC = fit->fitD = NULL;
-    }
-    fit->nQ = nQ;
     data_mergeQ(&fit->dataA,NULL,NULL,NULL,fit->fitQ);
   }
   /*{ int i; for (i=0; i < nQ; i++) printf("Q[%d]: %g\n",i,fit->fitQ[i]); }*/
@@ -449,7 +450,7 @@ void _write_profile(const fitinfo *fit, const char file[])
   FILE *f = fopen(file,"w");
   assert(f!=NULL);
 
-  if (fit->datatype == FIT_POLARIZED) {
+  if (fit->m.is_magnetic) {
 #ifdef HAVE_MAGNETIC
     fprintf(f,"\n# %12s %12s %12s %12s %12s %12s\n",
 	    "depth","rho","mu","P","theta","cos(theta");
@@ -500,8 +501,8 @@ void _write_refl(const fitinfo *fit, const char name[])
   fclose(f);
 }
 
-/* Incoherent sum of multiple models for magnetic reflectometry */
-static void incoherent_magnetic_theory(fitinfo *fit)
+/* Incoherent sum of multiple models for polarized reflectometry */
+static void incoherent_polarized_theory(fitinfo *fit)
 {
 	double total_weight; /* Total weight of all models */
 	int i, k;
@@ -546,17 +547,25 @@ static void incoherent_magnetic_theory(fitinfo *fit)
 	}
 }
 
-/* Incoherent sum of multiple models for magnetic reflectometry */
-static void incoherent_nonmagnetic_theory(fitinfo *fit)
+/* Incoherent sum of multiple models for unpolarized reflectometry */
+static void incoherent_unpolarized_theory(fitinfo *fit)
 {
 	double total_weight; /* Total weight of all models */
 	int i, k;
 	profile p; /* Incoherent model profile */
-	double *A;
+	double *A, *B, *C, *D;
 
 	/* Make space for incoherent models. */
- 	extend_work(fit,fit->nQ);
+ 	extend_work(fit,4*fit->nQ);
  	A = fit->work;
+	B = fit->work + fit->nQ;
+	C = fit->work + 2*fit->nQ;
+	D = fit->work + 3*fit->nQ;
+
+  	printf("base\n");
+	  for (k=0; k < fit->nQ; k++) {
+	  	printf("%g %g\n",fit->fitQ[k],fit->fitA[k]);
+	  }
 
 	/* Incoherent sum of the theory functions. */
   profile_init(&p);
@@ -564,9 +573,21 @@ static void incoherent_nonmagnetic_theory(fitinfo *fit)
 		profile_reset(&p);
 	  model_profile(fit->incoherent_models[i], &p);
 	  /* profile_print(&p,NULL); */
-	  reflectivity(p.n, p.d, p.rho, p.mu, fit->beam.lambda,
-		  fit->nQ, fit->fitQ, A);
+  	if (fit->m.is_magnetic) {
+	    magnetic_reflectivity(p.n, p.d, p.rho, 
+				  p.mu,fit->beam.lambda, p.P, p.expth, 
+				  fit->beam.Aguide, fit->nQ, fit->fitQ,  
+				  A, B, C, D);
+			for (k=0; k < fit->nQ; k++) {
+				A[k] = (A[k]+B[k]+C[k]+D[k])/2.;
+			}
+  	} else {
+ 	  	reflectivity(p.n, p.d, p.rho, p.mu, fit->beam.lambda,
+					fit->nQ, fit->fitQ, A);
+  	}
+  	printf("---- part %d\n",i);
 	  for (k=0; k < fit->nQ; k++) {
+	  	printf("%g %g\n",fit->fitQ[k],A[k]);
 	  	fit->fitA[k] += A[k] * fit->incoherent_weights[i];
 	  }
 	}
@@ -580,13 +601,16 @@ static void incoherent_nonmagnetic_theory(fitinfo *fit)
 	for (i=0; i < fit->number_incoherent; i++) {
 		total_weight += fit->incoherent_weights[i];
 	}
+	printf("---- total\n");
 	for (k=0; k < fit->nQ; k++) {
 		fit->fitA[k] /= total_weight;
+		printf("%g %g\n",fit->fitQ[k],fit->fitA[k]);
 	}
 }
 
 static void calc_magnitude(fitinfo *fit)
 {
+	int k;
   /* _write_profile(fit,"prof.out"); */
 
   if (fit->datatype == FIT_POLARIZED) {
@@ -598,7 +622,7 @@ static void calc_magnitude(fitinfo *fit)
 			  fit->beam.Aguide, fit->nQ, fit->fitQ,  
 			  fit->fitA, fit->fitB, fit->fitC, fit->fitD);
 
-	  if (fit->number_incoherent > 0) incoherent_magnetic_theory(fit);
+	  if (fit->number_incoherent > 0) incoherent_polarized_theory(fit);
 
     /* _write_refl(fit,"reflA.out"); */
     apply_beam_parameters(fit,fit->fitA,&fit->dataA);
@@ -611,12 +635,23 @@ static void calc_magnitude(fitinfo *fit)
     exit(1);
 #endif /* !HAVE_MAGNETIC */
   } else {
-    /* Generate reflectivity amplitude from the profile */
-    reflectivity(fit->p.n, fit->p.d, fit->p.rho, 
-				fit->p.mu, fit->beam.lambda,
-				fit->nQ, fit->fitQ, fit->fitA);
+		/* Generate reflectivity amplitude from the profile */
+  	if (fit->m.is_magnetic) {
+	    magnetic_reflectivity(fit->p.n, fit->p.d, fit->p.rho, 
+				  fit->p.mu,fit->beam.lambda,
+				  fit->p.P, fit->p.expth, 
+				  fit->beam.Aguide, fit->nQ, fit->fitQ,  
+				  fit->fitA, fit->fitB, fit->fitC, fit->fitD);
+			for (k=0; k < fit->nQ; k++) {
+				fit->fitA[k] = (fit->fitA[k]+fit->fitB[k]+fit->fitC[k]+fit->fitD[k])/2.;
+			}
+  	} else {
+ 	  	reflectivity(fit->p.n, fit->p.d, fit->p.rho, 
+					fit->p.mu, fit->beam.lambda,
+					fit->nQ, fit->fitQ, fit->fitA);
+  	}
 
-	  if (fit->number_incoherent > 0) incoherent_nonmagnetic_theory(fit);
+	  if (fit->number_incoherent > 0) incoherent_unpolarized_theory(fit);
 
     /* _write_refl(fit,"reflA.out"); */
     apply_beam_parameters(fit,fit->fitA,&fit->dataA);

@@ -562,11 +562,6 @@ static void incoherent_unpolarized_theory(fitinfo *fit)
 	C = fit->work + 2*fit->nQ;
 	D = fit->work + 3*fit->nQ;
 
-  	printf("base\n");
-	  for (k=0; k < fit->nQ; k++) {
-	  	printf("%g %g\n",fit->fitQ[k],fit->fitA[k]);
-	  }
-
 	/* Incoherent sum of the theory functions. */
   profile_init(&p);
 	for (i=0; i < fit->number_incoherent; i++) {
@@ -585,11 +580,9 @@ static void incoherent_unpolarized_theory(fitinfo *fit)
  	  	reflectivity(p.n, p.d, p.rho, p.mu, fit->beam.lambda,
 					fit->nQ, fit->fitQ, A);
   	}
-  	printf("---- part %d\n",i);
-	  for (k=0; k < fit->nQ; k++) {
-	  	printf("%g %g\n",fit->fitQ[k],A[k]);
-	  	fit->fitA[k] += A[k] * fit->incoherent_weights[i];
-	  }
+  	for (k=0; k < fit->nQ; k++) {
+  		fit->fitA[k] += A[k] * fit->incoherent_weights[i];
+  	}
 	}
   profile_destroy(&p);
 
@@ -601,10 +594,8 @@ static void incoherent_unpolarized_theory(fitinfo *fit)
 	for (i=0; i < fit->number_incoherent; i++) {
 		total_weight += fit->incoherent_weights[i];
 	}
-	printf("---- total\n");
 	for (k=0; k < fit->nQ; k++) {
 		fit->fitA[k] /= total_weight;
-		printf("%g %g\n",fit->fitQ[k],fit->fitA[k]);
 	}
 }
 

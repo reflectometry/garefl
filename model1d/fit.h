@@ -9,6 +9,10 @@
 #include "interface.h"
 #include "pars.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct beaminfo_struct {
   double lambda;         /* Wavelength */
   double intensity;      /* Beam intensity (usually 1) */
@@ -79,6 +83,10 @@ fitinfo*
 setup_models(int *models); /* simultaneous fitting */
 void 
 tied_parameters(fitinfo *fit); /* default constraints for simultaneous fitting */
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif /* _FIT_H */
 

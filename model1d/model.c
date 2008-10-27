@@ -290,6 +290,9 @@ add_half_interface(model *m, profile *p, int above, int below, int leftside)
     else if (rrho < rtheta) sm=rrho, med=rtheta, big=rP;
     else sm=rtheta, med=rrho, big=rP;
 
+  /* If the interface has no width, do nothing */
+  if (big < 1e-10) return;
+
   /* We are going to first add the slices for the sharpest interface,
    * then extend it with slices remaining from the next sharpest
    * interface, and finally extend it with slices from the broadest
@@ -406,6 +409,10 @@ add_interface_left(model *m, profile *p, int above, int below)
   int i, midpoint = (rm->n+1)/2;
  
   if (!profile_extend(p,midpoint)) return;
+
+  /* If the interface has no width, do nothing */
+  if (m->rough[below] < 1e-10) return;
+
   for (i = 0; i < midpoint; i++) {
     // printf("in add_interface_left\n");
     profile_slice(p, rm->step[i]*m->rough[below],
@@ -421,6 +428,10 @@ add_interface_right(model *m, profile *p, int above, int below)
   int i, midpoint = (rm->n+1)/2;
  
   if (!profile_extend(p,rm->n-midpoint+1)) return;
+
+  /* If the interface has no width, do nothing */
+  if (m->rough[above] < 1e-10) return;
+
   for (i = midpoint; i < rm->n; i++) {
     // printf("in add_interface_right\n");
     profile_slice(p, rm->step[i]*m->rough[below],

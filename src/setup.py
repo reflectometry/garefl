@@ -10,9 +10,9 @@ import os
 if 'FLIBS' in os.environ:
     fdirs,flibs = [],[]
     for str in os.environ['FLIBS'].split():
-        if str[:2] == '-L': 
+        if str[:2] == '-L':
             fdirs.append(str[2:])
-        elif str[:2] == '-l': 
+        elif str[:2] == '-l':
             flibs.append(str[2:])
         else:
             extralink.append(str)

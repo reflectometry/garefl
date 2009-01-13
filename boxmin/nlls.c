@@ -52,7 +52,7 @@ void box_nlls(nlls_fn f, int n, int k,
   double info[LM_INFO_SZ];
   double opts[LM_OPTS_SZ];
   opts[0]=LM_INIT_MU; /* Initial scale */
-  opts[1]=opts[2]=opts[3]=1e-6; /* Stopping threshhold */
+  opts[1]=opts[2]=opts[3]=1e-4; /* Stopping threshhold */
   opts[4]=LM_DIFF_DELTA; /* dx for numerical differentiation */
   dlevmar_bc_dif((lmfn)f, 
 		 p, (double *)y, n, k,

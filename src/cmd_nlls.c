@@ -165,6 +165,9 @@ void cmd_nlls()
     fflush(parFD); 
   }
 
+  /* Suppress logging during LM */
+  log_improvement = 0;
+
   /* Copy normalized data values */
   copy_normalized_data(y);
 
@@ -185,17 +188,15 @@ void cmd_nlls()
 #else
   nlls(step_nlls, ndim, nQ, (double *)fit, y, p, covar);
 #endif
+  printf("Done LM\n");fflush(stdout);
   toc();
   print_covar(ndim,covar);
 
-  if (parFD != NULL) {
-    fprintf(parFD,"# %15d   Keeping best from Levenberg-Marquardt...\n", 
-	    GetGen(&set));
-    fflush(parFD);
-    /* Reset chisq so that the next generation of ga writes the current
-	parameter set */
-    bestchi = 1e308;
-  }
+  /* Restore logging, recording LM results */
+  log_improvement = 1;
+  pars_set(&fit[0].pars,bestpars);
+  update_models(fit);
+  record_improvement();
 
   /* Inject new p into the GA */
   setChromosome(&set, 0, p);

@@ -140,6 +140,7 @@ int weighted = 1;
 int approximate_roughness = 0;
 double portion = 1.;
 char  parFile[64];
+int log_improvement = 1;
 FILE *parFD;
 FILE *searchFD;
 fitinfo *fit;
@@ -215,6 +216,7 @@ void write_ga_pop(const char filename[])
 
 
 void check_halt(void);
+void record_improvement(void);
 double do_step(fitinfo *fit, double portion);
 double update_models(fitinfo *fit);
 double partial_update_models(fitinfo *fit,double portion,double best);
@@ -436,6 +438,9 @@ void cmd_amoeba(void)
     fflush(parFD); 
   }
 
+  /* Suppress logging during amoeba */
+  log_improvement = 0;
+
   /* Make sure memory allocation was successful */
   assert(work != NULL);
 
@@ -451,9 +456,6 @@ void cmd_amoeba(void)
   /* Start fit from the current population best, in 0-1 notation */
   po = amoeba_VERTEX(&s,0);
   getChromosome(&set,fittest(&set),po);
-printf("fittest is %d\n",fittest(&set));
-pars_set01(&fit[0].pars,po);
-pars_print(&fit[0].pars);
   amoeba_VALUE(&s,0) = update_models(fit);
 
   /* Random restart */
@@ -478,13 +480,12 @@ pars_print(&fit[0].pars);
   tic(); 
   pbest = amoeba(&s,1e-8,500);
   toc();
-  if (parFD != NULL) {
-    fprintf(parFD,"# %15d   Keeping best from amoeba...\n", GetGen(&set));
-    fflush(parFD);
-    /* Reset chisq so that the next generation of ga writes the current
-	parameter set */
-    bestchi = 1e308;
-  }
+
+  /* Restore logging, recording amoeba results */
+  log_improvement = 1;
+  pars_set(&fit[0].pars,bestpars);
+  update_models(fit);
+  record_improvement();
 
   /* Add the best back to population; */
   setChromosome(&set, 0, pbest);
@@ -751,10 +752,12 @@ void check_halt(void)
   if (!halt) return;
 
   if (halt < 0) {
+    printf("Halting with halt<0\n"); fflush(stdout);
     write_pop_backup(&set);
     if (parFD) fclose(parFD);
     exit(0);
   } else {
+    printf("Halting with halt>0\n"); fflush(stdout);
     halt = 0;
     halt_ga();
   }
@@ -845,6 +848,39 @@ void save_models(fitinfo *fit)
     }
   }
 }
+
+/* Results improved; record it */
+void record_improvement(void)
+{
+  int i;
+  time_t now;
+
+  /* Print to screen */
+  now = time(NULL);
+  printf("Generation %d: best chisq=%g  --  %s\n", 
+	GetGen(&set), 
+	bestchi, ctime(&now));
+
+  if (!log_improvement) return;
+
+  pars_print(&fit[0].pars);
+  printf("\n");
+  fflush(stdout);
+
+  /* Print to file */
+  if (parFD != NULL) {
+    fprintf(parFD,"%17d %17g", GetGen(&set), bestchi);
+    for (i=0; i < fit->pars.n; i++) 
+      fprintf(parFD," %17g",fit[0].pars.value[i]);
+    fprintf(parFD,"\n");
+    fflush(parFD);
+  }
+
+  /* Print plots */
+  save_models(fit);
+}
+
+/* Evaluate model with current parameters */
 double do_step(fitinfo *fit, double portion)
 {
   int i;
@@ -876,31 +912,14 @@ double do_step(fitinfo *fit, double portion)
    * logging the models in profile#.dat and fit#.dat
    */
   if (chisq < bestchi) {
-    time_t now;
-    now = time(NULL);
     bestchi = chisq;
     pars_get(&fit[0].pars,bestpars);
-    printf("Generation %d: best chisq=%g  --  %s\n", 
-	GetGen(&set), 
-	chisq, ctime(&now));
-    pars_print(&fit[0].pars);
-    printf("\n");
-    fflush(stdout);
-    if (parFD != NULL) {
-      fprintf(parFD,"%17d %17g", GetGen(&set), chisq);
-      for (i=0; i < fit->pars.n; i++) 
-        fprintf(parFD," %17g",fit[0].pars.value[i]);
-      fprintf(parFD,"\n");
-      fflush(parFD);
-    }
-    save_models(fit);
+    record_improvement();
   }
 
   return chisq;
 }
 
-
-/* Copy parameters between models. */
 void tied_parameters(fitinfo fit[])
 {
   int i,k;
@@ -1290,6 +1309,7 @@ int main(int argc, char *argv[])
     //set.np = 1;
     init_ga_fit(fit,argc,argv);
     cmd_nlls();
+    printf("LM completed...\n");fflush(stdout);
     final_ga_fit();
 #endif
     break;

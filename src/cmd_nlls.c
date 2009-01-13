@@ -98,7 +98,7 @@ copy_normalized_theory(double *target)
 		    target+nQ);
       nQ += fit[k].dataA.n;
       copy_matching(fit[k].nQ,fit[k].fitQ,fit[k].fitB,
-		    fit[k].dataA.n,fit[k].dataB.Q,fit[k].dataB.dR,
+		    fit[k].dataB.n,fit[k].dataB.Q,fit[k].dataB.dR,
 		    target+nQ);
       nQ += fit[k].dataB.n;
       copy_matching(fit[k].nQ,fit[k].fitQ,fit[k].fitC,

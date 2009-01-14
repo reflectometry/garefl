@@ -95,6 +95,7 @@ void pars_init(fitpars *pars);
 void pars_reset(fitpars *pars);
 void pars_destroy(fitpars *pars);
 int pars_extend(fitpars *pars, int n);
+int pars_count(fitpars *pars);
 
 void pars_add(fitpars *pars, const char *name, 
 	      double *d, double min, double max);

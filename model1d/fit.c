@@ -504,6 +504,7 @@ void _write_refl(const fitinfo *fit, const char name[])
 /* Incoherent sum of multiple models for polarized reflectometry */
 static void incoherent_polarized_theory(fitinfo *fit)
 {
+#ifdef HAVE_MAGNETIC
 	double total_weight; /* Total weight of all models */
 	int i, k;
 	profile p; /* Incoherent model profile */
@@ -545,6 +546,7 @@ static void incoherent_polarized_theory(fitinfo *fit)
 		fit->fitC[k] /= total_weight;
 		fit->fitD[k] /= total_weight;
 	}
+#endif
 }
 
 /* Incoherent sum of multiple models for unpolarized reflectometry */
@@ -569,6 +571,7 @@ static void incoherent_unpolarized_theory(fitinfo *fit)
 	  model_profile(fit->incoherent_models[i], &p);
 	  /* profile_print(&p,NULL); */
   	if (fit->m.is_magnetic) {
+#ifdef HAVE_MAGNETIC
 	    magnetic_reflectivity(p.n, p.d, p.rho, 
 				  p.mu,fit->beam.lambda, p.P, p.expth, 
 				  fit->beam.Aguide, fit->nQ, fit->fitQ,  
@@ -576,6 +579,10 @@ static void incoherent_unpolarized_theory(fitinfo *fit)
 			for (k=0; k < fit->nQ; k++) {
 				A[k] = (A[k]+B[k]+C[k]+D[k])/2.;
 			}
+#else
+            fprintf(stderr,"Need to configure with --enable-magnetic\n");
+            exit(1);
+#endif
   	} else {
  	  	reflectivity(p.n, p.d, p.rho, p.mu, fit->beam.lambda,
 					fit->nQ, fit->fitQ, A);
@@ -622,12 +629,13 @@ static void calc_magnitude(fitinfo *fit)
     apply_beam_parameters(fit,fit->fitD,&fit->dataD);
     /* _write_refl(fit,"reflB.out"); */
 #else  /* !HAVE_MAGNETIC */
-    fprintf(stderr,"Refllib was not compiled for magnetic systems.\n");
+    fprintf(stderr,"Need to configure with --enable-magnetic\n");
     exit(1);
 #endif /* !HAVE_MAGNETIC */
   } else {
 		/* Generate reflectivity amplitude from the profile */
   	if (fit->m.is_magnetic) {
+#ifdef HAVE_MAGNETIC
 	    magnetic_reflectivity(fit->p.n, fit->p.d, fit->p.rho, 
 				  fit->p.mu,fit->beam.lambda,
 				  fit->p.P, fit->p.expth, 
@@ -636,6 +644,10 @@ static void calc_magnitude(fitinfo *fit)
 			for (k=0; k < fit->nQ; k++) {
 				fit->fitA[k] = (fit->fitA[k]+fit->fitB[k]+fit->fitC[k]+fit->fitD[k])/2.;
 			}
+#else
+            fprintf(stderr,"Need to configure with --enable-magnetic\n");
+            exit(1);
+#endif
   	} else {
  	  	reflectivity(fit->p.n, fit->p.d, fit->p.rho, 
 					fit->p.mu, fit->beam.lambda,

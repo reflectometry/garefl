@@ -41,9 +41,11 @@ int pars_extend(fitpars *pars, int n)
       pars->min = realloc(pars->min, 3*sizeof(double)*need);
       /* Shift columns to new offsets, starting at the last one. */
       if (pars->address != NULL) {
+        /* shift name pointer array */
 	memmove(pars->address+need, pars->address+size, size*sizeof(void*));
       }
       if (pars->min != NULL) {
+        /* shift value and range arrays */
 	memmove(pars->min+2*need, pars->min+2*size, size*sizeof(double));
 	memmove(pars->min+need, pars->min+size, size*sizeof(double));
       }
@@ -57,7 +59,7 @@ int pars_extend(fitpars *pars, int n)
     /* Update column offsets */
     pars->capacity = need;
     pars->range = pars->min + need;
-    pars->value = pars->range + need;
+    pars->value = pars->min + 2*need;
     pars->name = (const char **)(pars->address) + need;
   }
   return 1;
@@ -72,10 +74,6 @@ void pars_destroy(fitpars *pars)
   pars_init(pars);  
 }
 
-double* pars_vector(fitpars *pars)
-{
-  return pars->value;
-}
 double pars_to_01(const fitpars *pars, int i, double v)
 {
   double min=pars->min[i];
@@ -89,7 +87,7 @@ double pars_from_01(const fitpars *pars, int i, double v)
 }
 const char* pars_name(const fitpars *pars, int i)
 {
-  return pars->name[i];
+  return pars->name[i] ? pars->name[i] : "unknown";
 }
 double pars_peek(const fitpars *pars, int i)
 {
@@ -101,14 +99,15 @@ double pars_peek01(const fitpars *pars, int i)
 }
 void pars_poke(const fitpars *pars, int i, double v)
 {
-  double min = pars->min[i];
-  double max = min + pars->range[i];
-  pars->value[i] = *(pars->address[i]) = v < min ? min : (v > max ? max : v);
+  const double range = pars->range[i];
+  const double min = pars->min[i];
+  const double max = min + range;
+  v = v < min ? min : (v > max ? max : v);
+  *(pars->address[i])  = v;
 }
 void pars_poke01(const fitpars *pars, int i, double v)
 {
-  pars->value[i] = (v < 0. ? 0. : (v > 1. ? 1. : v));
-  *(pars->address[i]) = pars_from_01(pars,i,pars->value[i]);
+  pars_poke(pars, i, pars_from_01(pars, i, v));
 }
 double pars_min(const fitpars *pars, int i)
 {
@@ -138,39 +137,43 @@ void pars_get01(const fitpars *pars, double v[])
   int i;
   for (i=0; i < pars->n; i++) v[i] = pars_peek01(pars,i);
 }
-int pars_count(const fitpars *pars)
+
+
+static void _print_one(fitpars *pars, int i, double v, int zero_one)
 {
-  return pars->n;
+  char range[]="..........";
+  double value, portion;
+  if (zero_one) {
+    portion = v;
+    value = v*pars->range[i]+pars->min[i];
+  } else {
+    portion = (v-pars->min[i])/pars->range[i];
+    value = v;
+  }
+  if (portion < 0.) portion = 0.; 
+  else if (portion >= 1.) portion = 0.999999;
+
+  printf("%3d ",i);
+  if (pars->name[i] != NULL) printf("%25s", pars->name[i]);
+  range[(int)floor(portion*strlen(range))] = '|';
+  printf(" %s ", range);
+  printf("%g in [%g,%g]\n",value,pars->min[i],pars->min[i]+pars->range[i]);
 }
 
-
-void pars_print_set(fitpars *pars, double *set)
+void pars_print_set(fitpars *pars, double *set, int zero_one)
 {
   int i;
   for (i=0; i<pars->n; i++) {
-    char range[]="..........";
-    double value, portion;
-    if (pars->mode == PARS_ZERO_ONE) {
-      portion = set[i];
-      value = set[i]*pars->range[i]+pars->min[i];
-    } else {
-      portion = (set[i]-pars->min[i])/pars->range[i];
-      value = set[i];
-    }
-    if (portion < 0.) portion = 0.; 
-    else if (portion >= 1.) portion = 0.999999;
-
-    printf("%3d ",i);
-    if (pars->name[i] != NULL) printf("%25s", pars->name[i]);
-    range[(int)floor(portion*strlen(range))] = '|';
-    printf(" %s ", range);
-    printf("%g in [%g,%g]\n",value,pars->min[i],pars->min[i]+pars->range[i]);
+    _print_one(pars, i, set[i], zero_one);
   }
 }
 
 void pars_print(fitpars *pars)
 {
-  pars_print_set(pars, pars->value);
+  int i;
+  for (i=0; i<pars->n; i++) {
+    _print_one(pars, i, pars_peek(pars,i), 0);
+  }
 }
 
 int pars_select(fitpars *pars)
@@ -194,7 +197,7 @@ int pars_enter_value(fitpars *pars, int p, double *v)
   char buffer[100];
 
   if (p >= 0) {
-    const char *name = pars->name[p];
+    const char *name = pars_name(pars, p);
     double min = pars->min[p];
     double max = min + pars->range[p];
     float val;
@@ -232,72 +235,14 @@ void pars_add(fitpars *pars, const char *name, double *d,
   }
 }
 
-void pars_set_zero_one(fitpars *pars)
-{
-  int i;
-
-  /* Translate real numbers in the model to parameters */
-  pars->mode = PARS_ZERO_ONE;
-  for (i=0; i < pars->n; i++) {
-    pars->value[i] = pars_to_01(pars, i, *(pars->address[i]));
-  }
-}
-
-void pars_zero_one(int n, const double *p, fitpars *pars)
-{
-  int i;
-
-  /* Translate parameters to real numbers in the model */
-  assert(n <= pars->n);
-  for (i=0; i < n; i++) {
-    // Store the [0,1] values 
-    pars->value[i] = p[i];
-    // Store the real values
-    *(pars->address[i]) = pars_from_01(pars,i,p[i]);
-  }
-}
-
-void pars_set_constrained(fitpars *pars)
-{
-  int i;
-
-  /* Translate real numbers in the model to parameters */
-  pars->mode = PARS_CONSTRAINED;
-  for (i=0; i < pars->n; i++) {
-    double *p = pars->address[i], min=pars->min[i];
-    if (*p < min) pars->value[i] = min;
-    else if (*p > min+pars->range[i]) pars->value[i] = min+pars->range[i];
-    else pars->value[i] = *p;
-  }
-}
-
-void pars_constrained(int n, const double *p, fitpars *pars)
-{
-  int i;
-
-  /* Translate parameters to real numbers in the model */
-  assert(n <= pars->n);
-  for (i=0; i < n; i++) {
-    double v = p[i], min=pars->min[i];
-    if (v < min) v = min;
-    else {
-      double max=min+pars->range[i];
-      if (v > max) v = max;
-    }
-    *(pars->address[i]) = v;
-  }
-}
-
 void pars_set_range(fitpars *pars, int ipar, double newmin, double newmax) 
 {
   // Set the new minimum
   pars->min[ipar] = newmin;
   // Set the new range
   pars->range[ipar] = newmax-newmin;
-  // Set the value between zero and one
-  if (*(pars->address[ipar]) < pars->min[ipar]) pars->value[ipar] = 0.;
-  else if (*(pars->address[ipar]) > pars->min[ipar]+pars->range[ipar]) pars->value[ipar] = 1.;
-  else pars->value[ipar] = (*(pars->address[ipar])-pars->min[ipar])/pars->range[ipar];
+  // Force the current value into the range.
+  pars_poke(pars, ipar, pars_peek(pars, ipar));
 }
 
 /* $Id$ */

@@ -196,7 +196,7 @@ void cmd_nlls()
   log_improvement = 1;
   pars_set(&fit[0].pars,bestpars);
   update_models(fit);
-  record_improvement();
+  improvement();
 
   /* Inject new p into the GA */
   setChromosome(&set, 0, p);

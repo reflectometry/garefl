@@ -203,7 +203,7 @@ void write_ga_pop(const char filename[])
   }
   fprintf(file,"\n");
   for (p=0; p < set.nParams; p++) {
-  	fprintf(file,"%3d %25s: ",p, (pars->name[p]?pars->name[p]:""));
+  	fprintf(file,"%3d %25s: ",p, pars_name(pars, p));
 	for (i=0; i < set.np; i++) {
 	  pars_set01(pars, set.pop->indiv[i].value);
 	  if (*constraints) (*constraints)(fit);
@@ -216,7 +216,7 @@ void write_ga_pop(const char filename[])
 
 
 void check_halt(void);
-void record_improvement(void);
+void improvement(void);
 double do_step(fitinfo *fit, double portion);
 double update_models(fitinfo *fit);
 double partial_update_models(fitinfo *fit,double portion,double best);
@@ -485,9 +485,11 @@ void cmd_amoeba(void)
   log_improvement = 1;
   pars_set(&fit[0].pars,bestpars);
   update_models(fit);
-  record_improvement();
+  improvement();
 
-  /* Add the best back to population; */
+  /* Add the best back to population.
+   * pbest is part of the work vector, with values in [0-1] space.
+   */
   setChromosome(&set, 0, pbest);
   free(work);
 }
@@ -576,13 +578,14 @@ void cmd_change_range(void)
   }
 }
 
+/* Change a parameter within the population */
 void cmd_change_parameter(void)
 {
   int ipar;
   double val;
 
   bestchi = 1e308;
-  pars_constrained(fit[0].pars.n, bestpars, &fit[0].pars);
+  pars_set(&fit[0].pars, bestpars);
   ipar = pars_select(&fit[0].pars);
   if (ipar >= 0) ipar = pars_enter_value(&fit[0].pars,ipar,&val);
   if (ipar >= 0) {
@@ -850,7 +853,7 @@ void save_models(fitinfo *fit)
 }
 
 /* Results improved; record it */
-void record_improvement(void)
+void improvement(void)
 {
   int i;
   time_t now;
@@ -863,6 +866,7 @@ void record_improvement(void)
 
   if (!log_improvement) return;
 
+  pars_set(&fit[0].pars,bestpars);
   pars_print(&fit[0].pars);
   printf("\n");
   fflush(stdout);
@@ -871,7 +875,8 @@ void record_improvement(void)
   if (parFD != NULL) {
     fprintf(parFD,"%17d %17g", GetGen(&set), bestchi);
     for (i=0; i < fit->pars.n; i++) 
-      fprintf(parFD," %17g",fit[0].pars.value[i]);
+      /* TODO: use pars_peek rather than pars_peek01 */
+      fprintf(parFD," %17g",pars_peek01(&fit[0].pars,i));
     fprintf(parFD,"\n");
     fflush(parFD);
   }
@@ -914,7 +919,7 @@ double do_step(fitinfo *fit, double portion)
   if (chisq < bestchi) {
     bestchi = chisq;
     pars_get(&fit[0].pars,bestpars);
-    record_improvement();
+    improvement();
   }
 
   return chisq;
@@ -926,7 +931,7 @@ void tied_parameters(fitinfo fit[])
 
   /* Rescue the free parameters from the model. */
   for (i=0; i < fit[1].pars.n; i++)
-    fit[1].pars.value[i] = *(fit[1].pars.address[i]);
+    fit[1].pars.value[i] = pars_peek(&fit[1].pars,i);
 
   /* Go through all layers copying parameters from model 0
    * to the other models. This is more work than we strictly
@@ -952,7 +957,7 @@ void tied_parameters(fitinfo fit[])
 
   /* Restore the free parameters to the model. */
   for (i=0; i < fit[1].pars.n; i++)
-    *(fit[1].pars.address[i]) = fit[1].pars.value[i];
+    pars_poke(&fit[1].pars, i, fit[1].pars.value[i]);
 }
 
 double step_ga(int n, const double *p, void *user_data)
@@ -978,7 +983,7 @@ void init_ga_fit(fitinfo *fit, int argc, char *argv[])
   set.popFile[sizeof(set.popFile)-1]='\0';
 
   /* squeeze pars into [0,1] */
-  pars_set_zero_one(&fit[0].pars); 
+  pars_get01(&fit[0].pars, fit[0].pars.value);
   printf("Starting parameter values in model:\n");
   pars_print(&fit[0].pars);
 
@@ -1064,15 +1069,24 @@ void print_usage(void)
   printf("For plots use gaplot rho|mu|P|theta|fit|chisq [file.ps]\n"); 
 }
 
-/* Make the space arbitrarily bigger, and randomize the start condition */
-static void pars_explode(fitpars *p, double g)
+/* Scale space by factor g, and randomize the start condition */
+/* The condition min>=0 will be preserved if it is true. */
+static void explode(fitpars *p, double g)
 {
-  int n = pars_count(p);
+  int n = p->n;
   int i;
   for (i=0; i < n; i++) {
     double min = pars_min(p,i);
     double max = pars_max(p,i);
-    pars_set_range(p,i,min,min+(max-min)*g);
+    double delta = (max-min)*g/2.;
+    if (min >= 0 && delta < min) {
+      max += 2*delta - min;
+      min = 0;
+    } else {
+      max += delta;
+      min -= delta;
+    }
+    pars_set_range(p,i,min,max);
     pars_poke01(p,i,frandom());
   }
 }
@@ -1129,7 +1143,7 @@ int main(int argc, char *argv[])
 	double lo,hi;
 	if (xdims++) n1=nth;
         int n = sscanf(optarg,"%d:%lg:%lg:%d",&nth,&lo,&hi,&steps);
-        if (n>=3 && nth >= 0 && nth < pars_count(&fit[0].pars))
+        if (n>=3 && nth >= 0 && nth < fit[0].pars.n)
 	    pars_set_range(&fit[0].pars,nth,lo,hi);
       } while(0);
       action = CHISQ;
@@ -1234,17 +1248,17 @@ int main(int argc, char *argv[])
 	double lo=0., hi=0.;
 	int k,n;
 	n = sscanf(optarg,"%d:%lg:%lg",&k,&lo,&hi);
-        if (n==3 && k >= 0 && k < pars_count(&fit[0].pars))
+        if (n==3 && k >= 0 && k < fit[0].pars.n)
 	    pars_set_range(&fit[0].pars,k,lo,hi);
-        else if (n==2 && k >= 0 && k < pars_count(&fit[0].pars))
+        else if (n==2 && k >= 0 && k < fit[0].pars.n)
 	    pars_poke(&fit[0].pars,k,lo);
       } while (0);
       break;
 
     case 'X':
       do {
-        double explode = atof(optarg);
-        if (explode > 0. && explode != 1.) pars_explode(&fit[0].pars,explode);
+        double factor = atof(optarg);
+        if (factor > 0. && factor != 1.) explode(&fit[0].pars,factor);
       } while (0);
       break;
 
@@ -1261,7 +1275,7 @@ int main(int argc, char *argv[])
   if (constraints != NULL) (*constraints)(fit);
 
   /* Some place to save the best parameters */
-  bestpars = (double *)malloc(sizeof(*bestpars)*pars_count(&fit[0].pars));
+  bestpars = (double *)malloc(sizeof(*bestpars)*fit[0].pars.n);
   assert(bestpars != NULL);
 
 #if 0

@@ -3,10 +3,6 @@
 #ifndef _PARS_H
 #define _PARS_H
 
-/* FIXME this is what we should do rather than what we are
- * currently doing.
- */
-
 /* The pars structure is designed to hold pointers to values that
  * can be varied by a fit.  Usually these will be held within a
  * model structure, but they can also be global control parameters,
@@ -21,21 +17,18 @@
  * pars_destroy(pars)
  *   clear the pars structure and free any associated memory
  * pars_print(pars)
- *   display the list of parameters
- * pars_print_set(pars,set)
- *   display a saved set of parameters without inserting them in the model
- * pars_count(pars)
- *   return the number of parameters
- * pars_vector(pars)
- *   return a work vector big enough to hold all parameters; there
- *   is only one copy of the vector and no locking mechanism so
- *   keep access short.  pars_add, pars_destroy and pars_extend
- *   will change the pointer.
- *
+ *   display the current set of parameters
+ * pars_print_set(pars,set,zero_one)
+ *   display a set of parameters; zero_one is true if set parameters
+ *   are stored as values between zero and one, or false if the
+ *   parameters are in real coordinates.
+ * pars.n
+ *   the number of parameters
  *
  * Each parameter has:
  *    name    - string name of the parameter
  *    address - location in model to store parameter values
+ *    value   - temporary location preallocated for convenience
  *    min,max - box constraints on parameter values
  *
  * i = pars_add(pars,name,address,min,max)
@@ -49,7 +42,11 @@
  *
  * pars_set_range(pars,i,min,max)
  * pars_set_address(pars,i,address)
- *   reset info form parameter i, 0-origin
+ *   adjust info for parameter i, 0-origin
+ *
+ * v = pars_to_01(pars,i,v)
+ * v = pars_from_01(pars,i,v)
+ *   convert value v to/from [0,1] range for parameter i, 0-origin.
  *
  * pars_get(pars,v)
  * pars_set(pars,v)
@@ -59,9 +56,6 @@
  * pars_poke(pars,i,v)
  *   get/set the value of a single parameter from the model.
  *   
- * v = pars_to_01(pars,i,v)
- * v = pars_from_01(pars,i,v)
- *   convert v to/from [0,1] range for parameter i, 0-origin.
  * pars_get01(pars,v)
  * pars_set01(pars,v)
  * v = pars_peek01(pars,i)
@@ -101,18 +95,10 @@ void pars_reset(fitpars *pars);
 void pars_destroy(fitpars *pars);
 int pars_extend(fitpars *pars, int n);
 
-/* These will go away */
-void pars_set_zero_one(fitpars *pars);
-void pars_zero_one(int n, const double *p, fitpars *pars);
-void pars_set_constrained(fitpars *pars);
-void pars_constrained(int n, const double *p, fitpars *pars);
-
-
 void pars_add(fitpars *pars, const char *name, 
 	      double *d, double min, double max);
 
 double* pars_vector(fitpars *pars);
-int pars_count(const fitpars *pars);
 const char* pars_name(const fitpars *pars, int n);
 double pars_min(const fitpars *pars, int i);
 double pars_max(const fitpars *pars, int i);

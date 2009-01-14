@@ -149,6 +149,7 @@ fit_constraints *constraints = NULL;
 int step_num = 0;
 int start_step = 0;
 double trust_region = 0.1;
+int save_zero_one = 0;
 
 void tic(void)
 {
@@ -874,9 +875,12 @@ void improvement(void)
   /* Print to file */
   if (parFD != NULL) {
     fprintf(parFD,"%17d %17g", GetGen(&set), bestchi);
-    for (i=0; i < fit->pars.n; i++) 
-      /* TODO: use pars_peek rather than pars_peek01 */
-      fprintf(parFD," %17g",pars_peek01(&fit[0].pars,i));
+    for (i=0; i < fit->pars.n; i++) {
+      const double v = save_zero_one
+                     ? pars_peek01(&fit[0].pars,i)
+                     : pars_peek(&fit[0].pars,i);
+      fprintf(parFD," %17g",v);
+    }
     fprintf(parFD,"\n");
     fflush(parFD);
   }
@@ -1059,6 +1063,7 @@ void print_usage(void)
   printf("  -W         force weighted fit\n");
   printf("  -x <n:lo:hi:steps> print chisq landscape of parameter Pn\n");
   printf("             or of the Pm-Pn surface if -x is repeated\n");
+  printf("  -z         write par.dat file in [0-1] rather real space\n");
   printf("Output\n");
   printf("  model#.dat    : best model   (d rho mu P theta)\n");
   printf("  fit#.dat[ABCD]: best fit     (Q R dR fit)\n");
@@ -1117,10 +1122,14 @@ int main(int argc, char *argv[])
   set.initOption = 0;
   set.iElite = 0;
   action = GA;
-  while((ch = getopt(argc, argv, "A:f:x:n:T:r:s:t:c:v:X:H:peSFLmgijwWNalQ?")) != -1) {
+  while((ch = getopt(argc, argv, "A:f:x:n:T:r:s:t:c:v:X:H:peSFLmgijwWNalQz?")) != -1) {
     switch(ch) {
     case 'e':
       set.iElite = 1;
+      break;
+
+    case 'z':
+      save_zero_one = 1;
       break;
       
     case 'F':

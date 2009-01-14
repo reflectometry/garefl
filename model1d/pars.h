@@ -22,6 +22,7 @@
  *   display a set of parameters; zero_one is true if set parameters
  *   are stored as values between zero and one, or false if the
  *   parameters are in real coordinates.
+ * pars_count(pars)
  * pars.n
  *   the number of parameters
  *

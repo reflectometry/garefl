@@ -74,6 +74,8 @@ void pars_destroy(fitpars *pars)
   pars_init(pars);  
 }
 
+int pars_count(fitpars *pars) { return pars->n; }
+
 double pars_to_01(const fitpars *pars, int i, double v)
 {
   double min=pars->min[i];

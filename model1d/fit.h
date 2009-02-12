@@ -19,6 +19,11 @@ typedef struct beaminfo_struct {
   double background;     /* Background signal */
   double backabsorption; /* Absorption through substrate */
   double Aguide;         /* Angle relative to guide */
+  double alignment;      /* Angle correction for incident beam */
+  /* Note: if alignment is incorrect then the values we measure will have a
+   * small non-zero Qx component.  Assuming the back slits are not too tight
+   * this should not affect the total reflection measured.
+   * */
 } beaminfo;
 
 #define FIT_POLARIZED 4

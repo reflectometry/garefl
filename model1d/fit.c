@@ -44,6 +44,7 @@ beam_init(beaminfo *beam)
   beam->background = 0.;
   beam->lambda = 1.;
   beam->Aguide = -90.;
+  beam->alignment = 0.;
 }
 
 void
@@ -437,7 +438,7 @@ static void calc_approx(fitinfo *fit)
 
   /* Generate reflectivity amplitude from the profile */
   reflrough(fit->m.n, fit->m.d, fit->m.rough, fit->m.rho,
-	    fit->m.mu, fit->beam.lambda,
+	    fit->m.mu, fit->beam.lambda, fit->beam.alignment,
 	    fit->nQ, fit->fitQ, fit->fitA);
   apply_beam_parameters(fit,fit->fitA,&fit->dataA);
 }
@@ -522,6 +523,7 @@ static void incoherent_polarized_theory(fitinfo *fit)
 	for (i=0; i < fit->number_incoherent; i++) {
 	  model_profile(fit->incoherent_models[i], &p);
 	  magnetic_reflectivity(p.n, p.d, p.rho, p.mu, fit->beam.lambda,
+	                        fit->beam.alignment,
 		  p.P, p.expth, fit->beam.Aguide, fit->nQ, fit->fitQ, A,B,C,D);
 	  for (k=0; k < fit->nQ; k++) {
 	  	fit->fitA[k] += A[k] * fit->incoherent_weights[i];
@@ -573,7 +575,8 @@ static void incoherent_unpolarized_theory(fitinfo *fit)
   	if (fit->m.is_magnetic) {
 #ifdef HAVE_MAGNETIC
 	    magnetic_reflectivity(p.n, p.d, p.rho,
-				  p.mu,fit->beam.lambda, p.P, p.expth,
+				  p.mu,fit->beam.lambda, fit->beam.alignment,
+				  p.P, p.expth,
 				  fit->beam.Aguide, fit->nQ, fit->fitQ,
 				  A, B, C, D);
 			for (k=0; k < fit->nQ; k++) {
@@ -585,6 +588,7 @@ static void incoherent_unpolarized_theory(fitinfo *fit)
 #endif
   	} else {
  	  	reflectivity(p.n, p.d, p.rho, p.mu, fit->beam.lambda,
+ 	  	             fit->beam.alignment,
 					fit->nQ, fit->fitQ, A);
   	}
   	for (k=0; k < fit->nQ; k++) {
@@ -615,7 +619,7 @@ static void calc_magnitude(fitinfo *fit)
 #ifdef HAVE_MAGNETIC
     /* We've got polarized data: use magnetic calculations */
     magnetic_reflectivity(fit->p.n, fit->p.d, fit->p.rho,
-			  fit->p.mu,fit->beam.lambda,
+			  fit->p.mu,fit->beam.lambda, fit->beam.alignment,
 			  fit->p.P, fit->p.expth,
 			  fit->beam.Aguide, fit->nQ, fit->fitQ,
 			  fit->fitA, fit->fitB, fit->fitC, fit->fitD);
@@ -637,7 +641,7 @@ static void calc_magnitude(fitinfo *fit)
   	if (fit->m.is_magnetic) {
 #ifdef HAVE_MAGNETIC
 	    magnetic_reflectivity(fit->p.n, fit->p.d, fit->p.rho,
-				  fit->p.mu,fit->beam.lambda,
+				  fit->p.mu,fit->beam.lambda, fit->beam.alignment,
 				  fit->p.P, fit->p.expth,
 				  fit->beam.Aguide, fit->nQ, fit->fitQ,
 				  fit->fitA, fit->fitB, fit->fitC, fit->fitD);
@@ -651,6 +655,7 @@ static void calc_magnitude(fitinfo *fit)
   	} else {
  	  	reflectivity(fit->p.n, fit->p.d, fit->p.rho,
 					fit->p.mu, fit->beam.lambda,
+					fit->beam.alignment,
 					fit->nQ, fit->fitQ, fit->fitA);
   	}
 
@@ -669,8 +674,8 @@ static void calc_real(fitinfo *fit)
 
   /* Generate reflectivity amplitude from the profile */
   reflectivity_real(fit->p.n, fit->p.d, fit->p.rho,
-		    fit->p.mu, fit->beam.lambda,
-		    fit->nQ, fit->fitQ, fit->fitA);	
+		    fit->p.mu, fit->beam.lambda, fit->beam.alignment,
+		    fit->nQ, fit->fitQ, fit->fitA);
 
   /* FIXME need to support repeated Q with different resolution. For
      the resolution case, this simply means making sure that enough
@@ -697,7 +702,7 @@ static void calc_imaginary(fitinfo *fit)
 
   /* Generate reflectivity amplitude from the profile */
   reflectivity_imag(fit->p.n, fit->p.d, fit->p.rho,
-		    fit->p.mu, fit->beam.lambda,
+		    fit->p.mu, fit->beam.lambda, fit->beam.alignment,
 		    fit->nQ, fit->fitQ, fit->fitA);
 
   /* FIXME need to support repeated Q with different resolution. For

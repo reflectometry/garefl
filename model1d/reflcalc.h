@@ -107,43 +107,53 @@ extern "C" {
   typedef double refl_complex;
 #endif
 
+double
+adjust_alignment(double Q,double lambda,double alignment);
 
 void
 reflectivity(const int layers, const double d[],
 	     const double rho[], const double mu[], const double lambda,
+             const double alignment,
              const int points, const double Q[], double R[]);
 void
 reflectivity_amplitude(const int layers, const double d[],
 		       const double rho[], const double mu[], const double L,
+		       const double alignment,
 		       const int points, const double Q[], refl_complex R[]);
 void
 reflectivity_real(const int layers, const double d[],
 		  const double rho[], const double mu[], const double lambda,
+                  const double alignment,
 		  const int points, const double Q[], double R[]);
 
 void
 reflectivity_imag(const int layers, const double d[],
 		  const double rho[], const double mu[], const double lambda,
+                  const double alignment,
 		  const int points, const double Q[], double R[]);
 
 void
 reflrough(const int layers, const double d[], const double sigma[],
 	  const double rho[], const double mu[], const double lambda,
+          const double alignment,
 	  const int points, const double Q[], double R[]);
 void
 reflrough_amplitude(const int layers, const double d[], const double sigma[],
 		    const double rho[], const double mu[], const double lambda,
+                    const double alignment,
 		    const int points, const double Q[], refl_complex R[]);
 
 void
 magnetic_reflectivity(const int layers, const double d[],
 		      const double rho[], const double mu[], const double L,
+                      const double alignment,
 		      const double P[], const refl_complex expth[],
 		      const double Aguide, const int points, const double Q[],
 		      double Ra[], double Rb[], double Rc[], double Rd[]);
 void
 magnetic_amplitude(const int layers, const double d[],
 		   const double rho[], const double mu[], const double L,
+                   const double alignment,
 		   const double P[], const refl_complex expth[],
 		   const double Aguide, const int points, const double Q[],
 		   refl_complex Ra[], refl_complex Rb[],

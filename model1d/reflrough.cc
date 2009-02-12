@@ -83,20 +83,27 @@ refl(const int layers, const double d[], const double sigma[],
 extern "C" void
 reflrough_amplitude(const int layers, const double d[], const double sigma[],
 		    const double rho[], const double mu[], const double L,
+		    const double alignment,
 		    const int points, const double Q[], refl_complex R[])
 {
-  for (int i=0; i < points; i++) refl(layers,d,sigma,rho,mu,L,Q[i],R[i]);
+  for (int i=0; i < points; i++)
+    refl(layers,d,sigma,rho,mu,L,
+         adjust_alignment(Q[i],alignment,L),
+         R[i]);
 }
 
 
 extern "C" void
 reflrough(const int layers, const double d[], const double sigma[],
 	     const double rho[], const double mu[], const double lambda,
+	     const double alignment,
 	     const int points, const double Q[], double R[])
 {
   for (int i=0; i < points; i++) {
     refl_complex amp;
-    refl(layers,d,sigma,rho,mu,lambda,Q[i],amp);
+    refl(layers,d,sigma,rho,mu,lambda,
+         adjust_alignment(Q[i],alignment,lambda),
+         amp);
     R[i] = real(amp * conj(amp));
   }
 }

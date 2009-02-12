@@ -295,14 +295,17 @@ refl(const int layers, const double d[],
 extern "C" void
 reflectivity_amplitude(const int layers, const double d[],
 		       const double rho[], const double mu[], const double L,
+		       const double alignment,
 		       const int points, const double Q[], refl_complex R[])
 {
-  for (int i=0; i < points; i++) refl(layers,d,rho,mu,L,Q[i],R[i]);
+  for (int i=0; i < points; i++)
+    refl(layers,d,rho,mu,L,adjust_alignment(Q[i],alignment,L),R[i]);
 }
 
 extern "C" void
 reflectivity(const int layers, const double d[],
 	     const double rho[], const double mu[], const double lambda,
+	     const double alignment,
 	     const int points, const double Q[], double R[])
 {
   for (int i=0; i < points; i++) {
@@ -310,7 +313,7 @@ reflectivity(const int layers, const double d[],
 #ifdef TRACE
     trace = (i == points-1);
 #endif
-    refl(layers,d,rho,mu,lambda,Q[i],amp);
+    refl(layers,d,rho,mu,lambda,adjust_alignment(Q[i],alignment,lambda),amp);
 #ifdef TRACE
     trace = 0;
 #endif
@@ -321,11 +324,12 @@ reflectivity(const int layers, const double d[],
 extern "C" void
 reflectivity_real(const int layers, const double d[],
 		  const double rho[], const double mu[], const double lambda,
+		  const double alignment,
 		  const int points, const double Q[], double R[])
 {
   for (int i=0; i < points; i++) {
     refl_complex amp;
-    refl(layers,d,rho,mu,lambda,Q[i],amp);
+    refl(layers,d,rho,mu,lambda,adjust_alignment(Q[i],alignment,lambda),amp);
     R[i] = real(amp);
   }
 }
@@ -333,13 +337,28 @@ reflectivity_real(const int layers, const double d[],
 extern "C" void
 reflectivity_imag(const int layers, const double d[],
 		  const double rho[], const double mu[], const double lambda,
+		  const double alignment,
 		  const int points, const double Q[], double R[])
 {
   for (int i=0; i < points; i++) {
     refl_complex amp;
-    refl(layers,d,rho,mu,lambda,Q[i],amp);
+    refl(layers,d,rho,mu,lambda,
+         adjust_alignment(Q[i],alignment,lambda),
+         amp);
     R[i] = imag(amp);
   }
 }
+
+extern "C"
+double
+adjust_alignment(double Q, double alignment, double lambda)
+{
+  if (alignment != 0) {
+    Q = 4*M_PI/lambda*sin(asin(Q/4/M_PI*lambda)+alignment*M_PI/180.);
+  }
+  return Q;
+}
+
+
 
 // $Id$

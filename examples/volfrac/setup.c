@@ -17,11 +17,11 @@ void constr_models(fitinfo *fit)
 
   /* Go through all layers copying parameters from model 0 to other models */
   tied_parameters(fit);
- 
+
  /* copy the global roughness to all interfaces*/
   for (i=0; i< MODELS; i++) {
     for (k=1;k<7; k++) fit[i].m.rough[k]=global_rough;
-  }    
+  }
 
   /* Restore the free parameters to the model. */
   for (i=0; i < fit[1].pars.n; i++){
@@ -29,7 +29,7 @@ void constr_models(fitinfo *fit)
   }
 
   /* allow the cr_au roughness to differ from the global rough
-   * - this was saved as a free parameter for model[0], now copy to 
+   * - this was saved as a free parameter for model[0], now copy to
    * model[1]
    */
   fit[1].m.rough[3]=fit[0].m.rough[3];
@@ -38,7 +38,7 @@ void constr_models(fitinfo *fit)
   for (i=0; i< MODELS; i++) {
     fit[i].m.rho[4]= vol_fract_spacer*rho_spacer+(1-vol_fract_spacer)*fit[i].m.rho[fit[i].m.n-1];
     fit[i].m.rho[5]= vol_fract_alkyl*rho_alkyl+(1-vol_fract_alkyl)*fit[i].m.rho[fit[i].m.n-1];
-  }    
+  }
 
   //if (fit[0].m.d[1] > 10.) {
   //  printf("fit[0].m.d[1] = %g->%g\n",fit[0].m.d[1],10.);
@@ -56,9 +56,9 @@ fitinfo* setup_models(int *models)
   *models = MODELS;
 
   for (i=0; i < MODELS; i++) fit_init(&fit[i]);
-  
+
   /* Load the data for each model */
-  fit_data(&fit[0],"wc02.yor"); 
+  fit_data(&fit[0],"wc02.yor");
   fit_data(&fit[1],"wc03.yor");
 
   /* Initialize instrument parameters for each model.*/
@@ -87,7 +87,7 @@ fitinfo* setup_models(int *models)
     model_layer(&fit[i].m, 28.00, -0.2e-6, 0.0e-8, 10.00); /* 5 alkyl tails */
     model_layer(&fit[i].m, 100.0, 6.35e-6, 0.0e-8, 10.00); /* 6 solvent */
   }
-  
+
   rho_spacer=0.50e-6;
   rho_alkyl=-0.40e-6;
   vol_fract_spacer=0.9;
@@ -98,7 +98,7 @@ fitinfo* setup_models(int *models)
   /* fit[3].m.d[3] = ... */
   fit[1].m.rho[6]=3.4e-6;
 
-  
+
   /*=============== FIT PARAMETERS ===============================*/
 
   /* Specify which parameters are your fit parameters. Parameters are fitted
@@ -115,20 +115,20 @@ fitinfo* setup_models(int *models)
   pars_add(pars, "vol_fract_spacer", &(vol_fract_spacer), 0., 1.);
   pars_add(pars, "d_alkyl", &(fit[0].m.d[5]), 10., 17.);
   pars_add(pars, "rho_alkyl", &(rho_alkyl), -0.5e-6, 0.0e-6);
-  pars_add(pars, "vol_fract_alkyl", &(vol_fract_alkyl), 0., 1.);  
+  pars_add(pars, "vol_fract_alkyl", &(vol_fract_alkyl), 0., 1.);
   pars_add(pars, "rho_solv_0", &(fit[0].m.rho[fit[0].m.n-1]), 6.0e-6, 6.35e-6);
   pars_add(pars, "rho_solv_1", &(fit[1].m.rho[fit[1].m.n-1]), 3.0e-6, 4.5e-6);
   pars_add(pars, "global_rough", &(global_rough), 8.0, 15.0);
 
   /* Build a list of 'free parameters' in fit[1].pars. These are
    * parameters for which the values are aloowed to differ from those
-   * in model 0.  By default all values in all models are the same unless 
-   * specified here. The range data is not useful, so set it to [0,1].  
+   * in model 0.  By default all values in all models are the same unless
+   * specified here. The range data is not useful, so set it to [0,1].
    */
 
   pars_add(freepars, "rho_solv_1", &(fit[1].m.rho[fit[1].m.n-1]), 0., 1.);
   pars_add(freepars, "rough_cr_au", &(fit[0].m.rough[3]), 0., 1.);
-  
+
   constraints = constr_models;
   return fit;
 }

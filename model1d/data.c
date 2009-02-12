@@ -67,7 +67,7 @@ static void log2lin(int n, double *y, double *dy)
 int data_log2lin_if_negative(fitdata *data)
 {
   int i,neg;
-  
+
   neg = 0;
   for (i=0; i < data->n; i++) if (data->R[i] < 0) neg++;
   if (neg > (data->n*7)/10) {
@@ -134,11 +134,11 @@ void sort_data(fitdata *data)
 }
 
 
-/* Load data into data structure.  
+/* Load data into data structure.
  * Return the number of data columns:
  *   2: Q, R
  *   3: Q, R, dR
- *   4: Q, dQ, R, dR 
+ *   4: Q, dQ, R, dR
  *   dQ and dR default to 0.
  */
 int data_load(fitdata *data, const char *file)
@@ -186,7 +186,7 @@ int data_load(fitdata *data, const char *file)
 	}
       }
       switch (c) {
-      case 2: 
+      case 2:
 	data->Q[n]  = c1;
 	data->dQ[n] = 0.0;
 	data->R[n]  = c2;
@@ -273,14 +273,14 @@ calc_resolution(fitdata *data, double L, double dLoL,
   }
 }
 
-void 
-data_resolution_fixed(fitdata *data, double L, double dLoL,    
+void
+data_resolution_fixed(fitdata *data, double L, double dLoL,
 		      double Qlo, double Qhi, double dT)
 {
   calc_resolution(data,L,dLoL,Qlo,Qhi,dT,RES_FIXED);
 }
 
-void 
+void
 data_resolution_varying(fitdata *data, double L, double dLoL,
 			double Qlo, double Qhi, double dToT)
 {
@@ -297,7 +297,7 @@ data_resolution_fv(fitdata *data, double L, double dLoL,
 
 void
 data_resolution_fvf(fitdata *data, double L, double dLoL,
-		    double Qlo, double Qhi, 
+		    double Qlo, double Qhi,
 		    double dTlo, double dToT, double dThi)
 {
   calc_resolution(data,L,dLoL, 0.,Qlo,dTlo,RES_FIXED);
@@ -329,7 +329,7 @@ int data_printfit_subset(const char *file, const fitdata *data,
   for (i=0; i < data->n; i++) {
     while (j < nQ-1 && fitQ[j] < data->Q[i]) j++;
     assert (fitQ[j] == data->Q[i]);
-    fprintf(f, "%g %g %g %g %g\n", 
+    fprintf(f, "%g %g %g %g %g\n",
 	    data->Q[i], data->dQ[i], data->R[i], data->dR[i], fitR[j]);
   }
   fclose(f);
@@ -346,7 +346,7 @@ int data_printfit(const char *file, const fitdata *data, const double fitR[])
   fprintf(f,"# Q dQ R dR fit\n");
   if (f == NULL) return 0;
   for (i=0; i < data->n; i++) {
-    fprintf(f, "%g %g %g %g %g\n", 
+    fprintf(f, "%g %g %g %g %g\n",
 	    data->Q[i], data->dQ[i], data->R[i], data->dR[i], fitR[i]);
   }
   fclose(f);
@@ -425,13 +425,13 @@ wsumsq(const int n, const double x[], const double y[], const double dy[],
 }
 
 void
-data_wsumsq(const fitdata *data, 
+data_wsumsq(const fitdata *data,
 	    const int fitn, const double fitQ[], const double fitR[],
 	    int *n, double *sumsq)
 {
   if (data->n == 0) {
     /* n && sumsq are cumulative, so no need to reset them before returning */
-    return; 
+    return;
   }
 
   if (data->dR[0] == 0.) {
@@ -443,23 +443,23 @@ data_wsumsq(const fitdata *data,
 }
 
 void
-data_sumsq(const fitdata *data, 
+data_sumsq(const fitdata *data,
 	   const int fitn, const double fitQ[], const double fitR[],
 	   int *n, double *sumsq)
 {
   if (data->n == 0) {
     /* n && sumsq are cumulative, so no need to reset them before returning */
-    return; 
+    return;
   }
 
   wsumsq(data->n,data->Q,data->R,NULL,fitn,fitQ,fitR,NULL,n,sumsq);
 }
 
 int
-data_countQ(const fitdata *A, const fitdata *B, 
+data_countQ(const fitdata *A, const fitdata *B,
 	    const fitdata *C, const fitdata *D)
 {
-  int n,iA,iB,iC,iD; 
+  int n,iA,iB,iC,iD;
   double Q, nextA, nextB, nextC, nextD;
 
   Q = -INF;
@@ -472,16 +472,16 @@ data_countQ(const fitdata *A, const fitdata *B,
   while (nextA != INF || nextB != INF || nextC != INF || nextD != INF) {
     if (nextA <= nextB && nextA <= nextC && nextA <= nextD) {
       if (nextA != Q) n++, Q=nextA;
-      nextA = (++iA < A->n ? A->Q[iA] : INF);      
+      nextA = (++iA < A->n ? A->Q[iA] : INF);
     } else if (nextB <= nextC && nextB <= nextD) {
       if (nextB != Q) n++, Q=nextB;
-      nextB = (++iB < B->n ? B->Q[iB] : INF);      
+      nextB = (++iB < B->n ? B->Q[iB] : INF);
     } else if (nextC <= nextD) {
       if (nextC != Q) n++, Q=nextC;
-      nextC = (++iC < C->n ? C->Q[iC] : INF);      
+      nextC = (++iC < C->n ? C->Q[iC] : INF);
     } else {
       if (nextD != Q) n++, Q=nextD;
-      nextD = (++iD < D->n ? D->Q[iD] : INF);      
+      nextD = (++iD < D->n ? D->Q[iD] : INF);
     }
 #if 0
     printf("Q=%g, A[%d]=%g, B[%d]=%g, C[%d]=%g, D[%d]=%g\n",
@@ -492,33 +492,33 @@ data_countQ(const fitdata *A, const fitdata *B,
 }
 
 void
-data_mergeQ(const fitdata *A, const fitdata *B, 
+data_mergeQ(const fitdata *A, const fitdata *B,
 	    const fitdata *C, const fitdata *D,
 	    double merge[])
 {
-  int n,iA,iB,iC,iD; 
+  int n,iA,iB,iC,iD;
   double Q, nextA, nextB, nextC, nextD;
 
   Q = -INF;
   n = 0;
   iA = iB = iC = iD = 0;
-  nextA = A && A->n ? A->Q[0] : INF;      
-  nextB = B && B->n ? B->Q[0] : INF;      
-  nextC = C && C->n ? C->Q[0] : INF;      
-  nextD = D && D->n ? D->Q[0] : INF;      
+  nextA = A && A->n ? A->Q[0] : INF;
+  nextB = B && B->n ? B->Q[0] : INF;
+  nextC = C && C->n ? C->Q[0] : INF;
+  nextD = D && D->n ? D->Q[0] : INF;
   while (nextA != INF || nextB != INF || nextC != INF || nextD != INF) {
     if (nextA <= nextB && nextA <= nextC && nextA <= nextD) {
       if (nextA != Q) merge[n++]=Q=nextA;
-      nextA = (++iA < A->n ? A->Q[iA] : INF);      
+      nextA = (++iA < A->n ? A->Q[iA] : INF);
     } else if (nextB <= nextC && nextB <= nextD) {
       if (nextB != Q) merge[n++]=Q=nextB;
-      nextB = (++iB < B->n ? B->Q[iB] : INF);      
+      nextB = (++iB < B->n ? B->Q[iB] : INF);
     } else if (nextC <= nextD) {
       if (nextC != Q) merge[n++]=Q=nextC;
-      nextC = (++iC < C->n ? C->Q[iC] : INF);      
+      nextC = (++iC < C->n ? C->Q[iC] : INF);
     } else {
       if (nextD != Q) merge[n++]=Q=nextD;
-      nextD = (++iD < D->n ? D->Q[iD] : INF);      
+      nextD = (++iD < D->n ? D->Q[iD] : INF);
     }
   }
 }

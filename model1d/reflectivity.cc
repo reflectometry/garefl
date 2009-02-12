@@ -15,10 +15,10 @@
 // We need  a number of tests as follows:
 // (note V=vacuum, S=substrate, n=interior layer n, R=reflectivity amplitude)
 //    Check R matches precalculated R for profiles with:
-//      rho(n)=rho(V) for rho(V)=0 and rho(V)!=0 
+//      rho(n)=rho(V) for rho(V)=0 and rho(V)!=0
 //      rho(n)=0
 //      rho(S)=0 and rho(S)!=0
-//      rho(V)=0 and rho(V)!=0 
+//      rho(V)=0 and rho(V)!=0
 //      rho(V)=rho(S) for rho(V)=0 and rho(V)!=0
 //      rho(n)<0
 //      rho(n)>0
@@ -74,9 +74,9 @@
 
 #if defined(USE_PARRAT)
 #warning Using Parrat
-// based on: 
+// based on:
 //   Ankner JF, Majkrzak CF (1992) "Subsurface profile refinement for
-//   neutron reflectivity" in SPIE 1738 Neutron Optical Devices and 
+//   neutron reflectivity" in SPIE 1738 Neutron Optical Devices and
 //   Applications, 260-269.
 //
 // Note that the paper uses
@@ -134,7 +134,7 @@ refl(const int layers, const double d[],
     f_next = f;
   }
   // vacuum --- we've already accounted for the index of refraction
-  // of the vacuum and we are measuring reflectivity relative to the 
+  // of the vacuum and we are measuring reflectivity relative to the
   // top interface so we ignore absorption and depth.  This means that
   // S is 0 and the exponential is 1.
   f = fabs(Q);
@@ -158,7 +158,7 @@ refl(const int layers, const double d[],
 {
   const refl_complex J(0,1);
 
-  // Check that Q is not too close to zero.  
+  // Check that Q is not too close to zero.
   // For negative Q, reverse the layers.
   const double Qcutoff = 1e-10;
   int n,step;
@@ -176,19 +176,19 @@ refl(const int layers, const double d[],
   // Since sqrt(1/4 * x) = sqrt(x)/2, I'm going to pull the 1/2 into the
   // sqrt to save a multiplication later.
   const double pi4=1.2566370614359172e1;       // = 1/4 * 16 pi
-  const double pi2olambda = 0.5*pi4/lambda;    // = 1/4 * 8 pi / lambda 
+  const double pi2olambda = 0.5*pi4/lambda;    // = 1/4 * 8 pi / lambda
   const double Qsqrel = 0.25*Q*Q + pi4*rho[n]; // = 1/4 * (Q^2 + 16 pi Vrho)
 
   refl_complex B11, B12, B21, B22;
   B11 = B22 = 1.;
   B12 = B21 = 0.;
-  for (int i=2; i < layers; i++) { 
+  for (int i=2; i < layers; i++) {
     // Loop starts at 2 because vacuum and substrate are in the loop.  The
     // loop index is not the layer number because we may be going backward
     // or forward.  Instead, n is set to the incident layer (which may be
     // first or last) and incremented or decremented each time through.
     n += step;
-    // Given 
+    // Given
     //
     //    Qc^2(L) = 16 pi rho(L)
     //    S1 = 1/2 sqrt(Qc^2(L) - Qc^2(vacuum) - Q^2 - 8i pi mu(L)/lambda),
@@ -204,8 +204,8 @@ refl(const int layers, const double d[],
     // The scale factor
     //
     //     H=exp(a d)
-    // 
-    // keeps the calculation stable even for large thickness d. We can use 
+    //
+    // keeps the calculation stable even for large thickness d. We can use
     // any scale factor we want since it cancels later when we calculate
     // the reflectivity  R = V/U.
     const refl_complex S1 = sqrt(refl_complex(pi4*rho[n]-Qsqrel,
@@ -292,7 +292,7 @@ refl(const int layers, const double d[],
 }
 #endif /* !USE_PARRAT */
 
-extern "C" void 
+extern "C" void
 reflectivity_amplitude(const int layers, const double d[],
 		       const double rho[], const double mu[], const double L,
 		       const int points, const double Q[], refl_complex R[])
@@ -300,7 +300,7 @@ reflectivity_amplitude(const int layers, const double d[],
   for (int i=0; i < points; i++) refl(layers,d,rho,mu,L,Q[i],R[i]);
 }
 
-extern "C" void 
+extern "C" void
 reflectivity(const int layers, const double d[],
 	     const double rho[], const double mu[], const double lambda,
 	     const int points, const double Q[], double R[])
@@ -318,7 +318,7 @@ reflectivity(const int layers, const double d[],
   }
 }
 
-extern "C" void 
+extern "C" void
 reflectivity_real(const int layers, const double d[],
 		  const double rho[], const double mu[], const double lambda,
 		  const int points, const double Q[], double R[])
@@ -330,7 +330,7 @@ reflectivity_real(const int layers, const double d[],
   }
 }
 
-extern "C" void 
+extern "C" void
 reflectivity_imag(const int layers, const double d[],
 		  const double rho[], const double mu[], const double lambda,
 		  const int points, const double Q[], double R[])

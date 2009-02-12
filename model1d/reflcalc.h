@@ -3,7 +3,7 @@
 #ifndef _REFLCALC_H
 #define _REFLCALC_H
 
-/* 
+/*
 
 
 Reflectivity calculations on rectangular slabs.
@@ -18,7 +18,7 @@ Reflectivity calculations on rectangular slabs.
    - exptheta[2*M]: cos(theta),sin(theta) pairs for magnetic scattering angle
    - Aguide  polarization angle relative to the guide (usually -90)
    - N:      Number of Q points
-   - Q[N]:   Q points; negative for back reflectivity, which is implemented 
+   - Q[N]:   Q points; negative for back reflectivity, which is implemented
              by reversing the order of the layers
    - R[N]:   returned reflectivity = |r|^2
    - r[N]:   returned complex reflectivity amplitude
@@ -109,20 +109,20 @@ extern "C" {
 
 
 void
-reflectivity(const int layers, const double d[], 
+reflectivity(const int layers, const double d[],
 	     const double rho[], const double mu[], const double lambda,
              const int points, const double Q[], double R[]);
 void
-reflectivity_amplitude(const int layers, const double d[], 
+reflectivity_amplitude(const int layers, const double d[],
 		       const double rho[], const double mu[], const double L,
 		       const int points, const double Q[], refl_complex R[]);
 void
-reflectivity_real(const int layers, const double d[], 
+reflectivity_real(const int layers, const double d[],
 		  const double rho[], const double mu[], const double lambda,
 		  const int points, const double Q[], double R[]);
 
 void
-reflectivity_imag(const int layers, const double d[], 
+reflectivity_imag(const int layers, const double d[],
 		  const double rho[], const double mu[], const double lambda,
 		  const int points, const double Q[], double R[]);
 
@@ -136,27 +136,27 @@ reflrough_amplitude(const int layers, const double d[], const double sigma[],
 		    const int points, const double Q[], refl_complex R[]);
 
 void
-magnetic_reflectivity(const int layers, const double d[], 
+magnetic_reflectivity(const int layers, const double d[],
 		      const double rho[], const double mu[], const double L,
 		      const double P[], const refl_complex expth[],
-		      const double Aguide, const int points, const double Q[], 
+		      const double Aguide, const int points, const double Q[],
 		      double Ra[], double Rb[], double Rc[], double Rd[]);
 void
-magnetic_amplitude(const int layers, const double d[], 
+magnetic_amplitude(const int layers, const double d[],
 		   const double rho[], const double mu[], const double L,
 		   const double P[], const refl_complex expth[],
-		   const double Aguide, const int points, const double Q[], 
+		   const double Aguide, const int points, const double Q[],
 		   refl_complex Ra[], refl_complex Rb[],
 		   refl_complex Rc[], refl_complex Rd[]);
 
-void 
-fresnel_reflectivity(const double vrho, const double srho, 
-		     const double vmu, const double smu, 
+void
+fresnel_reflectivity(const double vrho, const double srho,
+		     const double vmu, const double smu,
 		     int points, const double Q[], double R[],
 		     const double lambda);
-void 
-fresnel_amplitude(const double vrho, const double srho, 
-		  const double vmu, const double smu, 
+void
+fresnel_amplitude(const double vrho, const double srho,
+		  const double vmu, const double smu,
 		  int points, const double Q[], refl_complex R[],
 		  const double lambda);
 
@@ -165,17 +165,17 @@ fresnel_amplitude(const double vrho, const double srho,
 void
 resolution(int Nin, const double Qin[], const double Rin[],
 	   int N, const double Q[], const double dQ[], double R[]);
-double 
+double
 resolution_dT(double s1,double s2,double d);
-double 
+double
 resolution_dToT(double s1,double s2,double d,double A3);
-  
+
 void
-resolution_fixed(double L, double dLoL, double dT, 
+resolution_fixed(double L, double dLoL, double dT,
 		 int n, const double Q[], double dQ[]);
 
 void
-resolution_varying(double L, double dLoL, double dToT, 
+resolution_varying(double L, double dLoL, double dToT,
 		   int n, const double Q[], double dQ[]);
 
 void

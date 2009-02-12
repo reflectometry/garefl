@@ -29,7 +29,7 @@ static int
 find_interval(const int n, const double x[], const double v);
 
 /* trisolve(n, l[],d[],u[], b[])
- * Solves the tridiagonal system A*x = b.  The vector l is the subdiagonal, 
+ * Solves the tridiagonal system A*x = b.  The vector l is the subdiagonal,
  * d is the diagonal and u is the superdiagonal of A.  On return the vector
  * B contains the solution.
  *
@@ -90,9 +90,9 @@ bspline3_refine(int n, const double control[], double new_points[])
 /* Evaluate a B-spline at a set of points within a segment.  */
 
 static void
-eval_points(const int N_knots, 
-	    const double knot[], const double control[], 
-	    const int segment, int n, const double t[], 
+eval_points(const int N_knots,
+	    const double knot[], const double control[],
+	    const int segment, int n, const double t[],
 	    double v[])
 {
   int N_control = N_knots - 4;
@@ -124,10 +124,10 @@ eval_points(const int N_knots,
 
     /* printf("ti %g: P2 %g P3 %g P4 %g\n",ti,P2,P3,P4); */
 
-    
+
     P4 = ( (ti-tm0)*P4 + (tp2-ti)*P3 ) / (tp2 - tm0);
     P3 = ( (ti-tm1)*P3 + (tp1-ti)*P2 ) / (tp1 - tm1);
-    
+
     P4 = ( (ti-tm0)*P4 + (tp1-ti)*P3 ) / (tp1 - tm0);
 
     v[i] = P4;
@@ -137,8 +137,8 @@ eval_points(const int N_knots,
 
 /* Evaluate a B-spline at a single point within a segment. */
 inline double
-eval_point(const int N_knots, 
-	   const double knot[], const double control[], 
+eval_point(const int N_knots,
+	   const double knot[], const double control[],
 	   const int segment, const double ti)
 {
   const double tm2 = knot[max(segment-2,0)];
@@ -149,18 +149,18 @@ eval_point(const int N_knots,
   const double tp3 = knot[min(segment+3,N_knots-1)];
   const int N_control = N_knots - 4;
 
-  double P4 = control_value(N_control, control, segment-0); 
-  double P3 = control_value(N_control, control, segment-1); 
-  double P2 = control_value(N_control, control, segment-2); 
+  double P4 = control_value(N_control, control, segment-0);
+  double P3 = control_value(N_control, control, segment-1);
+  double P2 = control_value(N_control, control, segment-2);
   double P1 = control_value(N_control, control, segment-3);
 
   P4 = ( (ti-tm0)*P4 + (tp3-ti)*P3 ) / (tp3 - tm0);
   P3 = ( (ti-tm1)*P3 + (tp2-ti)*P2 ) / (tp2 - tm1);
-  P2 = ( (ti-tm2)*P2 + (tp1-ti)*P1 ) / (tp1 - tm2);  
-    
+  P2 = ( (ti-tm2)*P2 + (tp1-ti)*P1 ) / (tp1 - tm2);
+
   P4 = ( (ti-tm0)*P4 + (tp2-ti)*P3 ) / (tp2 - tm0);
   P3 = ( (ti-tm1)*P3 + (tp1-ti)*P2 ) / (tp1 - tm1);
-  
+
   P4 = ( (ti-tm0)*P4 + (tp1-ti)*P3 ) / (tp1 - tm0);
 
   return P4;
@@ -169,8 +169,8 @@ eval_point(const int N_knots,
 
 /* Evaluate a B-spline and all derivatives at a point within a segment. */
 void
-bspline3_eval_all_derivs(const int N_knots, 
-		const double knot[], const double control[], 
+bspline3_eval_all_derivs(const int N_knots,
+		const double knot[], const double control[],
 		const double t, double derivs[4])
 {
   const int N_control = N_knots - 4;
@@ -186,26 +186,26 @@ bspline3_eval_all_derivs(const int N_knots,
 #endif
 
   } else {
-    
+
     const double tm2 = knot[max(segment-2,0)];
     const double tm1 = knot[max(segment-1,0)];
     const double tm0 = knot[segment-0];
     const double tp1 = knot[min(segment+1,N_knots-1)];
     const double tp2 = knot[min(segment+2,N_knots-1)];
     const double tp3 = knot[min(segment+3,N_knots-1)];
-    
-    double P4 = control_value(N_control, control, segment-0); 
-    double P3 = control_value(N_control, control, segment-1); 
-    double P2 = control_value(N_control, control, segment-2); 
+
+    double P4 = control_value(N_control, control, segment-0);
+    double P3 = control_value(N_control, control, segment-1);
+    double P2 = control_value(N_control, control, segment-2);
     double P1 = control_value(N_control, control, segment-3);
-    
+
     double Q4 = (P4 - P3) * 3 / (tp3 - tm0);
     double Q3 = (P3 - P2) * 3 / (tp2 - tm1);
     double Q2 = (P2 - P1) * 3 / (tp1 - tm2);
-    
+
     double R4 = (Q4 - Q3) * 2 / (tp2 - tm0);
     double R3 = (Q3 - Q2) * 2 / (tp1 - tm1);
-    
+
     double S4 = (R4 - R3) * 1 / (tp1 - tm0);
 
 #if 0
@@ -216,23 +216,23 @@ bspline3_eval_all_derivs(const int N_knots,
     printf("R: %f %f\n", R4,R3);
     printf("S: %f\n", S4);
 #endif
-    
+
     P4 = ( (t-tm0)*P4 + (tp3-t)*P3 ) / (tp3 - tm0);
     P3 = ( (t-tm1)*P3 + (tp2-t)*P2 ) / (tp2 - tm1);
-    P2 = ( (t-tm2)*P2 + (tp1-t)*P1 ) / (tp1 - tm2);  
-    
+    P2 = ( (t-tm2)*P2 + (tp1-t)*P1 ) / (tp1 - tm2);
+
     P4 = ( (t-tm0)*P4 + (tp2-t)*P3 ) / (tp2 - tm0);
     P3 = ( (t-tm1)*P3 + (tp1-t)*P2 ) / (tp1 - tm1);
-    
+
     P4 = ( (t-tm0)*P4 + (tp1-t)*P3 ) / (tp1 - tm0);
-    
+
     Q4 = ( (t-tm0)*Q4 + (tp2-t)*Q3 ) / (tp2 - tm0);
     Q3 = ( (t-tm1)*Q3 + (tp1-t)*Q2 ) / (tp1 - tm1);
-    
+
     Q4 = ( (t-tm0)*Q4 + (tp1-t)*Q3 ) / (tp1 - tm0);
-    
+
     R4 = ( (t-tm0)*R4 + (tp1-t)*R3 ) / (tp1 - tm0);
-    
+
     derivs[0] = P4;
     derivs[1] = Q4;
     derivs[2] = R4;
@@ -248,18 +248,18 @@ bspline3_eval_all_derivs(const int N_knots,
 }
 
 
-/* Evaluate a number of grid points within a B-Spline segment. 
+/* Evaluate a number of grid points within a B-Spline segment.
  * The evaluation uses the t_values given in the argument.
- * It is bounded by the edge of the segment.  
+ * It is bounded by the edge of the segment.
  *
  * The segment should be in the range [-1,N_knots-1], inclusive.
  *
- * Returns the (t,v) values of the grid points and the number of 
+ * Returns the (t,v) values of the grid points and the number of
  * points evaluated.
  */
 static int
-eval_grid(const int N_knots, 
-	  const double knot[], const double control[], 
+eval_grid(const int N_knots,
+	  const double knot[], const double control[],
 	  const int segment, const double t_values[],
 	  const int n, double t[], double v[])
 {
@@ -279,9 +279,9 @@ eval_grid(const int N_knots,
   }
 
   /* Set up evaluation points */
-  /* FIXME restore 'grid' behaviour of this function and use a 
+  /* FIXME restore 'grid' behaviour of this function and use a
    * separate function for evaluating a set of non-uniform points
-   * in a segment. 
+   * in a segment.
    */
   for (i=0; i < k; i++) t[i] = t_values[i];
 
@@ -309,8 +309,8 @@ eval_grid(const int N_knots,
     double z,dz1,dz2,dz3;
 
     eval_all_derivs(N_knots, knot, control, segment, t[0], d);
-    z = d[0]; dz = d[1]; d2z = d[2]; d3z= d[3]; 
-  
+    z = d[0]; dz = d[1]; d2z = d[2]; d3z= d[3];
+
     /* Step along the curve using the current derivative.  Update the
      * derivative using the second derivative.  Update the second derivative
      * using the third derivative.  This is a cubic, so the third derivative
@@ -363,7 +363,7 @@ bspline3(const int N_knots,
   segment = find_interval(N_knots, knot, t_vals[0]);
   k = eval_grid(N_knots, knot, control, segment, t_vals, n, t, v);
   while (k < n) {
-    k += eval_grid(N_knots, knot, control, ++segment, 
+    k += eval_grid(N_knots, knot, control, ++segment,
 		   t_vals+k, n-k, t+k, v+k);
     /* The loop is guaranteed to halt because eval_grid fills to the end
      * beyond the last knot.  But a little paranoia never hurt anybody...
@@ -385,8 +385,8 @@ bspline3(const int N_knots,
  * spline) in those cases. */
 
 void
-bspline3_eval_derivs(const int N_knots, const double knot[], 
-	    const double control[], const double currT, 
+bspline3_eval_derivs(const int N_knots, const double knot[],
+	    const double control[], const double currT,
 		     double result[])
 {
   int segment = 0;
@@ -400,15 +400,15 @@ bspline3_eval_derivs(const int N_knots, const double knot[],
   result[3] = knot[segment+1] - currT;
 }
 
-/* Interpolates a spline through the data points. 
+/* Interpolates a spline through the data points.
  * Takes N_data data points and returns a set of N_data+2
- * control points that create a spline passing through the data points. 
+ * control points that create a spline passing through the data points.
  * Requires a work vector of length (3*N_data)+4.
  */
 
 int
 bspline3_interpolate(const int N_data, double data[],
-		     double control[], double work[]) 
+		     double control[], double work[])
 {
   int i;
 
@@ -475,10 +475,10 @@ void check(double a, double b, double tol)
 void checkv(int k, const double a[], const double b[], double tol)
 {
   int i, error=0;
-  for (i=0; i < k; i++) error += (fabs(a[i]-b[i]) > tol); 
+  for (i=0; i < k; i++) error += (fabs(a[i]-b[i]) > tol);
   if (error) {
     printf("vectors differ in %d values:\n",error);
-    for (i=0; i < k; i++) 
+    for (i=0; i < k; i++)
       printf("%d: %c %g %g %g\n", i, fabs(a[i]-b[i])>tol?'*':' ', a[i], b[i],
 		      b[i]-a[i]);
   }
@@ -512,19 +512,19 @@ int main(int argc, char *argv[])
     int i;
     double expected_t[] = {
       -1, -0.2, 0.6, 1.4, 2.2, 3, 3.8, 4.6, 5.4, 6.2, 7
-    } ; 
+    } ;
     double expected_v[] = {
-      1, 1, 1.72, 2.58542222222222, 2.41973333333333, 1.84444444444444, 
+      1, 1, 1.72, 2.58542222222222, 2.41973333333333, 1.84444444444444,
       1.41137777777778, 1.49257777777778, 1.8572, 2, 2
     } ;
-    double dt; 
+    double dt;
 
     printf("# Checking single points\n");
-    bspline3(10, knot1, c1, 2.2, 1., 1, t, v); 
+    bspline3(10, knot1, c1, 2.2, 1., 1, t, v);
     check(v[0],0.,3e-16);
-    bspline3(10, knot1, c2, 2.2, 1., 1, t, v); 
+    bspline3(10, knot1, c2, 2.2, 1., 1, t, v);
     check(v[0],1.,3e-16);
-    bspline3(10, knot2, c3, 2., 1., 1, t, v);  
+    bspline3(10, knot2, c3, 2., 1., 1, t, v);
     check(v[0],761./240.,3e-15);
     bspline3(10, knot1, c3, 3.2, 1., 1, t, v);
     check(v[0],4.2976,3e-16);

@@ -17,9 +17,9 @@
 // will accept an absorption term for both, and you will have to apply
 // an absorption term separately based on the details of your substrate.
 
-extern "C" void 
-fresnel_reflectivity(const double vrho, const double srho, 
-		     const double vmu, const double smu, 
+extern "C" void
+fresnel_reflectivity(const double vrho, const double srho,
+		     const double vmu, const double smu,
 		     int points, const double Q[], double R[],
 		     const double lambda)
 {
@@ -46,9 +46,9 @@ fresnel_reflectivity(const double vrho, const double srho,
 }
 
 
-extern "C" void 
-fresnel_amplitude(const double vrho, const double srho, 
-		  const double vmu, const double smu, 
+extern "C" void
+fresnel_amplitude(const double vrho, const double srho,
+		  const double vmu, const double smu,
 		  int points, const double Q[], std::complex<double> R[],
 		  const double lambda)
 {

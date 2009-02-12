@@ -9,9 +9,9 @@
 #include <complex>
 #include "reflcalc.h"
 
-// based on: 
+// based on:
 //   Ankner JF, Majkrzak CF (1992) "Subsurface profile refinement for
-//   neutron reflectivity" in SPIE 1738 Neutron Optical Devices and 
+//   neutron reflectivity" in SPIE 1738 Neutron Optical Devices and
 //   Applications, 260-269.
 //
 // extensions to handle approximate roughness due to Nevot and Croce.
@@ -66,12 +66,12 @@ refl(const int layers, const double d[], const double sigma[],
   for (int i=2; i < layers; i++) {
     n += step; r += step;
     f = sqrt(refl_complex(Qsqrel-pi16*rho[n],pi8olambda*mu[n]));
-    F = (f - f_next) / (f + f_next) * exp(-0.5*Qsq*sigma[r]*sigma[r]/log(256)); 
+    F = (f - f_next) / (f + f_next) * exp(-0.5*Qsq*sigma[r]*sigma[r]/log(256));
     R = exp(d[n]*J*f) * (R + F) / (R*F + 1.);
     f_next = f;
   }
   // vacuum --- we've already accounted for the index of refraction
-  // of the vacuum and we are measuring reflectivity relative to the 
+  // of the vacuum and we are measuring reflectivity relative to the
   // top interface so we ignore absorption and depth.  This means that
   // S is 0 and the exponential is 1.
   r += step;
@@ -80,7 +80,7 @@ refl(const int layers, const double d[], const double sigma[],
   R = (R + F) / (R*F + 1.);
 }
 
-extern "C" void 
+extern "C" void
 reflrough_amplitude(const int layers, const double d[], const double sigma[],
 		    const double rho[], const double mu[], const double L,
 		    const int points, const double Q[], refl_complex R[])
@@ -89,7 +89,7 @@ reflrough_amplitude(const int layers, const double d[], const double sigma[],
 }
 
 
-extern "C" void 
+extern "C" void
 reflrough(const int layers, const double d[], const double sigma[],
 	     const double rho[], const double mu[], const double lambda,
 	     const int points, const double Q[], double R[])

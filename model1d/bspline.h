@@ -11,7 +11,7 @@ extern "C" {
  *
  * Values beyond the range of the knots are either clamped to 0 or to
  * the value of the last control point, depending on how bspline was
- * compiled.  
+ * compiled.
  *
  * The knot vector is of length N_knots.
  * The control vector is of length N_knots-4.
@@ -22,18 +22,18 @@ bspline3(const int N_knots,
 	 const double knot[], const double control[],
 	 const double t_vals[],
 	 const int n, double t[], double v[]);
-void  
-bspline3_refine(int n, const double control[], 
+void
+bspline3_refine(int n, const double control[],
 		double control_output[]);
 
 void
-bspline3_eval_derivs(const int N_knots, const double knot[], 
-	    const double control[], const double currT, 
+bspline3_eval_derivs(const int N_knots, const double knot[],
+	    const double control[], const double currT,
 	    double result[]);
 
 void
-bspline3_eval_all_derivs(const int N_knots, 
-			 const double knot[], const double control[], 
+bspline3_eval_all_derivs(const int N_knots,
+			 const double knot[], const double control[],
 			 double t, double derivs[]);
 
 int

@@ -28,7 +28,7 @@
  * gaussian G of width sima, or when x = sqrt(-2 sigma^2 log(0.001)). */
 #define LOG_RESLIMIT -6.90775527898213703123
 
-/** \file 
+/** \file
 The resolution function returns the convolution of the reflectometry
 curve with a Q-dependent gaussian.
 
@@ -51,41 +51,41 @@ The contribution of Q to a resolution of width dQo at point Qo is:
    p(Q) = 1/sqrt(2 pi dQo^2) exp ( (Q-Qo)^2/(2 dQo^2) )
 
 We are approximating the convolution at Qo using a numerical
-approximation to the integral over the measured points.  For 
-efficiency, the integral is limited to p(Q_i)/p(0)>=0.001.  
+approximation to the integral over the measured points.  For
+efficiency, the integral is limited to p(Q_i)/p(0)>=0.001.
 
 Note that the function we are convoluting is falling off as Q^4.
 That means the correct convolution should uniformly sample across
 the entire width of the Gaussian.  This is not possible at the
 end points unless you calculate the reflectivity beyond what is
-strictly needed for the data. The function resolution_pad(dQ,step) 
-returns the number of additional steps of size step required to 
+strictly needed for the data. The function resolution_pad(dQ,step)
+returns the number of additional steps of size step required to
 go beyond this limit for the given width dQ.  This occurs when:
 
     (n*step)^2 < -2 dQ^2 * ln 0.001
 
-The choice of sampling density is particularly important near the 
-critical edge.  This is where the resolution calculation has the 
-largest effect on the reflectivity curve. In one particular model, 
-calculating every 0.001 rather than every 0.02 changed one value 
-above the critical edge by 15%.  This is likely to be a problem for 
+The choice of sampling density is particularly important near the
+critical edge.  This is where the resolution calculation has the
+largest effect on the reflectivity curve. In one particular model,
+calculating every 0.001 rather than every 0.02 changed one value
+above the critical edge by 15%.  This is likely to be a problem for
 any system with a well defined critical edge.  The solution is to
 compute the theory function over a finer mesh where the derivative
 is changing rapidly.  For the critical edge, I have found a sampling
 density of 0.005 to be good enough.
 
-For systems involving thick layers, the theory function oscillates 
+For systems involving thick layers, the theory function oscillates
 rapidly around the measured points.  This is a problem when the
 period of the oscillation, 2 pi/d for total sample depth d, is on
-the order of the width of the resolution function. This is true even 
+the order of the width of the resolution function. This is true even
 for gradually changing profiles in materials with very high roughness
 values.  In these systems, the theory function should be oversampled
 around the measured points Q.  With a single thick layer, oversampling
 can be limited to just one period.  With multiple thick layers,
-oscillations will show interference patterns and it will be necessary 
+oscillations will show interference patterns and it will be necessary
 to oversample uniformly between the measured points.  When oversampled
 spacing is less than about 2 pi/7 d, it is possible to see aliasing
-effects.  
+effects.
 
 FIXME is it better to use random sampling or strictly
 regular spacing when you are undersampling?
@@ -101,18 +101,18 @@ regular spacing when you are undersampling?
    is a spike, but we are approximating it by a triangle so it is
    not surprising it works so poorly.  A slightly better solution is
    to use the inner limits rather than the outer limits, but this will
-   still break down if the Q spacing is approximately equal to limit. 
+   still break down if the Q spacing is approximately equal to limit.
    Best is to not use trapezoid.
 */
 
 /* Trapezoid rule for numerical integration of convolution */
-double 
+double
 convolve_point(const double Qin[], const double Rin[], int k, int n,
 	       double Qo, double limit, double sigma)
 {
   const double two_sigma_sq = 2. * sigma * sigma;
   double z, Glo, RGlo, R, norm;
-  
+
   z = Qo - Qin[k];
   Glo = exp(-z*z/two_sigma_sq);
   RGlo = Rin[k]*Glo;
@@ -123,15 +123,15 @@ convolve_point(const double Qin[], const double Rin[], int k, int n,
     const double Ghi = exp(-zhi*zhi/two_sigma_sq);
     const double RGhi = Rin[k] * Ghi;
     const double halfstep = 0.5*(Qin[k] - Qin[k-1]);
-    
+
     /* Add the trapezoidal area. */
     norm += halfstep * (Ghi + Glo);
     R += halfstep * (RGhi + RGlo);
-    
+
     /* Save the endpoint for next trapezoid. */
     Glo = Ghi;
     RGlo = RGhi;
-    
+
     /* Check if we've calculated far enough */
     if (Qin[k] >= Qo+limit) break;
   }
@@ -148,13 +148,13 @@ convolve_point(const double Qin[], const double Rin[], int k, int n,
 
 /* Analytic convolution of gaussian with linear spline */
 /* More expensive but more reliable */
-double 
+double
 convolve_point(const double Qin[], const double Rin[], int k, int n,
 	       double Qo, double limit, double sigma)
 {
   const double two_sigma_sq = 2. * sigma * sigma;
   double z, Glo, erflo, erfmin, R;
-  
+
   z = Qo - Qin[k];
   Glo = exp(-z*z/two_sigma_sq);
   erfmin = erflo = erf(-z/(SQRT2*sigma));
@@ -170,11 +170,11 @@ convolve_point(const double Qin[], const double Rin[], int k, int n,
 
     /* Add the integrals. */
     R += 0.5*(m*Qo+b)*(erfhi-erflo) - sigma/SQRT2PI*m*(Ghi-Glo);
-    
+
     /* Save the endpoint for next trapezoid. */
     Glo = Ghi;
     erflo = erfhi;
-    
+
     /* Check if we've calculated far enough */
     if (Qin[k] >= Qo+limit) break;
   }
@@ -251,7 +251,7 @@ where
 
 Return dQ as standard deviation:
    dQ = w / sqrt(8 ln(2))
-  
+
 We provide the following functions:
    resolution_varying(L, dL/L, dT/T, n, Q, dQ)  returns dQ
    resolution_fixed(L, dL/L, dT, n, Q, dQ)      returns dQ
@@ -265,92 +265,92 @@ where
    A3 in the incident angle theta in degrees
    s1,s2 are the slit openings
    d is the separateion between the slits in the same units as s1,s2
-  
-For a particular wavelength L, the angular divergence dT is 
+
+For a particular wavelength L, the angular divergence dT is
 approximated by a gaussian with FWHM:
-           
+
    dT = s/d
-  
-with s being the opening of slits s1 and s2 and d the distance 
+
+with s being the opening of slits s1 and s2 and d the distance
 between slits.
-   
-This formula for angular divergence dT is a small angle approximation 
-which assumes an isotropic field of neutrons before the first slit.  
-In these conditions, the angular distribution is triangular of 
+
+This formula for angular divergence dT is a small angle approximation
+which assumes an isotropic field of neutrons before the first slit.
+In these conditions, the angular distribution is triangular of
 width 2 dT, so the FWHM is dT.
 
-More precisely, the maximum divergence is Amax = arctan(s/d) ~ s/d in 
-either direction.  The number of neutrons at an angle |A| less than Amax 
+More precisely, the maximum divergence is Amax = arctan(s/d) ~ s/d in
+either direction.  The number of neutrons at an angle |A| less than Amax
 is given by the isotropic intensity I and the details of the slit:
    I(A) = I d ( s/d - tan |A| ) cos |A|
 You can derive this from simple geometry drawing the two pairs of
 slits and connecting the extreme edges:
-  
+
       S1     S2  *beam
       |      |***
            **C s2/2
    -----***---------
      *A*     B s1/2
    ** |--d---|
-  
+
 The triangle CAB is a right triangle with opposite (s1+s2)/2 and
 adjacent d, which for s1==s2 has angle Amax = arctan(s/d).  Consider
 an angle A < Amax given by triangle BAC*, with C* between B and C.
 The transmitted beam for angle A is the area between AC* and a
 parallel line A*C which goes through point C.  Then beam intensity
-for this angle I(A) = I times the perpendicular distance between 
+for this angle I(A) = I times the perpendicular distance between
 these two parallel lines. As angle A decreases and C* approaches B,
 the beam width increases up to a maximum corresponding to the slit
 opening.  The situation is symmetric for angles A < 0, leading to
 a symmetric distribution which is approximately triangular up to
 about s/d = 0.5.  This is well above the range of values we will see.
- 
-Note that the usual transformation, sigma = FWHM / sqrt(8 ln 2), 
-overestimates the width of the gaussian convolution function by 
-about 4% compared to the expected variance of a triangular distribution.  
-Strictly speaking, using a Gaussian resolution function is not correct, 
-but when combined with wavelength dispersion the result is close 
+
+Note that the usual transformation, sigma = FWHM / sqrt(8 ln 2),
+overestimates the width of the gaussian convolution function by
+about 4% compared to the expected variance of a triangular distribution.
+Strictly speaking, using a Gaussian resolution function is not correct,
+but when combined with wavelength dispersion the result is close
 enough to Gaussian for our purposes.
-  
+
 If the slits are different widths use:
-   s = (s1+s2)/2.  
-The precise analysis is more difficult because the distribution is a 
+   s = (s1+s2)/2.
+The precise analysis is more difficult because the distribution is a
 truncated triangle.  For a range of angles, the maximum beam width
 through one set of slits passes unobstructed through the second set of
 slits.  For very large differences in slit width, this leads to an
 approximately rectangular distribution being assigned a FWHM of about
-half its width, which underestimates the width of the gaussian 
+half its width, which underestimates the width of the gaussian
 convolution by as much as 35%.  The instrument is never operated in
 this region.
-  
+
 For small samples use:
-  
+
    dT = (s2 + h)/(2 d2)
-  
+
 where h is the width of the sample and d2 is the distance from sample
-to slit s2.  
-  
+to slit s2.
+
 FIXME make sure the estimate is reasonable given small samples
 and usual slits.
-  
+
 Preforming a stable calculation of dQ requires some tricks.  From
 above we have:
    T = asin ( |Q| L / 4 pi)
    dQ/Q = sqrt( (dL/L)^2 + (dT/tan(T))^2 )
-Note:  
+Note:
    tan(asin(x)) = x/sqrt(1 - x^2)
 so:
    dQ/Q = sqrt( (dL/L)^2 + dT^2 ((4 pi / Q L)^2 - 1 ) )
-  
+
 This blows up as Q -> 0, so bring Q under the sqrt:
    dQ = sqrt( Q^2 (dL/L)^2 + dT^2 ((4 pi / L)^2 - Q^2) )
 
-This result is stable even for Q = 0. 
+This result is stable even for Q = 0.
 
 ============================================================ */
 
 void
-resolution_varying(double L, double dLoL, double dToT, 
+resolution_varying(double L, double dLoL, double dToT,
 		   int n, const double Q[], double dQ[])
 {
   /* Given:
@@ -363,7 +363,7 @@ resolution_varying(double L, double dLoL, double dToT,
           = sqrt( T^2 (4 pi dToT/L)^2 + Q^2 ( dLoL^2 - T^2 dToT^2) )
 	  = sqrt( S1^2 T^2 + S2^2 Q^2 - S3^2 T^2 Q^2 )
      Divide by sqrt(8ln2) for sigma rather than FWHM.  This is
-     equivalent to dividing S1^2, S2^2 and S3^2 by 8ln2, which 
+     equivalent to dividing S1^2, S2^2 and S3^2 by 8ln2, which
      is what I've done in the definitions below.
   */
   const double Lo4pi = L / PI4;
@@ -381,7 +381,7 @@ resolution_varying(double L, double dLoL, double dToT,
 }
 
 void
-resolution_fixed(double L, double dLoL, double dT, 
+resolution_fixed(double L, double dLoL, double dT,
 		 int n, const double Q[], double dQ[])
 {
 #if 1
@@ -406,11 +406,11 @@ resolution_fixed(double L, double dLoL, double dT,
 
   for (j=0; j < n; j++) dQ[j] = sqrt( S1 + S2 * Q[j]*Q[j]);
 #else
-  /* mlayer resolution calculation 
+  /* mlayer resolution calculation
    * Simple adding rather than adding in quadrature.
    */
   int j;
-  for (j=0; j < n; j++) 
+  for (j=0; j < n; j++)
     dQ[j] = (fabs(Q[j]) * dLoL + 4. * M_PI * dT) / L / sqrt(LN256);
 #endif
 }

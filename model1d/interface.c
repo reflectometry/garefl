@@ -30,11 +30,11 @@ double interface_average(double above, double below, double weight)
   return .5 * (above + below + (below-above) * weight);
 }
 
-double interface_overlap(double weight_above, double weight_below, 
+double interface_overlap(double weight_above, double weight_below,
 				double v_above, double v, double v_below)
 {
-  return .5 * (v_above + v 
-	       + (v-v_above)*weight_above 
+  return .5 * (v_above + v
+	       + (v-v_above)*weight_above
 	       + v + v_below
 	       + (v_below-v)*weight_below) - v;
 }
@@ -77,7 +77,7 @@ void interface_steps(int n,double z[])
 
 #if 0
 /* erfinv was translated from Octave by Paul Kienzle
- * It's not the fastest or most accurate algorithm, but 
+ * It's not the fastest or most accurate algorithm, but
  * it is good enough our purposes.
  * Copyright (C) 1995, 1996 Kurt Hornik
  * GNU General Public License 2 or later.
@@ -187,8 +187,8 @@ double interface_value(const interface *rm, double z)
      * the midpoints.  First midpoint is at:
      *     z_1 = -w/2 + w_{1}/2
      * The next midpoint is at:
-     *     z_2 = z_1 + w_1 
-     * Curiously, if you push through the algebra you will see that 
+     *     z_2 = z_1 + w_1
+     * Curiously, if you push through the algebra you will see that
      * subsequent midpoints are at:
      *     z_{i+1}= 2 w_i + z_{i-1}
      * This makes sense considering the following profile:
@@ -214,12 +214,12 @@ double interface_value(const interface *rm, double z)
       z1 = z2;
       z2 = z0 + 2.*rm->step[i];
     }
-    if (i==1) { 
+    if (i==1) {
       z0 = z1 - 10.*rm->step[0];
-      v0=-1.; v1=rm->value[0]; v2=rm->value[1]; 
-    } else if (i>=n) { 
+      v0=-1.; v1=rm->value[0]; v2=rm->value[1];
+    } else if (i>=n) {
       z2 = z1 + 10.*rm->step[n-1];
-      v0=rm->value[n-2]; v1=rm->value[n-1]; v2=1.; 
+      v0=rm->value[n-2]; v1=rm->value[n-1]; v2=1.;
     } else {
       v0=rm->value[i-2]; v1=rm->value[i-1]; v2=rm->value[i];
     }
@@ -282,7 +282,7 @@ int interface_set(interface *rm, const char* name,
 
 }
 
-int interface_create(interface *rm, const char* name, 
+int interface_create(interface *rm, const char* name,
 		      interface_fn fn, int n)
 {
   assert(n>=0);

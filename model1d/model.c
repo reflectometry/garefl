@@ -24,7 +24,7 @@
    Majkrzak, J. Chem. Phys. 92, 5677 (1990)]
    John Ankner 14-June-1990 */
 
-/* FIXME this algorithm is a bit silly: it uses an equal number of interface 
+/* FIXME this algorithm is a bit silly: it uses an equal number of interface
  * steps for each interface no matter how wide the interface or how
  * big the difference in refractive index.
  */
@@ -55,7 +55,7 @@ void model_print(const model *m, const char *filename)
     f = fopen(filename, "w");
     if (f == NULL) return;
   }
-    
+
   fprintf(f,"Model %p\n",m);
   fprintf(f,"  size %d out of %d\n",m->n,m->capacity);
   fprintf(f,"  interface=%p\n",m->rm);
@@ -67,8 +67,8 @@ void model_print(const model *m, const char *filename)
 #ifdef HAVE_MAGNETIC
   fprintf(f,"  # d rho mu rough P Prough theta thetarough\n");
   for (i=0; i < m->n; i++) {
-    fprintf(f,"  %d %g %g %g %g %g %g %g %g\n", i, m->d[i], 
-	   m->rho[i], m->mu[i], m->rough[i], 
+    fprintf(f,"  %d %g %g %g %g %g %g %g %g\n", i, m->d[i],
+	   m->rho[i], m->mu[i], m->rough[i],
 	   m->P[i], m->Prough[i], m->theta[i], m->thetarough[i]);
   }
 #else
@@ -137,7 +137,7 @@ void model_destroy(model *m)
   model_init(m);
 }
 
-void 
+void
 model_layer(model *m, double d, double rho, double mu, double rough)
 {
   int n = m->n;
@@ -157,7 +157,7 @@ model_layer(model *m, double d, double rho, double mu, double rough)
   m->n=n+1;
 }
 
-void 
+void
 model_magnetic(model *m, double d, double rho, double mu, double rough,
 	       double P, double Prough, double theta, double thetarough)
 {
@@ -213,7 +213,7 @@ int model_repeat_insert(model *m, int R_start, int R_end, int R_count)
   int r, pos;
   if (m->num_repeats >= MODEL_MAX_REPEATS) return MODEL_REPEATS_EXCEEDED;
   if (R_end < R_start+1 || R_count < 2) return MODEL_REPEATS_BAD;
-  for (pos=0; pos < m->num_repeats; pos++) 
+  for (pos=0; pos < m->num_repeats; pos++)
     if (m->repeats[2*pos] < R_start) break;
   if ( (pos > 0 && m->repeats[2*pos-1]>=R_start)
        || (pos < m->num_repeats && m->repeats[2*pos]>=R_end) )
@@ -297,7 +297,7 @@ add_half_interface(model *m, profile *p, int above, int below, int leftside)
    * then extend it with slices remaining from the next sharpest
    * interface, and finally extend it with slices from the broadest
    * interface. This will make sure that we are sampling as densely
-   * as needed for the steepest curve. 
+   * as needed for the steepest curve.
    *
    * We are storing the widths of the slices in the profile slabs that
    * we have reserved above but not yet used.  For the bottom side
@@ -407,7 +407,7 @@ add_interface_left(model *m, profile *p, int above, int below)
 {
   interface *rm=m->rm;
   int i, midpoint = (rm->n+1)/2;
- 
+
   if (!profile_extend(p,midpoint)) return;
 
   /* If the interface has no width, do nothing */
@@ -426,7 +426,7 @@ add_interface_right(model *m, profile *p, int above, int below)
 {
   interface *rm=m->rm;
   int i, midpoint = (rm->n+1)/2;
- 
+
   if (!profile_extend(p,rm->n-midpoint+1)) return;
 
   /* If the interface has no width, do nothing */
@@ -476,7 +476,7 @@ add_overlapping_slice(model *m, profile *p, int above, int layer, int below,
 		);
 }
 
-static void 
+static void
 add_layer(model *m, profile *p, int above, int layer, int below)
 {
   double rtop, rbottom, bulk_depth;
@@ -522,8 +522,8 @@ add_layer(model *m, profile *p, int above, int layer, int below)
     for (i=0; i <= n; i++)
       add_overlapping_slice(m,p,above,layer,below,step*(i+.5),step);
 #else
-    /* Follow the algorithm in the mlayer program, where the first 
-     * and last slices are half-width and the remaining equally-spaced 
+    /* Follow the algorithm in the mlayer program, where the first
+     * and last slices are half-width and the remaining equally-spaced
      * slices are full-width.
      */
     double step = m->d[layer] / n;
@@ -561,7 +561,7 @@ void model_profile(model *m, profile *p)
   for (layer=1; layer<m->n-1; layer++) {
     /* Remember where the repeat section starts */
     if (layer == R_start+1) repeat_start = p->n;
-    
+
     /* Check if we need to repeat */
     if (layer == R_end) {
       /* The interface between repeats is different from the
@@ -584,11 +584,11 @@ void model_profile(model *m, profile *p)
       int r, repeat_length, repeat_interface;
 
       repeat_interface = p->n;
-      
+
       /* add interface between repeating sections */
       add_layer(m,p,R_end-1,R_end,R_start);
       add_layer(m,p,R_end,R_start,R_start+1);
-      
+
       /* do bulk repeats of R_start+1 to R_start */
       assert(repeat_start > 0);
       repeat_length = p->n - repeat_start;

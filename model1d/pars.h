@@ -56,12 +56,12 @@
  * v = pars_peek(pars,i)
  * pars_poke(pars,i,v)
  *   get/set the value of a single parameter from the model.
- *   
+ *
  * pars_get01(pars,v)
  * pars_set01(pars,v)
  * v = pars_peek01(pars,i)
  * pars_poke01(pars,i,v)
- *   same, but using scale independent box constraints which map from 
+ *   same, but using scale independent box constraints which map from
  *   values from [0,1] in the search space onto the entire parameter
  *   range in the model space.
  *
@@ -97,7 +97,7 @@ void pars_destroy(fitpars *pars);
 int pars_extend(fitpars *pars, int n);
 int pars_count(fitpars *pars);
 
-void pars_add(fitpars *pars, const char *name, 
+void pars_add(fitpars *pars, const char *name,
 	      double *d, double min, double max);
 
 double* pars_vector(fitpars *pars);

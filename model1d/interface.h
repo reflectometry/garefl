@@ -66,14 +66,14 @@ void tanh_interface(int n, double dz[], double r[]);
 void erf_interface(int n, double dz[], double r[]);
 void interface_steps(int n, double dz[]);
 void interface_init(interface *rm);
-int interface_create(interface *rm, const char *name, 
+int interface_create(interface *rm, const char *name,
 		     interface_fn f, int n);
-int interface_set(interface *rm, const char *name, 
+int interface_set(interface *rm, const char *name,
 		  int n, const double z[], const double v[]);
 void interface_destroy(interface *rm);
 double interface_value(const interface *rm, double v);
 double interface_average(double above, double below, double weight);
-double interface_overlap(double weight_above, double weight_below, 
+double interface_overlap(double weight_above, double weight_below,
 			 double v_above, double v, double v_below);
 void interface_print(interface *fm);
 

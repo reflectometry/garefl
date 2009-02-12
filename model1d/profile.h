@@ -26,7 +26,7 @@ extern "C" {
  * #endif
  *
  * Other fields may be present and the order may be different.
- * 
+ *
  * profile_init(profile*)
  *   Initialize a new profile structure.
  *
@@ -60,8 +60,8 @@ extern "C" {
  *
  * profile_expth(profile*)
  *   Convert theta from polar to rectangular coordinates.  The expth
- *   field is not maintained during profile construction.  Call 
- *   profile_expth after the profile is built.  Then you can use 
+ *   field is not maintained during profile construction.  Call
+ *   profile_expth after the profile is built.  Then you can use
  *   p->expth as the expth argument to the magnetic reflectivity calculation.
  *
  * Profiles are built with dynamic memory.  Sometimes a new profile
@@ -71,7 +71,7 @@ extern "C" {
  * if the profile it created is bad.
  *
  * Movie example:
- * 
+ *
  *   profile p;
  *   profile_init(&p);
  *   while (changes to model) {

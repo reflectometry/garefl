@@ -19,7 +19,7 @@ void profile_print(profile *p, char *filename)
     if (f == NULL) return;
     step = 1;
   }
-    
+
   if (step) {
     double z = -p->vacuum_offset;
 #ifdef HAVE_MAGNETIC
@@ -48,16 +48,16 @@ void profile_print(profile *p, char *filename)
     for (i=0; i < p->n; i++)
       fprintf(f, "  %d %g %g %g\n",i,p->d[i],p->rho[i],p->mu[i]);
 #endif
-  } 
+  }
   if (f != stdout) fclose(f);
 
 }
 
 #define PROFILE_DEFAULT_LENGTH 1000
 
-void profile_init(profile *p) 
-{ 
-  p->capacity = p->n = 0; 
+void profile_init(profile *p)
+{
+  p->capacity = p->n = 0;
   p->vacuum_offset = 0.;
 }
 
@@ -164,7 +164,7 @@ int profile_extend(profile *p, int n)
 }
 
 /* total profile depth, including vacuum interface */
-double profile_depth(profile *p) 
+double profile_depth(profile *p)
 {
   int i;
   double z=0.;

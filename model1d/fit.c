@@ -19,13 +19,13 @@ static double frandom(void) { return (double)rand()/RAND_MAX; }
  *
  * If intensity were to vary from measurement to measurement then it
  * would have to be applied after the resolution calculation.  Similarly
- * for the portion of background which varies from measurement to 
+ * for the portion of background which varies from measurement to
  * measurement independent of incident angle.  The portion of background
- * due to properties of the sample such as off-specular scattering and 
- * sample warp are angle dependent and should be applied before the 
+ * due to properties of the sample such as off-specular scattering and
+ * sample warp are angle dependent and should be applied before the
  * resolution calculation.
  */
-void 
+void
 beam_apply(const beaminfo *beam, int N, const double Q[], double R[])
 {
   const double r=beam->backabsorption;
@@ -33,10 +33,10 @@ beam_apply(const beaminfo *beam, int N, const double Q[], double R[])
   const double B=beam->background;
   int i;
 
-  for (i=0; i < N; i++) R[i] = (Q[i]<0?r:1.) * I * R[i] + B; 
+  for (i=0; i < N; i++) R[i] = (Q[i]<0?r:1.) * I * R[i] + B;
 }
 
-void 
+void
 beam_init(beaminfo *beam)
 {
   beam->backabsorption = 1.;
@@ -46,7 +46,7 @@ beam_init(beaminfo *beam)
   beam->Aguide = -90.;
 }
 
-void 
+void
 fit_init(fitinfo *fit)
 {
   beam_init(&fit->beam);
@@ -150,7 +150,7 @@ static void save_mlayer(FILE *fid, const fitinfo *fit)
   fprintf(fid, "%#15.6G%#15.6G%#15.6G\n",
 	  fit->beam.lambda, 0.01, 0.0005); /* Made up numbers for dL and dT */
   fprintf(fid, "%#15.6G%#15.6G%#15.6G%#15.6G%15d\n",
-	  fit->beam.intensity, fit->beam.background, 
+	  fit->beam.intensity, fit->beam.background,
 	  0., 0.5, 200); /* Qmin Qmax #Q */
   fprintf(fid, "%s\n", "e");
   fprintf(fid, "%s\n", fit->dataA.file);
@@ -182,7 +182,7 @@ static void save_mlayer(FILE *fid, const fitinfo *fit)
     save_mlayer_vacuum(fid,1);                         /* Mid-bottom break */
     save_mlayer_layers(fid,&(fit->m),1+top+mid,layers); /* Bottom layers */
   }
-    
+
   /* No fit parameters */
   fprintf(fid, "\n");
 }
@@ -297,13 +297,13 @@ static void getdata(fitdata *data, const char *file)
 }
 
 void
-fit_polarized_data(fitinfo *fit, const char *fileA, const char *fileB, 
+fit_polarized_data(fitinfo *fit, const char *fileA, const char *fileB,
 		   const char *fileC, const char *fileD)
 {
-  getdata(&fit->dataA,fileA);  
-  getdata(&fit->dataB,fileB);  
-  getdata(&fit->dataC,fileC);  
-  getdata(&fit->dataD,fileD);  
+  getdata(&fit->dataA,fileA);
+  getdata(&fit->dataB,fileB);
+  getdata(&fit->dataC,fileC);
+  getdata(&fit->dataD,fileD);
   fit->nQ = -1;
   fit->datatype = FIT_POLARIZED;
 }
@@ -350,7 +350,7 @@ void fit_data_print(const fitinfo *fit)
 
 /* Find Q values needed to calculate the fit, including padding at the
  * ends to help calculate the resolution accurately.  For thick layers,
- * need to insert Q points in the middle as well. 
+ * need to insert Q points in the middle as well.
  */
 static void find_target_Q(fitinfo *fit)
 {
@@ -358,13 +358,13 @@ static void find_target_Q(fitinfo *fit)
 
   if (fit->nQ >= 0) return;
 
-  /* Count unique Q */  
+  /* Count unique Q */
   if (fit->datatype == FIT_POLARIZED) {
     nQ = data_countQ(&fit->dataA,&fit->dataB,&fit->dataC,&fit->dataD);
   } else {
     nQ = data_countQ(&fit->dataA,NULL,NULL,NULL);
   }
-  
+
   /* Make room for QABCD even in unpolarized data in case it is
    * unpolarized magnetic data.
    */
@@ -436,7 +436,7 @@ static void calc_approx(fitinfo *fit)
   assert(fit->datatype == FIT_MAGNITUDE);
 
   /* Generate reflectivity amplitude from the profile */
-  reflrough(fit->m.n, fit->m.d, fit->m.rough, fit->m.rho, 
+  reflrough(fit->m.n, fit->m.d, fit->m.rough, fit->m.rho,
 	    fit->m.mu, fit->beam.lambda,
 	    fit->nQ, fit->fitQ, fit->fitA);
   apply_beam_parameters(fit,fit->fitA,&fit->dataA);
@@ -481,9 +481,9 @@ void _write_refl(const fitinfo *fit, const char name[])
     for (i=0; i < fit->nQ; i++) {
       double dQ;
       while (j<fit->dataA.n && fit->dataA.Q[j] < fit->fitQ[i]) j++;
-      dQ = (j<fit->dataA.n && fit->dataA.Q[j] == fit->fitQ[i] ? 
+      dQ = (j<fit->dataA.n && fit->dataA.Q[j] == fit->fitQ[i] ?
 	    fit->dataA.dQ[j]: 0.);
-      fprintf(f, "%10.5f %10.5f %18.5g %18.15g %18.15g %18.15g\n", 
+      fprintf(f, "%10.5f %10.5f %18.5g %18.15g %18.15g %18.15g\n",
 	      fit->fitQ[i],dQ,
 	      fit->fitA[i],fit->fitB[i],fit->fitC[i],fit->fitD[i]);
     }
@@ -493,7 +493,7 @@ void _write_refl(const fitinfo *fit, const char name[])
     for (i=0; i < fit->nQ; i++) {
       double dQ;
       while (j<fit->dataA.n && fit->dataA.Q[j] < fit->fitQ[i]) j++;
-      dQ = (j<fit->dataA.n && fit->dataA.Q[j] == fit->fitQ[i] ? 
+      dQ = (j<fit->dataA.n && fit->dataA.Q[j] == fit->fitQ[i] ?
 	    fit->dataA.dQ[j]: 0.);
       fprintf(f, "%10.5f %10.5f %18.5g\n", fit->fitQ[i],dQ,fit->fitA[i]);
     }
@@ -572,9 +572,9 @@ static void incoherent_unpolarized_theory(fitinfo *fit)
 	  /* profile_print(&p,NULL); */
   	if (fit->m.is_magnetic) {
 #ifdef HAVE_MAGNETIC
-	    magnetic_reflectivity(p.n, p.d, p.rho, 
-				  p.mu,fit->beam.lambda, p.P, p.expth, 
-				  fit->beam.Aguide, fit->nQ, fit->fitQ,  
+	    magnetic_reflectivity(p.n, p.d, p.rho,
+				  p.mu,fit->beam.lambda, p.P, p.expth,
+				  fit->beam.Aguide, fit->nQ, fit->fitQ,
 				  A, B, C, D);
 			for (k=0; k < fit->nQ; k++) {
 				A[k] = (A[k]+B[k]+C[k]+D[k])/2.;
@@ -614,10 +614,10 @@ static void calc_magnitude(fitinfo *fit)
   if (fit->datatype == FIT_POLARIZED) {
 #ifdef HAVE_MAGNETIC
     /* We've got polarized data: use magnetic calculations */
-    magnetic_reflectivity(fit->p.n, fit->p.d, fit->p.rho, 
+    magnetic_reflectivity(fit->p.n, fit->p.d, fit->p.rho,
 			  fit->p.mu,fit->beam.lambda,
-			  fit->p.P, fit->p.expth, 
-			  fit->beam.Aguide, fit->nQ, fit->fitQ,  
+			  fit->p.P, fit->p.expth,
+			  fit->beam.Aguide, fit->nQ, fit->fitQ,
 			  fit->fitA, fit->fitB, fit->fitC, fit->fitD);
 
 	  if (fit->number_incoherent > 0) incoherent_polarized_theory(fit);
@@ -636,10 +636,10 @@ static void calc_magnitude(fitinfo *fit)
 		/* Generate reflectivity amplitude from the profile */
   	if (fit->m.is_magnetic) {
 #ifdef HAVE_MAGNETIC
-	    magnetic_reflectivity(fit->p.n, fit->p.d, fit->p.rho, 
+	    magnetic_reflectivity(fit->p.n, fit->p.d, fit->p.rho,
 				  fit->p.mu,fit->beam.lambda,
-				  fit->p.P, fit->p.expth, 
-				  fit->beam.Aguide, fit->nQ, fit->fitQ,  
+				  fit->p.P, fit->p.expth,
+				  fit->beam.Aguide, fit->nQ, fit->fitQ,
 				  fit->fitA, fit->fitB, fit->fitC, fit->fitD);
 			for (k=0; k < fit->nQ; k++) {
 				fit->fitA[k] = (fit->fitA[k]+fit->fitB[k]+fit->fitC[k]+fit->fitD[k])/2.;
@@ -649,7 +649,7 @@ static void calc_magnitude(fitinfo *fit)
             exit(1);
 #endif
   	} else {
- 	  	reflectivity(fit->p.n, fit->p.d, fit->p.rho, 
+ 	  	reflectivity(fit->p.n, fit->p.d, fit->p.rho,
 					fit->p.mu, fit->beam.lambda,
 					fit->nQ, fit->fitQ, fit->fitA);
   	}
@@ -668,14 +668,14 @@ static void calc_real(fitinfo *fit)
   assert(fit->datatype == FIT_REAL);
 
   /* Generate reflectivity amplitude from the profile */
-  reflectivity_real(fit->p.n, fit->p.d, fit->p.rho, 
+  reflectivity_real(fit->p.n, fit->p.d, fit->p.rho,
 		    fit->p.mu, fit->beam.lambda,
 		    fit->nQ, fit->fitQ, fit->fitA);	
 
   /* FIXME need to support repeated Q with different resolution. For
      the resolution case, this simply means making sure that enough
    */
-  assert(fit->nQ == fit->dataA.n); 
+  assert(fit->nQ == fit->dataA.n);
 
   /* Compute the convolution of the reflectivity */
   /* FIXME can you simply convolve the real reflectivity? */
@@ -696,14 +696,14 @@ static void calc_imaginary(fitinfo *fit)
   assert(fit->datatype == FIT_IMAGINARY);
 
   /* Generate reflectivity amplitude from the profile */
-  reflectivity_imag(fit->p.n, fit->p.d, fit->p.rho, 
+  reflectivity_imag(fit->p.n, fit->p.d, fit->p.rho,
 		    fit->p.mu, fit->beam.lambda,
 		    fit->nQ, fit->fitQ, fit->fitA);
 
   /* FIXME need to support repeated Q with different resolution. For
      the resolution case, this simply means making sure that enough
    */
-  assert(fit->nQ == fit->dataA.n); 
+  assert(fit->nQ == fit->dataA.n);
 
   /* Compute the convolution of the reflectivity */
   /* FIXME can you simply convolve the real reflectivity? */
@@ -778,7 +778,7 @@ void fit_portion_update(fitinfo *fit, double portion)
       pQc = sqrt(16.*M_PI*(rhoS-rhoV));
     }
     fit->fitQ = fit->allQ + fit->totalQ;
-    fit->nQ = generate_subset(fit->totalQ, fit->allQ ,fit->fitQ, 
+    fit->nQ = generate_subset(fit->totalQ, fit->allQ ,fit->fitQ,
 			      mQc, pQc, portion);
   }
 
@@ -808,7 +808,7 @@ void fit_update(fitinfo *fit, int approx)
 }
 
 #define NOVALUE 1e308
-static void 
+static void
 partial_point(fitinfo *fit, int k, double Q[],
 	      double A[], double B[], double C[], double D[],
 	      int weighted, int *df, double *sumsq)
@@ -821,7 +821,7 @@ partial_point(fitinfo *fit, int k, double Q[],
      are not measured at every Q value or because thick layers requires
      oversampling in Q to avoid aliasing effects.
    */
-  assert(1==0); 
+  assert(1==0);
   if (A[k] == NOVALUE) {
     /* Set next point */
     fit->fitQ = Q+k;
@@ -829,12 +829,12 @@ partial_point(fitinfo *fit, int k, double Q[],
     fit->fitB = B+k;
     fit->fitC = C+k;
     fit->fitD = D+k;
-    
+
     /* Compute reflectivity */
     if (fit->datatype == FIT_REAL) calc_real(fit);
     else if (fit->datatype == FIT_IMAGINARY) calc_imaginary(fit);
     else calc_magnitude(fit);
-    
+
     /* Accumulate sumsq */
     if (weighted) fit_wsumsq(fit,df,sumsq);
     else fit_sumsq(fit,df,sumsq);
@@ -842,7 +842,7 @@ partial_point(fitinfo *fit, int k, double Q[],
 }
 
 void
-fit_partial(fitinfo *fit, int approx, double portion, double best, 
+fit_partial(fitinfo *fit, int approx, double portion, double best,
 	    int weighted, int *totaldf, double *totalsumsq)
 {
   int i, samples;

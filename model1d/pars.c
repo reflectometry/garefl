@@ -71,7 +71,7 @@ void pars_destroy(fitpars *pars)
     if (pars->min != NULL) free(pars->min);
     if (pars->address != NULL) free(pars->address);
   }
-  pars_init(pars);  
+  pars_init(pars);
 }
 
 int pars_count(fitpars *pars) { return pars->n; }
@@ -152,7 +152,7 @@ static void _print_one(fitpars *pars, int i, double v, int zero_one)
     portion = (v-pars->min[i])/pars->range[i];
     value = v;
   }
-  if (portion < 0.) portion = 0.; 
+  if (portion < 0.) portion = 0.;
   else if (portion >= 1.) portion = 0.999999;
 
   printf("%3d ",i);
@@ -218,7 +218,7 @@ int pars_enter_value(fitpars *pars, int p, double *v)
 }
 
 
-void pars_add(fitpars *pars, const char *name, double *d, 
+void pars_add(fitpars *pars, const char *name, double *d,
 	      double min, double max)
 {
 #if 0
@@ -237,7 +237,7 @@ void pars_add(fitpars *pars, const char *name, double *d,
   }
 }
 
-void pars_set_range(fitpars *pars, int ipar, double newmin, double newmax) 
+void pars_set_range(fitpars *pars, int ipar, double newmin, double newmax)
 {
   // Set the new minimum
   pars->min[ipar] = newmin;

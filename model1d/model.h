@@ -62,7 +62,7 @@ void model_profile(model *m, profile *p);
 void model_magnetic(model *m, double d,
 		    double rho, double mu, double rough,
 		    double P, double Prough, double theta, double thetarough);
-void model_layer(model *m, double d, 
+void model_layer(model *m, double d,
 		 double rho, double mu, double rough);
 const char *model_error(int code);
 

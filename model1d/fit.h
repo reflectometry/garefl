@@ -52,10 +52,10 @@ typedef struct fitinfo_struct {
   double chisq_est;  /* Current chisq */
   double weight;     /* Scale factor for chisq (default 1) */
 
-	/* Working storage */  
+	/* Working storage */
   int worksize;      /* Working storage */
   double *work;
-  
+
 } fitinfo;
 void fit_init(fitinfo *fit);
 void fit_destroy(fitinfo *fit);
@@ -64,7 +64,7 @@ void fit_wsumsq(const fitinfo *fit, int *n, double *sumsq);
 double fit_chisq(const fitinfo *fit);
 double fit_wchisq(const fitinfo *fit);
 void fit_update(fitinfo *fit, int approx);
-void fit_partial(fitinfo *fit, int approx, double portion, double best, 
+void fit_partial(fitinfo *fit, int approx, double portion, double best,
 		 int weighted, int *totaldf, double *totalsumsq);
 void fit_data(fitinfo *fit, const char *file);
 void fit_real_data(fitinfo *fit, const char *file);
@@ -81,7 +81,7 @@ typedef void fit_constraints(fitinfo *fit);
 extern fit_constraints *constraints; /* constraints callback */
 fitinfo*
 setup_models(int *models); /* simultaneous fitting */
-void 
+void
 tied_parameters(fitinfo *fit); /* default constraints for simultaneous fitting */
 #ifdef __cplusplus
 }

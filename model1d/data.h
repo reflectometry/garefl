@@ -51,7 +51,7 @@ int data_printfit(const char *file, const fitdata *data, const double fitR[]);
    * points in the data file.  The points are not weighted by the uncertainty
    * in the data.
    */
-void data_sumsq(const fitdata *data, 
+void data_sumsq(const fitdata *data,
 		const int fitn, const double fitQ[], const double fitR[],
 		int *n, double *sumsq);
   /* Add partial chisq and degrees of freedom information from the fit
@@ -70,19 +70,19 @@ void data_wsumsq(const fitdata *data,
    * data_countQ() returns the number of values that will result.
    * data_mergeQ() merges the cross sections.
    */
-int data_countQ(const fitdata *A, const fitdata *B, 
+int data_countQ(const fitdata *A, const fitdata *B,
 		const fitdata *C, const fitdata *D);
-void data_mergeQ(const fitdata *A, const fitdata *B, 
+void data_mergeQ(const fitdata *A, const fitdata *B,
 		 const fitdata *C, const fitdata *D, double Q[]);
 
 /* Assign resolution to points in the data.  Resolution is assigned
  * in Q ranges, with the same resolution for -Q as Q.  Use Qhi == 0
  * to go to the maximum range in Q.
  *
- * Fixed slits:     
+ * Fixed slits:
  *   data_resolution_fixed(data,L,dLoL,0.,0.,dT);
  *
- * Opening slits:   
+ * Opening slits:
  *   data_resolution_varying(data,L,dLoL,0.,0.,dToT);
  *
  * Fixed below |Qlo| then opening:
@@ -110,15 +110,15 @@ void data_mergeQ(const fitdata *A, const fitdata *B,
  *   #include "reflcalc.h"
  *   dToT = resolution_dToT(s1,s2,d,T)
  *
- * For time of flight instruments with binning adjusted to maintain 
+ * For time of flight instruments with binning adjusted to maintain
  * constant dQoQ over a particular Q range:
  *   data_resolution_dQoQ(data, dQoQ, |Qlo|, |Qhi|) // Part range
  *   data_resolution_dQoQ(data, dQoQ, 0., 0.)       // Full range
  */
-void 
+void
 data_resolution_fixed(fitdata *data, double L, double dLoL,
 		      double Qlo, double Qhi, double dT);
-void 
+void
 data_resolution_varying(fitdata *data, double L, double dLoL,
 			double Qlo, double Qhi, double dToT);
 
@@ -128,7 +128,7 @@ data_resolution_fv(fitdata *data, double L, double dLoL,
 
 void
 data_resolution_fvf(fitdata *data, double L, double dLoL,
-		    double Qlo, double Qhi, 
+		    double Qlo, double Qhi,
 		    double dTlo, double dToT, double dThi);
 void
 data_resolution_dQoQ(fitdata *data, double dQoQ, double Qlo, double Qhi);

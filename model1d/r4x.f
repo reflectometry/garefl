@@ -6,13 +6,13 @@ C This version allows non-vacuum incident and substrate media and has
 C been converted into a subroutine.
 C This version allows for negative Q by reversing the sample
 
-c ****************************************************************      
-c      
+c ****************************************************************
+c
 c Program "gepore.f" (GEneral POlarized REflectivity) calculates the
 c spin-dependent neutron reflectivities (and transmissions) for
 c model potentials, or scattering length density profiles, assuming
 c the specular condition.
-c      
+c
 c In the present version, both nuclear and magnetic, real scattering
 c length densities can be input, whereas imaginary components of the
 c nuclear potential cannot.  Also, magnetic and nuclear incident, or
@@ -21,7 +21,7 @@ c description of the input parameters is given below:
 c
 c It must be noted that in the continuum reflectivity calculation
 c performed by this program, Maxwell's equations apply, specifically
-c the requirement that the component of the magnetic induction, B, 
+c the requirement that the component of the magnetic induction, B,
 c normal to a boundary surface be continuous.  Neither the program
 c nor the wave equation itself automatically insure that this is so:
 c this condition must be satisfied by appropriate selection of the
@@ -46,24 +46,24 @@ C
 C 1. If Q is negative then the beam is assumed to come in from the
 C bottom of the sample, and all the layers are reversed.
 C
-C 2. The fronting and backing materials are assumed to be semi-infinite, 
+C 2. The fronting and backing materials are assumed to be semi-infinite,
 C so depth is ignored for the first and last layer.
 C
-C 3. Absorption is ignored for the fronting material, or the backing 
-C material for negative Q.  For negative Q, the beam is coming in 
-C through the side of the substrate, and you will need to multiply 
-C by a substrate absorption factor depending on the path length through 
-C the substrate.  For neutron reflectivity, this is approximately 
+C 3. Absorption is ignored for the fronting material, or the backing
+C material for negative Q.  For negative Q, the beam is coming in
+C through the side of the substrate, and you will need to multiply
+C by a substrate absorption factor depending on the path length through
+C the substrate.  For neutron reflectivity, this is approximately
 C constant for the angles we need to consider.
 C
 C 4. Magnetic scattering is ignored for the fronting and backing.
 C
-C 5. This subroutine does not deal with any component of sample moment 
-C that may lie out of the plane of the film.  Such a perpendicular 
-C component will cause a neutron presession, therefore an additional 
-C spin flip term.  If reflectivity data from a sample with an 
-C out-of-plane moment is modeled using this subroutine, one will 
-C obtain erroneous results, since all of the spin flip scattering 
+C 5. This subroutine does not deal with any component of sample moment
+C that may lie out of the plane of the film.  Such a perpendicular
+C component will cause a neutron presession, therefore an additional
+C spin flip term.  If reflectivity data from a sample with an
+C out-of-plane moment is modeled using this subroutine, one will
+C obtain erroneous results, since all of the spin flip scattering
 C will be attributed to in-plane moments perpendicular to the neutron.
 
 
@@ -101,7 +101,7 @@ C     paramters
       double precision RA,RB,RC,RD
 #endif
 
-        
+
 C     variables calculating S1, S3, COSH and SINH
       double precision QSQREL, PI2oLAMBDA
       double precision EPA, EMA, COSB, SINB, LOGH
@@ -255,7 +255,7 @@ C     2*cosh/H and 2*sinh/H rather than cosh/H and sinh/H
         A44=A11
         A24=A13
         A42=A31
-        
+
 C     Matrix update B=A*B
         C1=A11*B11+A12*B21+A13*B31+A14*B41
         C2=A21*B11+A22*B21+A23*B31+A24*B41
@@ -265,7 +265,7 @@ C     Matrix update B=A*B
         B21=C2
         B31=C3
         B41=C4
-        
+
         C1=A11*B12+A12*B22+A13*B32+A14*B42
         C2=A21*B12+A22*B22+A23*B32+A24*B42
         C3=A31*B12+A32*B22+A33*B32+A34*B42
@@ -274,7 +274,7 @@ C     Matrix update B=A*B
         B22=C2
         B32=C3
         B42=C4
-        
+
         C1=A11*B13+A12*B23+A13*B33+A14*B43
         C2=A21*B13+A22*B23+A23*B33+A24*B43
         C3=A31*B13+A32*B23+A33*B33+A34*B43
@@ -283,7 +283,7 @@ C     Matrix update B=A*B
         B23=C2
         B33=C3
         B43=C4
-        
+
         C1=A11*B14+A12*B24+A13*B34+A14*B44
         C2=A21*B14+A22*B24+A23*B34+A24*B44
         C3=A31*B14+A32*B24+A33*B34+A34*B44
@@ -318,7 +318,7 @@ C     Note: reusing A instead of creating CST
       A34 = CC*B34 + SS*B43 + SCI*(B33-B44)
       A43 = CC*B43 + SS*B34 + SCI*(B44-B33)
       A44 = CC*B44 + SS*B33 + SCI*(B43-B34)
-      
+
 C     Use corrected versions of X,Y,ZI, and ZS to account for effect
 C     of incident and substrate media
 C     Note: this does not take into account magnetic fronting/backing
@@ -326,24 +326,24 @@ C     media --- use gepore.f directly for a more complete solution
       L=L+STEP
       ZS=CI*CDSQRT(QSQREL-PI4*RHO(L) + CI*PI2oLAMBDA*MU(L))
       ZI=CI*DABS(0.5*Q)
- 
+
       X=-1.
       Y=ZI*ZS
-      
+
 C     W below is U and V is -V of printed versions
-      
+
       V11=ZS*A11+X*A31+Y*A13-ZI*A33
       V12=ZS*A12+X*A32+Y*A14-ZI*A34
       V21=ZS*A21+X*A41+Y*A23-ZI*A43
       V22=ZS*A22+X*A42+Y*A24-ZI*A44
-      
+
       W11=ZS*A11+X*A31-Y*A13+ZI*A33
       W12=ZS*A12+X*A32-Y*A14+ZI*A34
       W21=ZS*A21+X*A41-Y*A23+ZI*A43
       W22=ZS*A22+X*A42-Y*A24+ZI*A44
-      
+
       DETW=W22*W11-W12*W21
-     
+
 C     Calculate reflectivity coefficients specified by POLSTAT
       YA = (V21*W12-V11*W22)/DETW
       YB = (V11*W21-V21*W11)/DETW
@@ -354,9 +354,9 @@ C     Calculate reflectivity coefficients specified by POLSTAT
       RA = (DREAL(YA))**2+(DIMAG(YA))**2
       RB = (DREAL(YB))**2+(DIMAG(YB))**2
       RC = (DREAL(YC))**2+(DIMAG(YC))**2
-      RD = (DREAL(YD))**2+(DIMAG(YD))**2 
+      RD = (DREAL(YD))**2+(DIMAG(YD))**2
 #endif
-            
+
       return
       END
 

@@ -15,6 +15,7 @@
 #include <sys/resource.h>
 #endif
 
+void log_best(void);
 #include "refl.h"
 #include "ga.h"
 #include "amoeba.h"
@@ -140,7 +141,7 @@ int weighted = 1;
 int approximate_roughness = 0;
 double portion = 1.;
 char  parFile[64];
-int log_improvement = 1;
+int log_improvement = 0;
 FILE *parFD;
 FILE *searchFD;
 fitinfo *fit;
@@ -217,7 +218,7 @@ void write_ga_pop(const char filename[])
 
 
 void check_halt(void);
-void improvement(void);
+void improvement(int store_model);
 double do_step(fitinfo *fit, double portion);
 double update_models(fitinfo *fit);
 double partial_update_models(fitinfo *fit,double portion,double best);
@@ -439,9 +440,6 @@ void cmd_amoeba(void)
     fflush(parFD); 
   }
 
-  /* Suppress logging during amoeba */
-  log_improvement = 0;
-
   /* Make sure memory allocation was successful */
   assert(work != NULL);
 
@@ -482,11 +480,8 @@ void cmd_amoeba(void)
   pbest = amoeba(&s,1e-8,500);
   toc();
 
-  /* Restore logging, recording amoeba results */
-  log_improvement = 1;
-  pars_set(&fit[0].pars,bestpars);
-  update_models(fit);
-  improvement();
+  /* Record amoeba results */
+  log_best(); /* assumes bestpars == pbest */
 
   /* Add the best back to population.
    * pbest is part of the work vector, with values in [0-1] space.
@@ -631,7 +626,10 @@ void cmd_print_best(void)
 
   /* Compute partial chisq of best */
   pars_set(&fit[0].pars, bestpars);
-  chisq = do_step(fit,1.); /* Force full chisq calc. */
+  /* Force recalc with full chisq calc, saving current graph. */
+  chisq = do_step(fit,1.); 
+  if (!log_improvement) 
+    log_best(); /* TODO: shouldn't been doing yet another calc */
 
   /* Print parameters. */
   printf("Generation %d: Best parameters\n",GetGen(&set));
@@ -700,26 +698,26 @@ void halt_ga (void) {
   now = time(NULL);
   printf("Generation number %i  -- %s\n",GetGen(&set),ctime(&now));
   printf("Select an option:\n");
-  printf("   q (quit)\n");
-  printf("   w (write population)\n");
-  printf("   b (write and quit)\n");
+  printf("   A (accelerate)\n");
   printf("   a (run amoeba from current best)\n");
-  printf("   t (change trust region for amoeba)\n");
+  printf("   b (write and quit)\n");
+  printf("   c (change a parameter)\n");
+  printf("   j (write staj files for current best values)\n");
 #ifdef USE_NLLS_FIT
   printf("   l (run Levenberg-Marquardt from current best)\n");
 #endif
+  printf("   p (print current best values)\n");
 #ifdef USE_QUAD_FIT
   printf("   Q (run Powell's NEWUOA from current best)\n");
 #endif
-  printf("   A (accelerate)\n");
-  printf("   S (approximate roughness)\n");
-  printf("   r (randomize)\n");
-  printf("   x (plot chi^2)\n");
-  printf("   X (plot chi^2 surface)\n");
-  printf("   c (change a parameter)\n");
-  printf("   p (print current best values)\n");
+  printf("   q (quit)\n");
   printf("   R (Change range for a parameter)\n");
-  printf("   j (write staj files for current best values)\n");
+  printf("   r (randomize)\n");
+  printf("   S (approximate roughness)\n");
+  printf("   t (change trust region for amoeba)\n");
+  printf("   w (write population)\n");
+  printf("   X (plot chi^2 surface)\n");
+  printf("   x (plot chi^2)\n");
   printf("   any other character to continue\n");
   if (fgets(buffer,sizeof(buffer),stdin) == NULL) return;
   switch (buffer[0]) {
@@ -854,7 +852,7 @@ void save_models(fitinfo *fit)
 }
 
 /* Results improved; record it */
-void improvement(void)
+void improvement(int store_model)
 {
   int i;
   time_t now;
@@ -865,7 +863,7 @@ void improvement(void)
 	GetGen(&set), 
 	bestchi, ctime(&now));
 
-  if (!log_improvement) return;
+  if (!store_model) return;
 
   pars_set(&fit[0].pars,bestpars);
   pars_print(&fit[0].pars);
@@ -923,10 +921,17 @@ double do_step(fitinfo *fit, double portion)
   if (chisq < bestchi) {
     bestchi = chisq;
     pars_get(&fit[0].pars,bestpars);
-    improvement();
+    improvement(log_improvement);
   }
 
   return chisq;
+}
+
+void log_best(void)
+{
+  pars_set(&fit[0].pars,bestpars);
+  update_models(fit);
+  improvement(1);
 }
 
 void tied_parameters(fitinfo fit[])
@@ -1048,7 +1053,8 @@ void print_usage(void)
 #endif
   printf("  -L         log all parameter sets and associated chisq to fit.log\n");
   printf("  -m         print the initial model and profile to the screen\n");
-  printf("  -n         limit the number of generations for the GA\n");
+  printf("  -n         limit the number of generations for the GA; this also\n");
+  printf("             suppresses writing of intermediate profile and theory files\n");
   printf("  -N         create new pop_##.dat file each trace period\n");
   printf("  -p         use saved population from pop.dat\n");
 #ifdef USE_QUAD_FIT
@@ -1311,7 +1317,9 @@ int main(int argc, char *argv[])
   switch (action) {
   case GA:
     init_ga_fit(fit,argc,argv);
+    log_improvement = (generations > 1000000);
     ga_fit(&set,generations);
+    log_best();
     final_ga_fit();
 
     break;

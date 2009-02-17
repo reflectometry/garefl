@@ -165,9 +165,6 @@ void cmd_nlls()
     fflush(parFD); 
   }
 
-  /* Suppress logging during LM */
-  log_improvement = 0;
-
   /* Copy normalized data values */
   copy_normalized_data(y);
 
@@ -192,11 +189,8 @@ void cmd_nlls()
   toc();
   print_covar(ndim,covar);
 
-  /* Restore logging, recording LM results */
-  log_improvement = 1;
-  pars_set(&fit[0].pars,bestpars);
-  update_models(fit);
-  improvement();
+  /* Record LM results */
+  log_best();
 
   /* Inject new p into the GA */
   setChromosome(&set, 0, p);

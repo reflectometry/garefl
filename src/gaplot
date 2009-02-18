@@ -323,8 +323,9 @@ EOF
     res)
 	EXT="*"
 	case $1 in [Aa]) EXT=A;; [Bb]) EXT=B;; [Cc]) EXT=C;; [Dd]) EXT=D;; esac
+        # Plot (data - theory*resolution)/uncertainty
         Y="(\$3-\$5)/\$4"; DY=""; 
-        YTITLE="Normalised residuals";
+        YTITLE="Normalised residuals (R-F(Q))/dR";
 	CMD="plot"
 	LINE=""
 	let LINENUM=1

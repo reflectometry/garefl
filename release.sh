@@ -43,7 +43,7 @@ okay "Are you ready to update the server?"
 scp release/*$VERSION* $NCNRWEB/release
 scp release/garefl.html $NCNRWEB
 scp release/*$VERSION* $REFLWEB/download
-svn copy $REPO/trunk/garefl $REPO/releases/garefl-$VERSION
+svn copy $REPO/trunk/garefl $REPO/releases/garefl-$VERSION -m "tag release $VERSION"
 
 head -20 RELEASE-NOTES
 echo "Copy the release notes onto reflectometry.org and update the links"

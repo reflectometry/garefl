@@ -15,12 +15,14 @@
 
   The next step(s) are operating system specific.
 
-  <MacOSX>
+  MacOSX
     For OS X 10.4 you will need to have a fortran compiler to fit
     magnetic systems.  E.g., the following version of the gfortran 
     compiler builds universal binaries:
 
         http://r.research.att.com/tools
+
+    Install gnuplot and aquaterm.
 
     On Mac OS X you may need to use one of the following:
 
@@ -28,13 +30,21 @@
 	./configure FLIBS=-lg2c         # g77 fortran compiler
         ./configure FLIBS=/usr/local/lib/libgfortran.a  # gfortran compiler
 
-  </MacOSX>
-  <Windows>
+  Windows
+    
+    Install cygwin with dev tools (gcc, make, gfortran), or install msys+mingw.
+    Install gnuplot for windows.
+
         ./configure
-  </Windows>
-  <Unix>
+
+
+  Unix
+
+    Install development environment (e.g., gcc, make, gfortran) using the
+    package manager for the OS and install gnuplot.
+
 	./configure
-  </Unix>
+
 
   Once configure has completed, use
 
@@ -53,5 +63,5 @@
   and fitting with them.
 
 Paul Kienzle
-2007-11-08
+2008-02-26
 

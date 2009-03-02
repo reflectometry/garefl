@@ -27,3 +27,5 @@ clean: ; -$(RM) setup.o
 
 distclean: clean ; -$(RM) *~ fit$(EXE) $(LOGFILES) Makefile gaplot
 
+check: fit
+	./fit -n 2

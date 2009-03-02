@@ -59,3 +59,6 @@ clean:
 
 distclean: 
 	-$(RM) *.o core *~
+
+check:
+

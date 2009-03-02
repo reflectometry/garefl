@@ -48,6 +48,8 @@ bspline.o: $(BSPLINE_H)
 bspline_test$(EXE): bspline.c
 	$(CC) -Wall -O3 -DTEST bspline.c -obspline_test$(EXE) -lm
 
+check:
+
 clean:
 	-$(RM) *.o core librefl.a
 

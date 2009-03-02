@@ -5570,4 +5570,4 @@ if test "$no_create" != yes; then
 fi
 
 
-# $Id: configure.in 338 2007-11-09 00:09:38Z pkienzle $
+# $Id: configure.in 706 2008-06-13 15:37:34Z pkienzle $

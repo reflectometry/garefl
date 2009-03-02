@@ -1,0 +1,8 @@
+version 2009-02-26
+
+* Support incoherent sums of multiple models to one data set
+* Support unpolarized measurements on magnetic samples
+* Suppress logging when not GA running continuously
+* Save parameters in [0-1] or as fitted values
+* BUG: spin-flip cross-sections now fitted properly with L-M
+

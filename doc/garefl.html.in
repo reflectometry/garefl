@@ -1,0 +1,136 @@
+<!Doctype HTML PUBLIC "//W3C//DTD HTML 4.0 Transitional//EN"
+         "http://www.w3c.org/TR/REC-html40/loose.dtd">
+
+<html>
+<head>
+<title>GA refl</title>
+<style>
+A:link {text-decoration:none; }
+A:vlink {text-decoration:none ; }
+
+A:alink { text-decoration:none;}
+
+BODY 		{font-family: arial, helvetica, sans-serif; 
+			color: 000000 ;  background-color: FFFFFF }
+
+H1      {font-family: Tahoma, Verdana, Arial, sans-serif; 
+				font-style: italic; color: 663399;}
+
+H2 		{font-family: Tahoma, Verdana, Arial, sans-serif; 
+				font-style: italic;}
+
+H3		{font-family: arial, helvetica, sans-serif;}
+				
+td    {font-weight: bold;}
+				
+</style>
+</head>
+<BODY BGCOLOR="#FFFFFF"
+      topmargin="0" leftmargin="0" marginwidth="0" marginheight="0" 
+      text="#000000" link="#0033ff" vlink="#0033ff" alink="#0033ff">
+
+
+<?
+   include("/var/www/include/navigation.inc");
+   include("/var/www/include/utility.inc");
+?>
+<blockquote>
+<h2>GA refl</h2>
+
+<p>Current version: @VERSION@  (<a href="release/garefl-@VERSION@-notes">release notes</a>)
+ 
+<p>GA refl is a program for simultaneous fitting of X ray and neutron
+polarized reflectometry data.  Slab models are supported, with interfacial
+roughness.</p>
+
+<p>A variety of fitting procedures are supported: genetic algorithms,
+Nelder-Mead simplex and Levenberg-Marquardt.  All algorithms support
+bounds constraints.</p>
+
+<p>GA refl is a work in progress.  Preliminary versions of the program 
+are available.</p>
+
+<h2>Building from source</h2>
+
+<p>Download the source for the current release
+<a href="release/garefl-@VERSION@-src.tar.gz">garefl-@VERSION@-src.tar.gz</a>
+or retrieve the current source from the repository:
+<pre>
+    svn co svn://danse.us/reflectometry/trunk/garefl
+</pre>
+</p>
+     
+<p>Building GA refl from source requires various text processing tools 
+(e.g., sed) to configure the source, and C, C++ and Fortran compilers 
+to build the executable.  You will need to install gnuplot to see the
+results.
+</p>
+
+<p>Most unix systems will already have the required tools, though you
+may need to install some of the development packages.</p>
+
+<p>For Mac OS X the developers kit available in the install CDs contains
+everything you need.  See your Apple documentation for details.
+You will also need to find a version of fortran for your Mac.  Several
+binaries for gfortran exist on the web.</p>
+
+<p>On Windows it is easiest to install cygwin, being sure to select the
+packages for the compilers (gcc, g++, gfortran) and for subversion (svn).
+You can also use MinGW and MSYS.</p>
+
+
+<p>Once you have the source downloaded and expanded, see the README file
+for details.</p>
+
+
+<a name="citation"><h2>Citing GA refl</h2></a>
+Acknowledging use of GA refl in publications may be done by making a 
+reference to this site. For example:<br>
+<blockquote>
+The program ga_simul from the reflpak suite was used for elements of the analysis.[1]
+</blockquote>
+<blockquote>[1] P.A. Kienzle, M. Doucet, D.J. McGillivray, K.V. O'Donovan, N.F. Berk, C.F. Majkrzak;
+http://www.ncnr.nist.gov/reflpak. 2000-2006</blockquote>
+</P>
+
+
+<a name="disclaimer"><h2>Disclaimer</h2></a>
+<P>
+This software was developed at the National Institute of 
+Standards and Technology at the NIST Center for Neutron Research by 
+employees of the Federal Government in the course of their official 
+duties. Pursuant to title 17 section 105* of the United States Code 
+this software is not subject to copyright protection and is in the 
+public domain.  NIST does not assume any responsibility 
+whatsoever for the use of this software, and makes no guarantees,
+expressed or implied, about its quality, reliability, or any other
+characteristic.  The use of certain trade names or commercial products
+does not imply any endorsement of a particular product, nor does it
+imply that the named product is necessarily the best product for the
+stated purpose.  We would appreciate acknowledgment if the
+software is used.</P>
+
+<P>*Subject matter of copyright: United States Government works</P>
+
+<P>Copyright protection under this title is not available for any work of
+the United States Government, but the United States Government is not
+precluded from receiving and holding copyrights transferred to it by
+assignment, bequest, or otherwise.</P>
+
+
+<h2>Acknowledgments</h2>
+<P>Portions of this work are based upon activities supported by the 
+National Science Foundation under Agreement No. DMR-0412074.</P>
+
+<h2>References</h2>
+<dl>
+<dt>Calculating polarized neutron reflectometry</dt>
+<dd>C.F. Majrkzak, K.V. O'Donovan, N.F. Berk (2006); Polarized neutron reflectometry.
+In <em>Neutron Scattering from Magnetic Materials,</em> T. Chatterji, editor. Elsevier.</dd>
+</dl>
+
+
+<br /><font size=-1><? lastmod(); ?></font>
+</blockquote>
+</body>
+</html>

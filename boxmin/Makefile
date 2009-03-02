@@ -43,6 +43,8 @@ clean: $(SUBDIRS)
 distclean: $(SUBDIRS)
 	$(RM) *.o $(TARGET) *~
 
+check:
+
 $(SUBDIRS):
 	cd $@ && $(MAKE) $(MAKECMDGOALS)
 

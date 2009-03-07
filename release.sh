@@ -40,6 +40,7 @@ okay "Was the build error free?"
 make dist
 ls release/*$VERSION*
 okay "Are you ready to update the server?"
+chmod a+r release/*
 scp release/*$VERSION* $NCNRWEB/release
 scp release/garefl.html $NCNRWEB
 scp release/*$VERSION* $REFLWEB/download

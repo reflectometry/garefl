@@ -274,6 +274,12 @@ calc_resolution(fitdata *data, double L, double dLoL,
 }
 
 void
+data_constant_resolution(fitdata *data, double res)
+{
+  constant_resolution(res, data->n, data->dQ);
+}
+
+void
 data_resolution_fixed(fitdata *data, double L, double dLoL,
 		      double Qlo, double Qhi, double dT)
 {

@@ -91,12 +91,8 @@ void data_mergeQ(const fitdata *A, const fitdata *B,
  * Opening between |Qlo| and |Qhi|, fixed above and below:
  *   data_resolution_fvf(data,L,dLoL,|Qlo|,|Qhi|,dTlo,dToT,dThi);
  *
- * Fixed in stages (e.g., from TOF source):
- *   data_resolution_fixed(data,L,dLoL,0.,Q1,dT1);
- *   data_resolution_fixed(data,L,dLoL,Q1,Q2,dT2);
- *   data_resolution_fixed(data,L,dLoL,Q2,Q3,dT3);
- *   ...
- *   data_resolution_fixed(data,L,dLoL,Qn,0.,dT3);
+ * Constant resolution (e.g., from TOF source)
+ *   data_resolution(data, res);
  *
  * If instrument uses angle T rather than Q:
  *   #include "reflcalc.h"
@@ -132,6 +128,9 @@ data_resolution_fvf(fitdata *data, double L, double dLoL,
 		    double dTlo, double dToT, double dThi);
 void
 data_resolution_dQoQ(fitdata *data, double dQoQ, double Qlo, double Qhi);
+
+void
+data_constant_resolution(fitdata *data, double res);
 
 #ifdef __cplusplus
 }

@@ -85,6 +85,7 @@ with each point Q
    dToT = resolution_dToT(s1,s2,d,A3)
    resolution_fixed(L,dLoL,dT,N,Q,dQ)
    resolution_varying(L,dLoL,dToT,N,Q,dQ)
+   constant_resolution(res, N, dQ)
 
 Resolution padding to determine the number of additional steps beyond
 Q of a given step size in order to reach 0.001 on a gaussian of width dQ
@@ -179,6 +180,9 @@ double
 resolution_dT(double s1,double s2,double d);
 double
 resolution_dToT(double s1,double s2,double d,double A3);
+
+void
+constant_resolution(double res, int n, double dQ[]);
 
 void
 resolution_fixed(double L, double dLoL, double dT,

@@ -381,6 +381,17 @@ resolution_varying(double L, double dLoL, double dToT,
 }
 
 void
+constant_resolution(double res, int n, double dQ[])
+{
+  int j;
+
+  for (j=0; j < n; j++) {
+    dQ[j] = res;
+  }
+}
+
+
+void
 resolution_fixed(double L, double dLoL, double dT,
 		 int n, const double Q[], double dQ[])
 {

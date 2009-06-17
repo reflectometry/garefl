@@ -46,6 +46,23 @@ void constr_models(fitinfo *fit)
   //}
 }
 
+void save(fitinfo *fit)
+{
+  int k;
+
+  printf("Volfrac parameters\n");
+  printf("  vol_fract_spacer: %g\n",vol_fract_spacer);
+  printf("  vol_fract_alkyl: %g\n",vol_fract_alkyl);
+  printf("  rho_spacer: %g\n", rho_spacer);
+  printf("  rho_alkyl: %g\n", rho_alkyl);
+  printf("  global_rough: %g\n", global_rough);
+  for (k=0; k < MODELS; k++) {
+    printf("== Model %d ==\n", k);
+    model_print(&fit[k].m,NULL);
+  }
+  
+}
+
 /*============ INITIAL SETUP ============================*/
 fitinfo* setup_models(int *models)
 {
@@ -60,6 +77,9 @@ fitinfo* setup_models(int *models)
   /* Load the data for each model */
   fit_data(&fit[0],"wc02.yor");
   fit_data(&fit[1],"wc03.yor");
+
+  /* Constant resolution example */
+  /* data_constant_resolution(&fit[0].dataA, 0.3); */
 
   /* Initialize instrument parameters for each model.*/
   for (i=0; i < MODELS; i++) {
@@ -130,5 +150,6 @@ fitinfo* setup_models(int *models)
   pars_add(freepars, "rough_cr_au", &(fit[0].m.rough[3]), 0., 1.);
 
   constraints = constr_models;
+  output_model = save;
   return fit;
 }

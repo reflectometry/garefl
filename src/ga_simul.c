@@ -146,6 +146,7 @@ FILE *parFD;
 FILE *searchFD;
 fitinfo *fit;
 Settings set; /* GA fit parameters */
+fit_output *output_model = NULL;
 fit_constraints *constraints = NULL;
 int step_num = 0;
 int start_step = 0;
@@ -1056,6 +1057,7 @@ void print_usage(void)
   printf("  -n         limit the number of generations for the GA; this also\n");
   printf("             suppresses writing of intermediate profile and theory files\n");
   printf("  -N         create new pop_##.dat file each trace period\n");
+  printf("  -o         output model using output_model function of setup.c\n");
   printf("  -p         use saved population from pop.dat\n");
 #ifdef USE_QUAD_FIT
   printf("  -Q         use Powell's NEWUOA unconstrained fit\n");
@@ -1106,7 +1108,7 @@ int main(int argc, char *argv[])
 {
   enum { 
     GA, AMOEBA, NLLS, QUADFIT, 
-    CHISQ, PRINT_MODEL, PRINT_PROFILE, SAVE_STAJ 
+    CHISQ, PRINT_MODEL, PRINT_PROFILE, SAVE_STAJ, OUTPUT_MODEL
   } action;
   int nth=0, n1=0, xdims=0, k, steps=20;
   int generations = 1000000000;
@@ -1128,7 +1130,7 @@ int main(int argc, char *argv[])
   set.initOption = 0;
   set.iElite = 0;
   action = GA;
-  while((ch = getopt(argc, argv, "A:f:x:n:T:r:s:t:c:v:X:H:peSFLmgijwWNalQz?")) != -1) {
+  while((ch = getopt(argc, argv, "A:f:x:n:T:r:s:t:c:v:X:H:opeSFLmgijwWNalQz?")) != -1) {
     switch(ch) {
     case 'e':
       set.iElite = 1;
@@ -1140,6 +1142,10 @@ int main(int argc, char *argv[])
       
     case 'F':
       action = GA;
+      break;
+
+    case 'o':
+      action = OUTPUT_MODEL;
       break;
 
     case 'm':
@@ -1321,7 +1327,6 @@ int main(int argc, char *argv[])
     ga_fit(&set,generations);
     log_best();
     final_ga_fit();
-
     break;
 
   case AMOEBA:
@@ -1352,6 +1357,10 @@ int main(int argc, char *argv[])
     cmd_quadfit();
     final_ga_fit();
 #endif
+    break;
+
+  case OUTPUT_MODEL:
+    if (*output_model != NULL) (*output_model)(fit);
     break;
 
   case PRINT_MODEL:

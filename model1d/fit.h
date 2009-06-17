@@ -84,6 +84,8 @@ void fit_save_staj(const fitinfo *fit, const char *file);
 /* Temporary hacks to support models separate from main. */
 typedef void fit_constraints(fitinfo *fit);
 extern fit_constraints *constraints; /* constraints callback */
+typedef void fit_output(fitinfo *fit);
+extern fit_output *output_model; /* constraints callback */
 fitinfo*
 setup_models(int *models); /* simultaneous fitting */
 void

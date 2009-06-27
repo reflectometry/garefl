@@ -978,11 +978,8 @@ double step_ga(int n, const double *p, void *user_data)
   return chisq2fitness(chisq);
 }
 
-void init_ga_fit(fitinfo *fit, int argc, char *argv[])
+void init_ga_fit(fitinfo *fit)
 {
-  char cwd[128];
-  int k;
-
   // Number of fit parameters
   set.nParams   = fit->pars.n;
   // Fitness function
@@ -994,6 +991,16 @@ void init_ga_fit(fitinfo *fit, int argc, char *argv[])
 
   /* squeeze pars into [0,1] */
   pars_get01(&fit[0].pars, fit[0].pars.value);
+
+  /* Initialize the data structures */
+  ga_init(&set,fit->pars.value);
+}
+
+void prep_par_file(fitinfo *fit, int argc, char *argv[])
+{
+  char cwd[128];
+  int k;
+
   printf("Starting parameter values in model:\n");
   pars_print(&fit[0].pars);
 
@@ -1022,9 +1029,6 @@ void init_ga_fit(fitinfo *fit, int argc, char *argv[])
   fprintf(parFD,"# Startup command (%s):", getcwd(cwd,sizeof(cwd))?cwd:"?");
   for (k=0; k < argc; k++) fprintf(parFD, " %s", argv[k]);
   fprintf(parFD,"\n");
-
-  /* Initialize the data structures */
-  ga_init(&set,fit->pars.value);
 }
 
 void final_ga_fit(void)
@@ -1292,9 +1296,6 @@ int main(int argc, char *argv[])
   set_signal_handlers();
   cpulimit(hours);
 
-  /* Apply constraints given new limits */
-  if (constraints != NULL) (*constraints)(fit);
-
   /* Some place to save the best parameters */
   bestpars = (double *)malloc(sizeof(*bestpars)*fit[0].pars.n);
   assert(bestpars != NULL);
@@ -1319,10 +1320,21 @@ int main(int argc, char *argv[])
   // crossing prob cross-60
   set.pCross=0.60;
   
+
+  /* Preload population file */
+  if (set.popOption == 1)  {
+    init_ga_fit(fit);
+    getChromosome(&set,fittest(&set),bestpars);
+    pars_set01(&fit[0].pars, bestpars); 
+  }
+
+  /* Apply constraints given new limits */
+  if (constraints != NULL) (*constraints)(fit);
   
   switch (action) {
   case GA:
-    init_ga_fit(fit,argc,argv);
+    if (set.popOption != 1) init_ga_fit(fit);
+    prep_par_file(fit, argc, argv);
     log_improvement = (generations > 1000000);
     ga_fit(&set,generations);
     log_best();
@@ -1332,7 +1344,8 @@ int main(int argc, char *argv[])
   case AMOEBA:
     // Need to separate amoeba from GA; currently faking ga init to set up data
     //set.np = 1;
-    init_ga_fit(fit,argc,argv);
+    if (set.popOption != 1) init_ga_fit(fit);
+    prep_par_file(fit, argc, argv);
     cmd_amoeba();
     cmd_amoeba();
     cmd_amoeba();
@@ -1343,7 +1356,8 @@ int main(int argc, char *argv[])
 #ifdef USE_NLLS_FIT
     // Need to separate nlls from GA; currently faking ga init to set up data
     //set.np = 1;
-    init_ga_fit(fit,argc,argv);
+    if (set.popOption != 1) init_ga_fit(fit);
+    prep_par_file(fit, argc, argv);
     cmd_nlls();
     printf("LM completed...\n");fflush(stdout);
     final_ga_fit();
@@ -1353,7 +1367,8 @@ int main(int argc, char *argv[])
   case QUADFIT:
 #ifdef USE_QUAD_FIT
     //set.np = 1;
-    init_ga_fit(fit,argc,argv);
+    if (set.popOption != 1) init_ga_fit(fit);
+    prep_par_file(fit, argc, argv);
     cmd_quadfit();
     final_ga_fit();
 #endif

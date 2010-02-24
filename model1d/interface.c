@@ -25,13 +25,13 @@ void interface_print(interface *rm)
     printf("  %d %g %g\n",i,rm->value[i],rm->step[i]);
 }
 
-double interface_average(double above, double below, double weight)
+Real interface_average(Real above, Real below, Real weight)
 {
   return .5 * (above + below + (below-above) * weight);
 }
 
-double interface_overlap(double weight_above, double weight_below,
-				double v_above, double v, double v_below)
+Real interface_overlap(Real weight_above, Real weight_below,
+				Real v_above, Real v, Real v_below)
 {
   return .5 * (v_above + v
 	       + (v-v_above)*weight_above
@@ -51,9 +51,9 @@ double interface_overlap(double weight_above, double weight_below,
  * set the interfaces between the slices half way between the z_i
  * values, with the last slice extending an extra half step beyond
  * the last value.  We then convert that to a series of slice widths. */
-void interface_steps(int n,double z[])
+void interface_steps(int n,Real z[])
 {
-   register double ohalfstep, ztemp;
+   register Real ohalfstep, ztemp;
    register int j;
 
    ohalfstep = .5 * (z[1] - z[0]);
@@ -84,9 +84,9 @@ void interface_steps(int n,double z[])
  */
 #define TOLERANCE 1e-15
 #define MAXITERATIONS 20 /* 9 should be enough */
-double erfinv(double x)
+Real erfinv(Real x)
 {
-  double zero=0., s, z_old, z_new;
+  Real zero=0., s, z_old, z_new;
   int iterations;
   if (fabs(x) > 1.) return zero/zero;
   if (fabs(x) == 1.) return x/zero;
@@ -103,15 +103,15 @@ double erfinv(double x)
 }
 #endif
 
-void erf_interface(int n, double z[], double r[])
+void erf_interface(int n, Real z[], Real r[])
 {
   if (n==0) {
     /* Calculate interface at a particular value */
     *r = erf(CE * *z);
   } else {
     /* Split [-1,1] into n intervals sampled at the midpoint of each. */
-    double step = 2. / (n+1);
-    double x = -1.+ step;
+    Real step = 2. / (n+1);
+    Real x = -1.+ step;
     int i;
 
     for (i=0; i<n; i++) {
@@ -135,15 +135,15 @@ void erf_interface(int n, double z[], double r[])
    where ZF is fwhm */
 #define CT 2.292
 
-void tanh_interface(int n, double z[], double r[])
+void tanh_interface(int n, Real z[], Real r[])
 {
   if (n==0) {
     /* Calculate interface at a particular value */
     *r = tanh(CT * *z);
   } else {
     /* Split [-1,1] into n intervals sampled at the midpoint of each. */
-    double step = 2. / (n+1);
-    double x = -1.+ step;
+    Real step = 2. / (n+1);
+    Real x = -1.+ step;
     int i;
 
     for (i=0; i<n; i++) {
@@ -157,30 +157,30 @@ void tanh_interface(int n, double z[], double r[])
 }
 
 /* Neville's interpolation for a quadratic. */
-double quadinterp(double x, double x0, double x1, double x2,
-		  double y0, double y1, double y2)
+Real quadinterp(Real x, Real x0, Real x1, Real x2,
+		  Real y0, Real y1, Real y2)
 {
-  double d0 = x-x0;
-  double d1 = x-x1;
-  double d2 = x-x2;
+  Real d0 = x-x0;
+  Real d1 = x-x1;
+  Real d2 = x-x2;
   return (d2*(y0*d1-y1*d0)/(x0-x1) - d0*(y1*d2 - y2*d1)/(x1-x2)) / (x0-x2);
 }
 
-double interface_value(const interface *rm, double z)
+Real interface_value(const interface *rm, Real z)
 {
   if (rm->fn != NULL) {
     /* Have an interface function */
-    double retval;
+    Real retval;
     (*(rm->fn))(0,&z,&retval);
     return retval;
   } else if (1) {
-    double retval;
+    Real retval;
     erf_interface(0,&z,&retval);
     return retval;
   } else {
     /* Need to interpolate */
     int n = rm->n;
-    double z0, z1, z2, v0, v1, v2;
+    Real z0, z1, z2, v0, v1, v2;
     int i;
     assert(n > 1);
     /* z goes from -w/2 to w/2 in steps sampled at
@@ -246,7 +246,7 @@ void interface_destroy(interface *rm)
 }
 
 int interface_set(interface *rm, const char* name,
-		  int n, const double z[], const double v[])
+		  int n, const Real z[], const Real v[])
 {
   rm->name = name;
   rm->n = n;
@@ -259,7 +259,7 @@ int interface_set(interface *rm, const char* name,
   }
 
   /* Step and value share one allocation */
-  rm->step = malloc(sizeof(double)*n*2);
+  rm->step = malloc(sizeof(Real)*n*2);
   rm->value = rm->step+n;
   if (rm->step == NULL) {
     /* Couldn't allocate: pretend there is no roughness */
@@ -297,7 +297,7 @@ int interface_create(interface *rm, const char* name,
   }
 
   /* Step and value share one allocation */
-  rm->step = malloc(sizeof(double)*n*2);
+  rm->step = malloc(sizeof(Real)*n*2);
   rm->value = rm->step+n;
   if (rm->step == NULL) {
     /* Couldn't allocate: pretend there is no roughness */

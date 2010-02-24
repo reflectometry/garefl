@@ -96,14 +96,14 @@
 // must be called with a work vector.
 
 static void
-refl(const int layers, const double d[],
-     const double rho[], const double mu[], const double lambda,
-     const double Q, refl_complex& R)
+refl(const int layers, const Real d[],
+     const Real rho[], const Real mu[], const Real lambda,
+     const Real Q, refl_complex& R)
 {
-  const double Qcutoff = 1e-10;
+  const Real Qcutoff = 1e-10;
   const refl_complex J(0,1);
-  const double pi16=5.0265482457436690e1;
-  const double pi8olambda = pi16/lambda/2.;
+  const Real pi16=5.0265482457436690e1;
+  const Real pi8olambda = pi16/lambda/2.;
   refl_complex F, f, f_next;
   int n, step, vacuum;
 
@@ -123,7 +123,7 @@ refl(const int layers, const double d[],
   // substrate --- calculate the index of refraction.  Ignore depth
   // since the substrate is semi-infinite and we get no reflection
   // from the bottom interface.
-  const double Qsqrel = Q*Q + pi16*rho[vacuum];
+  const Real Qsqrel = Q*Q + pi16*rho[vacuum];
   f_next = sqrt(refl_complex(Qsqrel-pi16*rho[n],pi8olambda*mu[n]));
   R = 0.;
   for (int i=2; i < layers; i++) {
@@ -136,7 +136,8 @@ refl(const int layers, const double d[],
   // vacuum --- we've already accounted for the index of refraction
   // of the vacuum and we are measuring reflectivity relative to the
   // top interface so we ignore absorption and depth.  This means that
-  // S is 0 and the exponential is 1.
+  // S is 0 and the exponential is 1.      int c = sscanf(buf, "%lf %lf %lf %lf %lf", &c1, &c2, &c3, &c4, &c5);
+
   f = fabs(Q);
   F = (f-f_next) / (f+f_next);
   R = (R + F) / (R*F + 1.);
@@ -152,15 +153,15 @@ int trace = 0;
 // Modification of C.F. Majrkzak's progam gepore.f for calculating
 // reflectivities of four polarization states of neutron reflectivity data.
 static void
-refl(const int layers, const double d[],
-     const double rho[], const double mu[], const double lambda,
-     const double Q, refl_complex& R)
+refl(const int layers, const Real d[],
+     const Real rho[], const Real mu[], const Real lambda,
+     const Real Q, refl_complex& R)
 {
   const refl_complex J(0,1);
 
   // Check that Q is not too close to zero.
   // For negative Q, reverse the layers.
-  const double Qcutoff = 1e-10;
+  const Real Qcutoff = 1e-10;
   int n,step;
   if (Q >= Qcutoff) {
     n=0;
@@ -175,9 +176,9 @@ refl(const int layers, const double d[],
 
   // Since sqrt(1/4 * x) = sqrt(x)/2, I'm going to pull the 1/2 into the
   // sqrt to save a multiplication later.
-  const double pi4=1.2566370614359172e1;       // = 1/4 * 16 pi
-  const double pi2olambda = 0.5*pi4/lambda;    // = 1/4 * 8 pi / lambda
-  const double Qsqrel = 0.25*Q*Q + pi4*rho[n]; // = 1/4 * (Q^2 + 16 pi Vrho)
+  const Real pi4=1.2566370614359172e1;       // = 1/4 * 16 pi
+  const Real pi2olambda = 0.5*pi4/lambda;    // = 1/4 * 8 pi / lambda
+  const Real Qsqrel = 0.25*Q*Q + pi4*rho[n]; // = 1/4 * (Q^2 + 16 pi Vrho)
 
   refl_complex B11, B12, B21, B22;
   B11 = B22 = 1.;
@@ -219,20 +220,20 @@ refl(const int layers, const double d[],
     // it doesn't matter which since both yield (1+exp(-2|a|))/2, but for
     // the (exp(a)-exp(-a))/2 term this will change the sign.
 #ifdef TRACE
-    const double epa = exp(real(S1)*d[n]);
-    const double rexp = (epa + 1./epa)/2.;
-    const double rexm = (epa - 1./epa)/2.;
+    const Real epa = exp(real(S1)*d[n]);
+    const Real rexp = (epa + 1./epa)/2.;
+    const Real rexm = (epa - 1./epa)/2.;
 #else
-    const double em2a = exp(-2.*fabs(real(S1))*d[n]);
-    const double rexp = (1.+em2a)/2.;
-    const double rexm = ( real(S1)>0. ? (1.-em2a)/2. : (em2a-1.)/2. );
+    const Real em2a = exp(-2.*fabs(real(S1))*d[n]);
+    const Real rexp = (1.+em2a)/2.;
+    const Real rexm = ( real(S1)>0. ? (1.-em2a)/2. : (em2a-1.)/2. );
 #endif // !TRACE
 #if defined(HAVE_SINCOS)
-    double costheta, sintheta;
+    Real costheta, sintheta;
     sincos(imag(S1)*d[n],&sintheta,&costheta);
 #else
-    const double sintheta = sin(imag(S1)*d[n]);
-    const double costheta = cos(imag(S1)*d[n]);
+    const Real sintheta = sin(imag(S1)*d[n]);
+    const Real costheta = cos(imag(S1)*d[n]);
 #endif // !HAVE_SINCOS
     const refl_complex Adiag(rexp*costheta,rexm*sintheta); // = coshS1
     const refl_complex sinhS1(rexm*costheta,rexp*sintheta);
@@ -267,7 +268,7 @@ refl(const int layers, const double d[],
   n+=step;
   const refl_complex ZS = J*sqrt(refl_complex(Qsqrel-pi4*rho[n],
 					      pi2olambda*mu[n]));
-  const refl_complex ZI = J*fabs(0.5*Q);
+  const refl_complex ZI = J*Real(fabs(0.5*Q));
 
   // Save a few more multiplies by gathering the following:
   //   X=-1; Y = ZI*ZS;
@@ -293,20 +294,20 @@ refl(const int layers, const double d[],
 #endif /* !USE_PARRAT */
 
 extern "C" void
-reflectivity_amplitude(const int layers, const double d[],
-		       const double rho[], const double mu[], const double L,
-		       const double alignment,
-		       const int points, const double Q[], refl_complex R[])
+reflectivity_amplitude(const int layers, const Real d[],
+		       const Real rho[], const Real mu[], const Real L,
+		       const Real alignment,
+		       const int points, const Real Q[], refl_complex R[])
 {
   for (int i=0; i < points; i++)
     refl(layers,d,rho,mu,L,adjust_alignment(Q[i],alignment,L),R[i]);
 }
 
 extern "C" void
-reflectivity(const int layers, const double d[],
-	     const double rho[], const double mu[], const double lambda,
-	     const double alignment,
-	     const int points, const double Q[], double R[])
+reflectivity(const int layers, const Real d[],
+	     const Real rho[], const Real mu[], const Real lambda,
+	     const Real alignment,
+	     const int points, const Real Q[], Real R[])
 {
   for (int i=0; i < points; i++) {
     refl_complex amp;
@@ -322,10 +323,10 @@ reflectivity(const int layers, const double d[],
 }
 
 extern "C" void
-reflectivity_real(const int layers, const double d[],
-		  const double rho[], const double mu[], const double lambda,
-		  const double alignment,
-		  const int points, const double Q[], double R[])
+reflectivity_real(const int layers, const Real d[],
+		  const Real rho[], const Real mu[], const Real lambda,
+		  const Real alignment,
+		  const int points, const Real Q[], Real R[])
 {
   for (int i=0; i < points; i++) {
     refl_complex amp;
@@ -335,10 +336,10 @@ reflectivity_real(const int layers, const double d[],
 }
 
 extern "C" void
-reflectivity_imag(const int layers, const double d[],
-		  const double rho[], const double mu[], const double lambda,
-		  const double alignment,
-		  const int points, const double Q[], double R[])
+reflectivity_imag(const int layers, const Real d[],
+		  const Real rho[], const Real mu[], const Real lambda,
+		  const Real alignment,
+		  const int points, const Real Q[], Real R[])
 {
   for (int i=0; i < points; i++) {
     refl_complex amp;
@@ -350,8 +351,8 @@ reflectivity_imag(const int layers, const double d[],
 }
 
 extern "C"
-double
-adjust_alignment(double Q, double alignment, double lambda)
+Real
+adjust_alignment(Real Q, Real alignment, Real lambda)
 {
   if (alignment != 0) {
     Q = 4*M_PI/lambda*sin(asin(Q/4/M_PI*lambda)+alignment*M_PI/180.);

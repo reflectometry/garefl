@@ -21,7 +21,7 @@ void profile_print(profile *p, char *filename)
   }
 
   if (step) {
-    double z = -p->vacuum_offset;
+    Real z = -p->vacuum_offset;
 #ifdef HAVE_MAGNETIC
     fprintf(f,"# z rho mu P theta\n");
     for (i=0; i < p->n; i++) {
@@ -63,9 +63,9 @@ void profile_init(profile *p)
 
 int profile_good(profile *p) { return (p->capacity >= 0); }
 
-void profile_slice(profile *p, double d, double rho, double mu
+void profile_slice(profile *p, Real d, Real rho, Real mu
 #ifdef HAVE_MAGNETIC
-		   , double P, double theta
+		   , Real P, Real theta
 #endif
 		   )
 {
@@ -94,9 +94,9 @@ void profile_expth(profile *p)
   int i;
 
   for (i=0; i < n; i++) {
-    const double th = p->theta[i];
+    const Real th = p->theta[i];
     if (th != 270.) {
-# if defined(HAVE_SINCOS)
+# if defined(HAVE_SINCOS) && !defined(USE_SINGLE)
       sincos(th*M_PI/180.,p->expth+2*i+1,p->expth+2*i);
 # else
       p->expth[2*i] = cos(th*M_PI/180.);
@@ -140,11 +140,11 @@ int profile_extend(profile *p, int n)
     new_size += new_size/10; /* 10% spare */
     if (new_size < PROFILE_DEFAULT_LENGTH) new_size = PROFILE_DEFAULT_LENGTH;
     if (p->capacity <= 0) {
-      p->mu = malloc(PROFILE_FIELDS*sizeof(double)*new_size);
+      p->mu = malloc(PROFILE_FIELDS*sizeof(Real)*new_size);
     } else {
-      p->mu = realloc(p->mu,PROFILE_FIELDS*sizeof(double)*new_size);
+      p->mu = realloc(p->mu,PROFILE_FIELDS*sizeof(Real)*new_size);
       for (i=PROFILE_FIELDS-1; i>0; i--)
-	memmove(p->mu+i*new_size,p->mu+i*old_size,old_size*sizeof(double));
+	memmove(p->mu+i*new_size,p->mu+i*old_size,old_size*sizeof(Real));
     }
     p->rho = p->mu + new_size;
     p->d = p->mu + 2*new_size;
@@ -164,10 +164,10 @@ int profile_extend(profile *p, int n)
 }
 
 /* total profile depth, including vacuum interface */
-double profile_depth(profile *p)
+Real profile_depth(profile *p)
 {
   int i;
-  double z=0.;
+  Real z=0.;
   for (i=0; i < p->n; i++) z += p->d[i];
   return z;
 }
@@ -180,8 +180,8 @@ void profile_copy(profile *p, int start, int length)
   int i, end=p->n;
   if (!profile_extend(p, length)) return;
   for (i=0; i < PROFILE_FIELDS; i++) {
-    double *field = p->mu + i*p->capacity;
-    memcpy(field+end, field+start, sizeof(double)*length);
+    Real *field = p->mu + i*p->capacity;
+    memcpy(field+end, field+start, sizeof(Real)*length);
   }
   p->n += length;
 }

@@ -18,28 +18,28 @@
 // an absorption term separately based on the details of your substrate.
 
 extern "C" void
-fresnel_reflectivity(const double vrho, const double srho,
-		     const double vmu, const double smu,
-		     int points, const double Q[], double R[],
-		     const double lambda)
+fresnel_reflectivity(const Real vrho, const Real srho,
+		     const Real vmu, const Real smu,
+		     int points, const Real Q[], Real R[],
+		     const Real lambda)
 {
-  const double cutoff = 1e-10;
-  const std::complex<double> Sp(16*M_PI*(srho-vrho),8*M_PI*smu/lambda);
-  const std::complex<double> Sm(16*M_PI*(vrho-srho),8*M_PI*vmu/lambda);
+  const Real cutoff = 1e-10;
+  const std::complex<Real> Sp(16*M_PI*(srho-vrho),8*M_PI*smu/lambda);
+  const std::complex<Real> Sm(16*M_PI*(vrho-srho),8*M_PI*vmu/lambda);
 
   for (int i=0; i < points; i++) {
     if (fabs(Q[i]) <= cutoff) {
       R[i] = 1.;
     } else if (Q[i] > 0.) {
-      const std::complex<double> f = sqrt(Q[i]*Q[i] - Sp);
-      const std::complex<double> amp = (Q[i] - f) / (Q[i] + f);
+      const std::complex<Real> f = sqrt(Q[i]*Q[i] - Sp);
+      const std::complex<Real> amp = (Q[i] - f) / (Q[i] + f);
       R[i] = real(amp*conj(amp));
     } else {
-      const std::complex<double> f = sqrt(Q[i]*Q[i] - Sm);
+      const std::complex<Real> f = sqrt(Q[i]*Q[i] - Sm);
       // Note: The following is inverted relative to q>0 case
       // because we are not using |Q|.  It is equivalent to
       // (-Q - f) / (-Q + f).
-      const std::complex<double> amp = (Q[i] + f) / (Q[i] - f);
+      const std::complex<Real> amp = (Q[i] + f) / (Q[i] - f);
       R[i] = real(amp*conj(amp));
     }
   }
@@ -47,23 +47,23 @@ fresnel_reflectivity(const double vrho, const double srho,
 
 
 extern "C" void
-fresnel_amplitude(const double vrho, const double srho,
-		  const double vmu, const double smu,
-		  int points, const double Q[], std::complex<double> R[],
-		  const double lambda)
+fresnel_amplitude(const Real vrho, const Real srho,
+		  const Real vmu, const Real smu,
+		  int points, const Real Q[], std::complex<Real> R[],
+		  const Real lambda)
 {
-  const double cutoff = 1e-10;
-  const std::complex<double> Sp(16*M_PI*(srho-vrho),8*M_PI*smu/lambda);
-  const std::complex<double> Sm(16*M_PI*(vrho-srho),8*M_PI*vmu/lambda);
+  const Real cutoff = 1e-10;
+  const std::complex<Real> Sp(16*M_PI*(srho-vrho),8*M_PI*smu/lambda);
+  const std::complex<Real> Sm(16*M_PI*(vrho-srho),8*M_PI*vmu/lambda);
 
   for (int i=0; i < points; i++) {
     if (fabs(Q[i]) <= cutoff) {
-      R[i] = std::complex<double>(-1.,0.);
+      R[i] = std::complex<Real>(-1.,0.);
     } else if (Q[i] > 0.) {
-      const std::complex<double> f = sqrt(Q[i]*Q[i] - Sp);
+      const std::complex<Real> f = sqrt(Q[i]*Q[i] - Sp);
       R[i] = (Q[i] - f) / (Q[i] + f);
     } else {
-      const std::complex<double> f = sqrt(Q[i]*Q[i] - Sm);
+      const std::complex<Real> f = sqrt(Q[i]*Q[i] - Sm);
       // Note: The following is inverted relative to q>0 case
       // because we are not using |Q|.  It is equivalent to
       // (-Q - f) / (-Q + f).

@@ -2,6 +2,15 @@
 
 #ifndef _AMOEBA_H
 #define _AMOEBA_H
+
+#ifndef Real
+# ifdef USE_SINGLE
+#  define Real float
+# else
+#  define Real double
+# endif
+#endif
+
 /** \file
    Amoeba bounds-constrained nelder-mead simplex.
 
@@ -10,7 +19,7 @@
 	 \code
    // space for the simplex
    simplex s;
-   p = malloc(sizeof(double)*(n*n+4*n+1));
+   p = malloc(sizeof(Real)*(n*n+4*n+1));
 
    // initialize the simplex
    amoeba_init(&s,n,bounds,p,f,data);
@@ -39,7 +48,7 @@ You can use your own outer loop as well:
 Use the following macros to access the simplex directly:
 
    \code
-   double *pk = amoeba_VERTEX(&s,k);
+   Real *pk = amoeba_VERTEX(&s,k);
    amoeba_VALUE(&s,k) = fn(n,pk,userdata);
 	 \endcode
 
@@ -57,14 +66,14 @@ extern "C" {
 	/** Objective function typedef.  Your objective functions should be of
 			this type to minimize them with boxmin.
 	*/
-typedef double (*optimfn)(int, const double[], void *);
+typedef Real (*optimfn)(int, const Real[], void *);
 typedef struct simplex__ 
 {
   int n;          /* n dimensions */
-  double *p;      /* n+1 vertices of the simplex, n coordinates for each */
-  double *ptry;   /* a trial vertex with n coordinates */
-  double *psum;   /* sum of the vertex coordinates across all vertices */
-  const double *bounds; /* NULL or 2*n bounds (lo 1 2 3 ... hi 1 2 3 ...) */
+  Real *p;      /* n+1 vertices of the simplex, n coordinates for each */
+  Real *ptry;   /* a trial vertex with n coordinates */
+  Real *psum;   /* sum of the vertex coordinates across all vertices */
+  const Real *bounds; /* NULL or 2*n bounds (lo 1 2 3 ... hi 1 2 3 ...) */
   int ilo, ihi, inhi; /* lowest and highest vertices */
   int iterations; /* Number of iterations */
   optimfn fn;     /* Function to optimize */
@@ -78,9 +87,9 @@ int amoeba_worksize(int n);
 void amoeba_init(
  simplex *s,            /* structure to hold the state of the simplex. */
  int n,                 /* the number of fit variables. */
- const double bounds[], /* the lo-hi bounds for each variable. */
- double p[],            /* the simplex workspace (min. n^2+4n+1 values) */ 
- optimfn fn,          /* f(int np, double p[], void *data) */
+ const Real bounds[], /* the lo-hi bounds for each variable. */
+ Real p[],            /* the simplex workspace (min. n^2+4n+1 values) */
+ optimfn fn,          /* f(int np, Real p[], void *data) */
  void *userdata);     /* extra data for function f */
 
 	/** Some macros for accessing vertices and values directly in the simplex */
@@ -96,25 +105,25 @@ void amoeba_init(
  * \param scale Size of the initial Simplex (as portion of search space).
  * \returns Nothing
  */
-void amoeba_reset(simplex *s, double Po[], double scale);
+void amoeba_reset(simplex *s, Real Po[], Real scale);
 
 	/** print the current simplex to the screen */
 void amoeba_dumpsimplex(simplex *s);
 
 	/** Search the vertices, remembering and returning the best */
-double* amoeba_best(simplex *s);
+Real* amoeba_best(simplex *s);
 
 	/** Take one amoeba step, recalculating any vertices as necessary.
  * Returns the new best vertex.
  */
-double* amoeba_step(simplex *s);
+Real* amoeba_step(simplex *s);
 
 	/** return the flatness of the simplex
  * Call this after amoeba or amoeba_step.
  */
-double amoeba_flatness(simplex *s);
+Real amoeba_flatness(simplex *s);
 
-double* amoeba(simplex *s, double ftol, int itmax);
+Real* amoeba(simplex *s, Real ftol, int itmax);
 
 #ifdef __cplusplus
 }

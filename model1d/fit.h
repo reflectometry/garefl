@@ -14,12 +14,12 @@ extern "C" {
 #endif
 
 typedef struct beaminfo_struct {
-  double lambda;         /* Wavelength */
-  double intensity;      /* Beam intensity (usually 1) */
-  double background;     /* Background signal */
-  double backabsorption; /* Absorption through substrate */
-  double Aguide;         /* Angle relative to guide */
-  double alignment;      /* Angle correction for incident beam */
+  Real lambda;         /* Wavelength */
+  Real intensity;      /* Beam intensity (usually 1) */
+  Real background;     /* Background signal */
+  Real backabsorption; /* Absorption through substrate */
+  Real Aguide;         /* Angle relative to guide */
+  Real alignment;      /* Angle correction for incident beam */
   /* Note: if alignment is incorrect then the values we measure will have a
    * small non-zero Qx component.  Assuming the back slits are not too tight
    * this should not affect the total reflection measured.
@@ -40,12 +40,12 @@ typedef struct fitinfo_struct {
   /* Support for incoherent sums across models */
   int number_incoherent;
   model **incoherent_models;
-  double *incoherent_weights;
+  Real *incoherent_weights;
 
    /* Theory curve */
   int nQ, capacity;  /* Theory function storage */
-  double *fitQ;
-  double *fitA, *fitB, *fitC, *fitD;
+  Real *fitQ;
+  Real *fitA, *fitB, *fitC, *fitD;
 
   /* Reflectometry data */
   fitdata dataA, dataB, dataC, dataD;
@@ -54,23 +54,23 @@ typedef struct fitinfo_struct {
   fitpars pars;      /* Fitting parameters */
 
   /* Fitness value */
-  double chisq_est;  /* Current chisq */
-  double weight;     /* Scale factor for chisq (default 1) */
+  Real chisq_est;  /* Current chisq */
+  Real weight;     /* Scale factor for chisq (default 1) */
 
 	/* Working storage */
   int worksize;      /* Working storage */
-  double *work;
+  Real *work;
 
 } fitinfo;
 void fit_init(fitinfo *fit);
 void fit_destroy(fitinfo *fit);
-void fit_sumsq(const fitinfo *fit, int *n, double *sumsq);
-void fit_wsumsq(const fitinfo *fit, int *n, double *sumsq);
-double fit_chisq(const fitinfo *fit);
-double fit_wchisq(const fitinfo *fit);
+void fit_sumsq(const fitinfo *fit, int *n, Real *sumsq);
+void fit_wsumsq(const fitinfo *fit, int *n, Real *sumsq);
+Real fit_chisq(const fitinfo *fit);
+Real fit_wchisq(const fitinfo *fit);
 void fit_update(fitinfo *fit, int approx);
-void fit_partial(fitinfo *fit, int approx, double portion, double best,
-		 int weighted, int *totaldf, double *totalsumsq);
+void fit_partial(fitinfo *fit, int approx, Real portion, Real best,
+		 int weighted, int *totaldf, Real *totalsumsq);
 void fit_data(fitinfo *fit, const char *file);
 void fit_real_data(fitinfo *fit, const char *file);
 void fit_imaginary_data(fitinfo *fit, const char *file);

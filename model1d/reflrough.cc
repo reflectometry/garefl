@@ -32,14 +32,14 @@
 // must be called with a work vector.
 
 static void
-refl(const int layers, const double d[], const double sigma[],
-     const double rho[], const double mu[], const double lambda,
-     const double Q, refl_complex& R)
+refl(const int layers, const Real d[], const Real sigma[],
+     const Real rho[], const Real mu[], const Real lambda,
+     const Real Q, refl_complex& R)
 {
-  const double Qcutoff = 1e-10;
+  const Real Qcutoff = 1e-10;
   const refl_complex J(0,1);
-  const double pi16=5.0265482457436690e1;
-  const double pi8olambda = pi16/lambda/2.;
+  const Real pi16=5.0265482457436690e1;
+  const Real pi8olambda = pi16/lambda/2.;
   refl_complex F, f, f_next;
   int n, r, step, vacuum;
 
@@ -59,15 +59,15 @@ refl(const int layers, const double d[], const double sigma[],
   // substrate --- calculate the index of refraction.  Ignore depth
   // since the substrate is semi-infinite and we get no reflection
   // from the bottom interface.
-  const double Qsq = Q*Q;
-  const double Qsqrel = Qsq + pi16*rho[vacuum];
+  const Real Qsq = Q*Q;
+  const Real Qsqrel = Qsq + pi16*rho[vacuum];
   f_next = sqrt(refl_complex(Qsqrel-pi16*rho[n],pi8olambda*mu[n]));
   R = 0.;
   for (int i=2; i < layers; i++) {
     n += step; r += step;
     f = sqrt(refl_complex(Qsqrel-pi16*rho[n],pi8olambda*mu[n]));
-    F = (f - f_next) / (f + f_next) * exp(-0.5*Qsq*sigma[r]*sigma[r]/log(256));
-    R = exp(d[n]*J*f) * (R + F) / (R*F + 1.);
+    F = (f - f_next) / (f + f_next) * Real(exp(-0.5*Qsq*sigma[r]*sigma[r]/log(256)));
+    R = exp(d[n]*J*f) * (R + F) / (R*F + Real(1));
     f_next = f;
   }
   // vacuum --- we've already accounted for the index of refraction
@@ -76,15 +76,15 @@ refl(const int layers, const double d[], const double sigma[],
   // S is 0 and the exponential is 1.
   r += step;
   f = fabs(Q);
-  F = (f-f_next) / (f+f_next) * exp(-0.5*Qsq*sigma[r]*sigma[r]/log(256));
-  R = (R + F) / (R*F + 1.);
+  F = (f-f_next) / (f+f_next) * Real(exp(-0.5*Qsq*sigma[r]*sigma[r]/log(256)));
+  R = (R + F) / (R*F + Real(1));
 }
 
 extern "C" void
-reflrough_amplitude(const int layers, const double d[], const double sigma[],
-		    const double rho[], const double mu[], const double L,
-		    const double alignment,
-		    const int points, const double Q[], refl_complex R[])
+reflrough_amplitude(const int layers, const Real d[], const Real sigma[],
+		    const Real rho[], const Real mu[], const Real L,
+		    const Real alignment,
+		    const int points, const Real Q[], refl_complex R[])
 {
   for (int i=0; i < points; i++)
     refl(layers,d,sigma,rho,mu,L,
@@ -94,10 +94,10 @@ reflrough_amplitude(const int layers, const double d[], const double sigma[],
 
 
 extern "C" void
-reflrough(const int layers, const double d[], const double sigma[],
-	     const double rho[], const double mu[], const double lambda,
-	     const double alignment,
-	     const int points, const double Q[], double R[])
+reflrough(const int layers, const Real d[], const Real sigma[],
+	     const Real rho[], const Real mu[], const Real lambda,
+	     const Real alignment,
+	     const int points, const Real Q[], Real R[])
 {
   for (int i=0; i < points; i++) {
     refl_complex amp;

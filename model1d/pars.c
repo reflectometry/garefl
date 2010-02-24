@@ -34,11 +34,11 @@ int pars_extend(fitpars *pars, int n)
     need += need/10 + 20;
     /* Allocate or extend existing memory */
     if (size <= 0) {
-      pars->min = malloc(3*sizeof(double)*need);
+      pars->min = malloc(3*sizeof(Real)*need);
       pars->address = malloc(2*sizeof(void*)*need);
     } else {
       pars->address = realloc(pars->address, 2*sizeof(void*)*need);
-      pars->min = realloc(pars->min, 3*sizeof(double)*need);
+      pars->min = realloc(pars->min, 3*sizeof(Real)*need);
       /* Shift columns to new offsets, starting at the last one. */
       if (pars->address != NULL) {
         /* shift name pointer array */
@@ -46,8 +46,8 @@ int pars_extend(fitpars *pars, int n)
       }
       if (pars->min != NULL) {
         /* shift value and range arrays */
-	memmove(pars->min+2*need, pars->min+2*size, size*sizeof(double));
-	memmove(pars->min+need, pars->min+size, size*sizeof(double));
+	memmove(pars->min+2*need, pars->min+2*size, size*sizeof(Real));
+	memmove(pars->min+need, pars->min+size, size*sizeof(Real));
       }
     }
     /* Check that memory was allocated successfully */
@@ -76,14 +76,14 @@ void pars_destroy(fitpars *pars)
 
 int pars_count(fitpars *pars) { return pars->n; }
 
-double pars_to_01(const fitpars *pars, int i, double v)
+Real pars_to_01(const fitpars *pars, int i, Real v)
 {
-  double min=pars->min[i];
+  Real min=pars->min[i];
   if (v < min) return 0.;
   else if (v > min+pars->range[i]) return 1.;
   else return (v-min)/pars->range[i];
 }
-double pars_from_01(const fitpars *pars, int i, double v)
+Real pars_from_01(const fitpars *pars, int i, Real v)
 {
   return pars->min[i]+v*pars->range[i];
 }
@@ -91,60 +91,60 @@ const char* pars_name(const fitpars *pars, int i)
 {
   return pars->name[i] ? pars->name[i] : "unknown";
 }
-double pars_peek(const fitpars *pars, int i)
+Real pars_peek(const fitpars *pars, int i)
 {
   return *(pars->address[i]);
 }
-double pars_peek01(const fitpars *pars, int i)
+Real pars_peek01(const fitpars *pars, int i)
 {
   return pars_to_01(pars,i,*(pars->address[i]));
 }
-void pars_poke(const fitpars *pars, int i, double v)
+void pars_poke(const fitpars *pars, int i, Real v)
 {
-  const double range = pars->range[i];
-  const double min = pars->min[i];
-  const double max = min + range;
+  const Real range = pars->range[i];
+  const Real min = pars->min[i];
+  const Real max = min + range;
   v = v < min ? min : (v > max ? max : v);
   *(pars->address[i])  = v;
 }
-void pars_poke01(const fitpars *pars, int i, double v)
+void pars_poke01(const fitpars *pars, int i, Real v)
 {
   pars_poke(pars, i, pars_from_01(pars, i, v));
 }
-double pars_min(const fitpars *pars, int i)
+Real pars_min(const fitpars *pars, int i)
 {
   return pars->min[i];
 }
-double pars_max(const fitpars *pars, int i)
+Real pars_max(const fitpars *pars, int i)
 {
   return pars->min[i]+pars->range[i];
 }
-void pars_set(const fitpars *pars, const double v[])
+void pars_set(const fitpars *pars, const Real v[])
 {
   int i;
   for (i=0; i < pars->n; i++) pars_poke(pars,i,v[i]);
 }
-void pars_set01(const fitpars *pars, const double v[])
+void pars_set01(const fitpars *pars, const Real v[])
 {
   int i;
   for (i=0; i < pars->n; i++) pars_poke01(pars,i,v[i]);
 }
-void pars_get(const fitpars *pars, double v[])
+void pars_get(const fitpars *pars, Real v[])
 {
   int i;
   for (i=0; i < pars->n; i++) v[i] = pars_peek(pars,i);
 }
-void pars_get01(const fitpars *pars, double v[])
+void pars_get01(const fitpars *pars, Real v[])
 {
   int i;
   for (i=0; i < pars->n; i++) v[i] = pars_peek01(pars,i);
 }
 
 
-static void _print_one(fitpars *pars, int i, double v, int zero_one)
+static void _print_one(fitpars *pars, int i, Real v, int zero_one)
 {
   char range[]="..........";
-  double value, portion;
+  Real value, portion;
   if (zero_one) {
     portion = v;
     value = v*pars->range[i]+pars->min[i];
@@ -162,7 +162,7 @@ static void _print_one(fitpars *pars, int i, double v, int zero_one)
   printf("%g in [%g,%g]\n",value,pars->min[i],pars->min[i]+pars->range[i]);
 }
 
-void pars_print_set(fitpars *pars, double *set, int zero_one)
+void pars_print_set(fitpars *pars, Real *set, int zero_one)
 {
   int i;
   for (i=0; i<pars->n; i++) {
@@ -194,14 +194,14 @@ int pars_select(fitpars *pars)
   }
 }
 
-int pars_enter_value(fitpars *pars, int p, double *v)
+int pars_enter_value(fitpars *pars, int p, Real *v)
 {
   char buffer[100];
 
   if (p >= 0) {
     const char *name = pars_name(pars, p);
-    double min = pars->min[p];
-    double max = min + pars->range[p];
+    Real min = pars->min[p];
+    Real max = min + pars->range[p];
     float val;
     printf("Enter value for %s in [%g,%g]: ",name,min,max);
     fflush(stdout);
@@ -218,8 +218,8 @@ int pars_enter_value(fitpars *pars, int p, double *v)
 }
 
 
-void pars_add(fitpars *pars, const char *name, double *d,
-	      double min, double max)
+void pars_add(fitpars *pars, const char *name, Real *d,
+	      Real min, Real max)
 {
 #if 0
   printf("add par %d: ",pars->n);
@@ -237,7 +237,7 @@ void pars_add(fitpars *pars, const char *name, double *d,
   }
 }
 
-void pars_set_range(fitpars *pars, int ipar, double newmin, double newmax)
+void pars_set_range(fitpars *pars, int ipar, Real newmin, Real newmax)
 {
   // Set the new minimum
   pars->min[ipar] = newmin;

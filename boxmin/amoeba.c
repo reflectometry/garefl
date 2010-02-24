@@ -25,10 +25,10 @@
 #define AVG 1
 #if AVG>1
 #define MEASURE(s,p) (avg(s->fn,s->n,p,s->userdata))
-static double avg(optimfn fn, int ndim, double p[], void *data)
+static Real avg(optimfn fn, int ndim, Real p[], void *data)
 {
   int j;
-  double v = 0.;
+  Real v = 0.;
 
   for (j=0; j<AVG; j++) v += (*fn)(ndim,p,data);
   return v/AVG;
@@ -37,17 +37,17 @@ static double avg(optimfn fn, int ndim, double p[], void *data)
 #define MEASURE(s,p) ((*s->fn)(s->n,p,s->userdata))
 #endif
 
-static void metropolitan_init(simplex *s, double scale)
+static void metropolitan_init(simplex *s, Real scale)
 {
-  const double *bounds = s->bounds;
-  double *po = amoeba_VERTEX(s,0);
+  const Real *bounds = s->bounds;
+  Real *po = amoeba_VERTEX(s,0);
   int ndim = s->n;
   int i;
-  double v;
+  Real v;
 
   /* Duplicate P_o in each vertex of simplex */
   for (i=1; i <= ndim; i++) 
-	memcpy(amoeba_VERTEX(s,i),po,ndim*sizeof(double));
+	memcpy(amoeba_VERTEX(s,i),po,ndim*sizeof(Real));
   
   /* Step out by a factor of scale */
   for (i=0; i < ndim; i++) {
@@ -56,8 +56,8 @@ static void metropolitan_init(simplex *s, double scale)
       v = po[i]+scale;
     } else {
       /* Determine step size from scale and bounds */
-      double lo = bounds[i], hi=bounds[i+ndim];
-      double step = scale*(hi-lo)/100.;
+      Real lo = bounds[i], hi=bounds[i+ndim];
+      Real step = scale*(hi-lo)/100.;
 
       /* Take a step along dim i, keeping it in bounds */
       v = po[i];
@@ -78,10 +78,10 @@ static void metropolitan_init(simplex *s, double scale)
 
 static void sumvertices(simplex *s)
 {
-  double *psum = s->psum;
+  Real *psum = s->psum;
   int ndim = s->n;
   int i, j;
-  double *pi;
+  Real *pi;
 
   for (j=0; j<ndim; j++) psum[j] = 0.;
   for (i=0; i<=ndim;i++) {
@@ -90,15 +90,15 @@ static void sumvertices(simplex *s)
   }
 }
 
-static double trymove(simplex *s, int ihi, double scale)
+static Real trymove(simplex *s, int ihi, Real scale)
 {
   int ndim = s->n;
-  const double *bounds = s->bounds;
-  double *psum = s->psum;
-  double *ptry = s->ptry;
-  double *phi = amoeba_VERTEX(s,ihi);
+  const Real *bounds = s->bounds;
+  Real *psum = s->psum;
+  Real *ptry = s->ptry;
+  Real *phi = amoeba_VERTEX(s,ihi);
 
-  double fac1, fac2, ytry;
+  Real fac1, fac2, ytry;
   int j;
 
 
@@ -142,7 +142,7 @@ static void find_extremes(simplex *s)
   ihi = amoeba_VALUE(s,0)>amoeba_VALUE(s,1) ? 0 : 1;
   inhi = 1-ihi;
   for (i=0;i<=ndim;i++) {
-    double yi = amoeba_VALUE(s,i);
+    Real yi = amoeba_VALUE(s,i);
     if (yi < amoeba_VALUE(s,ilo)) ilo=i;
     if (yi > amoeba_VALUE(s,ihi)) {
       inhi=ihi;
@@ -157,12 +157,12 @@ static void find_extremes(simplex *s)
 void amoeba_dumpsimplex(simplex *s)
 {
   int i, j;
-  double *po = amoeba_VERTEX(s,0);
-  double sumsq = 0.;
+  Real *po = amoeba_VERTEX(s,0);
+  Real sumsq = 0.;
 
   printf("---Simplex---\n");
   for (i=0; i <= s->n; i++) {
-    double *pi = amoeba_VERTEX(s,i);
+    Real *pi = amoeba_VERTEX(s,i);
     printf("P[%d]=%g at ( ",i,amoeba_VALUE(s,i));
     for (j=0; j<s->n; j++) {
       printf("%g ",pi[j]);
@@ -182,8 +182,8 @@ int amoeba_worksize(int n)
 void amoeba_init
 (simplex *s,
  int n,                 /* Problem dimension */
- const double bounds[], /* 2*n bounds as lo 1,2,3 ... hi 1 2 3 ...,or NULL */
- double work[],         /* min. n^2+4n+1 values for simplex */ 
+ const Real bounds[], /* 2*n bounds as lo 1,2,3 ... hi 1 2 3 ...,or NULL */
+ Real work[],         /* min. n^2+4n+1 values for simplex */
  optimfn fn,            /* Function to optimize */
  void *userdata)        /* User data structure */
 {
@@ -197,7 +197,7 @@ void amoeba_init
   s->psum = s->ptry + n;
 }
 
-void amoeba_reset(simplex *s, double Po[], double scale)
+void amoeba_reset(simplex *s, Real Po[], Real scale)
 {
   int i;
 
@@ -209,32 +209,32 @@ void amoeba_reset(simplex *s, double Po[], double scale)
 }
 
 
-double amoeba_flatness(simplex *s)
+Real amoeba_flatness(simplex *s)
 {
-  double yhi = amoeba_VALUE(s,s->ihi);
-  double ylo = amoeba_VALUE(s,s->ilo);
+  Real yhi = amoeba_VALUE(s,s->ihi);
+  Real ylo = amoeba_VALUE(s,s->ilo);
 
   return (yhi == ylo) ? 0. : 2. * fabs(yhi-ylo) / (fabs(yhi)+fabs(ylo));
 }
 
 
-double* amoeba_best(simplex *s)
+Real* amoeba_best(simplex *s)
 {
   find_extremes(s);
   return amoeba_VERTEX(s,s->ilo);
 }
 
-double* amoeba_step(simplex *s)
+Real* amoeba_step(simplex *s)
 {
   int i, j;
   int ilo = s->ilo;
   int ihi = s->ihi;
   int inhi = s->inhi;
   int ndim = s->n;
-  double ytry;
-  double ylo = amoeba_VALUE(s,ilo);
-  double yhi = amoeba_VALUE(s,ihi);
-  double ynhi = amoeba_VALUE(s,inhi);
+  Real ytry;
+  Real ylo = amoeba_VALUE(s,ilo);
+  Real yhi = amoeba_VALUE(s,ihi);
+  Real ynhi = amoeba_VALUE(s,inhi);
 
 #ifdef DEBUG
     amoeba_dumpsimplex(s);
@@ -252,11 +252,11 @@ double* amoeba_step(simplex *s)
     ytry = trymove(s,ihi,BETA);
     if (ytry >= yhi) {
       /* printf("closer is not better...suck in all vertices\n"); */
-      double *plo = amoeba_VERTEX(s,ilo);
+      Real *plo = amoeba_VERTEX(s,ilo);
       
 #if 0
-      double size = 0.;
-      double *phi = amoeba_VERTEX(s,ihi);
+      Real size = 0.;
+      Real *phi = amoeba_VERTEX(s,ihi);
       for(j=0;j<ndim;j++) size += (phi[j]-plo[j])*(phi[j]-plo[j]);
       printf("size = %g\n",size);
       if (size < ftol*ftol) {
@@ -267,7 +267,7 @@ double* amoeba_step(simplex *s)
       
       for(i=0;i<=ndim;i++) {
 	if(i != ilo) {
-	  double *ptmp = amoeba_VERTEX(s,i);
+	  Real *ptmp = amoeba_VERTEX(s,i);
 	  /* original code: p[i] = (p[i] + p[ilo])*0.5; */
 	  /* Norm Berk mod: p[i] = p[i]*beta + p[ilo]*(1.0-beta); */
 	  for (j=0;j<ndim;j++) ptmp[j] = ptmp[j]*BETA + plo[j]*(1.-BETA);
@@ -281,12 +281,12 @@ double* amoeba_step(simplex *s)
   return amoeba_best(s);
 }
 
-double *amoeba(simplex *s,       /* Simplex */
-	       double ftol,      /* Minimum flatness of simplex */
+Real *amoeba(simplex *s,       /* Simplex */
+	       Real ftol,      /* Minimum flatness of simplex */
 	       int itmax)        /* Maximum iterations */
 {
   int iterations = 0;
-  double *best;
+  Real *best;
 
   best = amoeba_best(s);
   for(;;) {

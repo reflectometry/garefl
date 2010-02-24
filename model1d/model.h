@@ -17,7 +17,7 @@ extern "C" {
  *   make space for n layers
  * model_extend(model*, int n)
  *   make space for n more layers
- * model_slice(model*, int l, double d, double rho, double mu, double rough)
+ * model_slice(model*, int l, Real d, Real rho, Real mu, Real rough)
  *   add a layer to the model
  */
 
@@ -36,15 +36,15 @@ extern "C" {
 typedef struct model_struct {
   int capacity;
   int n;
-  double *rho;
-  double *mu;
-  double *d;
-  double *rough;
+  Real *rho;
+  Real *mu;
+  Real *d;
+  Real *rough;
 #ifdef HAVE_MAGNETIC
-  double *P;
-  double *Prough;
-  double *theta;
-  double *thetarough;
+  Real *P;
+  Real *Prough;
+  Real *theta;
+  Real *thetarough;
 #endif
   interface *rm;
   int num_repeats;
@@ -59,11 +59,11 @@ void model_repeat(model *m, int R, int *start, int *end, int *count);
 int model_repeat_insert(model *m, int start, int end, int count);
 void model_repeat_delete(model *m, int R);
 void model_profile(model *m, profile *p);
-void model_magnetic(model *m, double d,
-		    double rho, double mu, double rough,
-		    double P, double Prough, double theta, double thetarough);
-void model_layer(model *m, double d,
-		 double rho, double mu, double rough);
+void model_magnetic(model *m, Real d,
+		    Real rho, Real mu, Real rough,
+		    Real P, Real Prough, Real theta, Real thetarough);
+void model_layer(model *m, Real d,
+		 Real rho, Real mu, Real rough);
 const char *model_error(int code);
 
 void model_print(const model *m, const char *filename);

@@ -14,8 +14,8 @@
 #endif
 
 #ifdef HAVE_INLINE
-inline double min(double a, double b) { return a < b ? a : b; }
-inline double max(double a, double b) { return a > b ? a : b; }
+inline Real min(Real a, Real b) { return a < b ? a : b; }
+inline Real max(Real a, Real b) { return a > b ? a : b; }
 #else
 #define min(a,b) ( (a) < (b) ? (a) : (b) )
 #define max(a,b) ( (a) > (b) ? (a) : (b) )
@@ -26,7 +26,7 @@ inline double max(double a, double b) { return a > b ? a : b; }
 
 /* function prototype */
 static int
-find_interval(const int n, const double x[], const double v);
+find_interval(const int n, const Real x[], const Real v);
 
 /* trisolve(n, l[],d[],u[], b[])
  * Solves the tridiagonal system A*x = b.  The vector l is the subdiagonal,
@@ -37,14 +37,24 @@ find_interval(const int n, const double x[], const double v);
  *
  * Uses LAPACK's nonsymmetric tridiagonal solver dgtsv.
  */
-#define Fdgtsv F77_FUNC(dgtsv,DGTSV)
+#ifdef USE_SINGLE
+# define Fsgtsv F77_FUNC(sgtsv,SGTSV)
+extern int Fsgtsv(const int *n, const int *nrhs, const float l[],
+		  const float d[], const float u[], float b[],
+		  const int *bskip, int *info);
+# define gtsv Fsgtsv
+#else
+# define Fdgtsv F77_FUNC(dgtsv,DGTSV)
 extern int Fdgtsv(const int *n, const int *nrhs, const double l[],
 		  const double d[], const double u[], double b[],
 		  const int *bskip, int *info);
-int trisolve(const int n, double l[], double d[], double u[], double b[])
+# define gtsv Fdgtsv
+#endif
+
+int trisolve(const int n, Real l[], Real d[], Real u[], Real b[])
 {
   int info, bskip=n, nrhs=1;
-  Fdgtsv(&n, &nrhs, l, d, u, b, &bskip, &info);
+  gtsv(&n, &nrhs, l, d, u, b, &bskip, &info);
   return info == 0;
 }
 
@@ -52,8 +62,8 @@ int trisolve(const int n, double l[], double d[], double u[], double b[])
  * values, this is either clamped to the last control value if CLAMP_ENDS==1
  * or to 0 if CLAMP_ENDS==0.
  */
-inline double
-control_value(const int n, const double c[], const int k)
+inline Real
+control_value(const int n, const Real c[], const int k)
 {
 #if CLAMP_ENDS
   return k < 0 ? c[0] : (k >= n ? c[n-1] : c[k]);
@@ -67,12 +77,12 @@ control_value(const int n, const double c[], const int k)
 /* Given a sequence of n control points, will return a sequence of 2n+1 control points */
 
 void
-bspline3_refine(int n, const double control[], double new_points[])
+bspline3_refine(int n, const Real control[], Real new_points[])
 {
   /*printf("N is %d\n", n);*/
   int i, j, k;
-  double edge_points[n+1];
-  double vertex_points[n];
+  Real edge_points[n+1];
+  Real vertex_points[n];
   edge_points[0] = control[0];
   for(i=1; i < n; i++)
     edge_points[i] = ((control[i-1] + control[i])/2.0);
@@ -91,32 +101,32 @@ bspline3_refine(int n, const double control[], double new_points[])
 
 static void
 eval_points(const int N_knots,
-	    const double knot[], const double control[],
-	    const int segment, int n, const double t[],
-	    double v[])
+	    const Real knot[], const Real control[],
+	    const int segment, int n, const Real t[],
+	    Real v[])
 {
   int N_control = N_knots - 4;
   int i;
-  const double tm2 = knot[max(segment-2,0)];
-  const double tm1 = knot[max(segment-1,0)];
-  const double tm0 = knot[segment-0];
-  const double tp1 = knot[min(segment+1,N_knots-1)];
-  const double tp2 = knot[min(segment+2,N_knots-1)];
-  const double tp3 = knot[min(segment+3,N_knots-1)];
+  const Real tm2 = knot[max(segment-2,0)];
+  const Real tm1 = knot[max(segment-1,0)];
+  const Real tm0 = knot[segment-0];
+  const Real tp1 = knot[min(segment+1,N_knots-1)];
+  const Real tp2 = knot[min(segment+2,N_knots-1)];
+  const Real tp3 = knot[min(segment+3,N_knots-1)];
 
-  const double P4o = control_value(N_control, control, segment-0);
-  const double P3o = control_value(N_control, control, segment-1);
-  const double P2o = control_value(N_control, control, segment-2);
-  const double P1o = control_value(N_control, control, segment-3);
+  const Real P4o = control_value(N_control, control, segment-0);
+  const Real P3o = control_value(N_control, control, segment-1);
+  const Real P2o = control_value(N_control, control, segment-2);
+  const Real P1o = control_value(N_control, control, segment-3);
 
   /* printf("P1 %g P2 %g P3 %g P4 %g\n",P1,P2,P3,P4); */
   for (i=0; i < n; i++) {
-    double ti = t[i];
+    Real ti = t[i];
 
-    double P4 = P4o;
-    double P3 = P3o;
-    double P2 = P2o;
-    double P1 = P1o;
+    Real P4 = P4o;
+    Real P3 = P3o;
+    Real P2 = P2o;
+    Real P1 = P1o;
 
     P4 = ( (ti-tm0)*P4 + (tp3-ti)*P3 ) / (tp3 - tm0);
     P3 = ( (ti-tm1)*P3 + (tp2-ti)*P2 ) / (tp2 - tm1);
@@ -136,23 +146,23 @@ eval_points(const int N_knots,
 
 
 /* Evaluate a B-spline at a single point within a segment. */
-inline double
+inline Real
 eval_point(const int N_knots,
-	   const double knot[], const double control[],
-	   const int segment, const double ti)
+	   const Real knot[], const Real control[],
+	   const int segment, const Real ti)
 {
-  const double tm2 = knot[max(segment-2,0)];
-  const double tm1 = knot[max(segment-1,0)];
-  const double tm0 = knot[segment-0];
-  const double tp1 = knot[min(segment+1,N_knots-1)];
-  const double tp2 = knot[min(segment+2,N_knots-1)];
-  const double tp3 = knot[min(segment+3,N_knots-1)];
+  const Real tm2 = knot[max(segment-2,0)];
+  const Real tm1 = knot[max(segment-1,0)];
+  const Real tm0 = knot[segment-0];
+  const Real tp1 = knot[min(segment+1,N_knots-1)];
+  const Real tp2 = knot[min(segment+2,N_knots-1)];
+  const Real tp3 = knot[min(segment+3,N_knots-1)];
   const int N_control = N_knots - 4;
 
-  double P4 = control_value(N_control, control, segment-0);
-  double P3 = control_value(N_control, control, segment-1);
-  double P2 = control_value(N_control, control, segment-2);
-  double P1 = control_value(N_control, control, segment-3);
+  Real P4 = control_value(N_control, control, segment-0);
+  Real P3 = control_value(N_control, control, segment-1);
+  Real P2 = control_value(N_control, control, segment-2);
+  Real P1 = control_value(N_control, control, segment-3);
 
   P4 = ( (ti-tm0)*P4 + (tp3-ti)*P3 ) / (tp3 - tm0);
   P3 = ( (ti-tm1)*P3 + (tp2-ti)*P2 ) / (tp2 - tm1);
@@ -170,8 +180,8 @@ eval_point(const int N_knots,
 /* Evaluate a B-spline and all derivatives at a point within a segment. */
 void
 bspline3_eval_all_derivs(const int N_knots,
-		const double knot[], const double control[],
-		const double t, double derivs[4])
+		const Real knot[], const Real control[],
+		const Real t, Real derivs[4])
 {
   const int N_control = N_knots - 4;
   const int segment = find_interval(N_knots, knot, t);
@@ -187,26 +197,26 @@ bspline3_eval_all_derivs(const int N_knots,
 
   } else {
 
-    const double tm2 = knot[max(segment-2,0)];
-    const double tm1 = knot[max(segment-1,0)];
-    const double tm0 = knot[segment-0];
-    const double tp1 = knot[min(segment+1,N_knots-1)];
-    const double tp2 = knot[min(segment+2,N_knots-1)];
-    const double tp3 = knot[min(segment+3,N_knots-1)];
+    const Real tm2 = knot[max(segment-2,0)];
+    const Real tm1 = knot[max(segment-1,0)];
+    const Real tm0 = knot[segment-0];
+    const Real tp1 = knot[min(segment+1,N_knots-1)];
+    const Real tp2 = knot[min(segment+2,N_knots-1)];
+    const Real tp3 = knot[min(segment+3,N_knots-1)];
 
-    double P4 = control_value(N_control, control, segment-0);
-    double P3 = control_value(N_control, control, segment-1);
-    double P2 = control_value(N_control, control, segment-2);
-    double P1 = control_value(N_control, control, segment-3);
+    Real P4 = control_value(N_control, control, segment-0);
+    Real P3 = control_value(N_control, control, segment-1);
+    Real P2 = control_value(N_control, control, segment-2);
+    Real P1 = control_value(N_control, control, segment-3);
 
-    double Q4 = (P4 - P3) * 3 / (tp3 - tm0);
-    double Q3 = (P3 - P2) * 3 / (tp2 - tm1);
-    double Q2 = (P2 - P1) * 3 / (tp1 - tm2);
+    Real Q4 = (P4 - P3) * 3 / (tp3 - tm0);
+    Real Q3 = (P3 - P2) * 3 / (tp2 - tm1);
+    Real Q2 = (P2 - P1) * 3 / (tp1 - tm2);
 
-    double R4 = (Q4 - Q3) * 2 / (tp2 - tm0);
-    double R3 = (Q3 - Q2) * 2 / (tp1 - tm1);
+    Real R4 = (Q4 - Q3) * 2 / (tp2 - tm0);
+    Real R3 = (Q3 - Q2) * 2 / (tp1 - tm1);
 
-    double S4 = (R4 - R3) * 1 / (tp1 - tm0);
+    Real S4 = (R4 - R3) * 1 / (tp1 - tm0);
 
 #if 0
     printf("segment=%d, max=%d\n",segment,N_knots);
@@ -259,9 +269,9 @@ bspline3_eval_all_derivs(const int N_knots,
  */
 static int
 eval_grid(const int N_knots,
-	  const double knot[], const double control[],
-	  const int segment, const double t_values[],
-	  const int n, double t[], double v[])
+	  const Real knot[], const Real control[],
+	  const int segment, const Real t_values[],
+	  const int n, Real t[], Real v[])
 {
   int i,k;
   assert(segment>=-1 && segment<N_knots);
@@ -287,7 +297,7 @@ eval_grid(const int N_knots,
 
   /* Handle points beyond the ends */
   if (segment < 0 || segment >= N_knots) {
-    double vk = control_value(N_knots-4,control,segment);
+    Real vk = control_value(N_knots-4,control,segment);
     for (i=0; i < k; i++) v[i] = vk;
     return k;
   }
@@ -305,8 +315,8 @@ eval_grid(const int N_knots,
     if (k) eval_points(N_knots, knot, control, segment, k, t, v);
     return k;
   } else {
-    double d[4];
-    double z,dz1,dz2,dz3;
+    Real d[4];
+    Real z,dz1,dz2,dz3;
 
     eval_all_derivs(N_knots, knot, control, segment, t[0], d);
     z = d[0]; dz = d[1]; d2z = d[2]; d3z= d[3];
@@ -334,7 +344,7 @@ eval_grid(const int N_knots,
  * the last in the series.
  */
 static int
-find_interval(const int n, const double x[], const double v)
+find_interval(const int n, const Real x[], const Real v)
 {
   int lo = 0, hi=n-1;
   if (v < x[0]) return -1;
@@ -353,9 +363,9 @@ find_interval(const int n, const double x[], const double v)
 /* Fill a grid of values.  Complete docs in bspline.h. */
 void
 bspline3(const int N_knots,
-	 const double knot[], const double control[],
-	 const double t_vals[],
-	 const int n, double t[], double v[])
+	 const Real knot[], const Real control[],
+	 const Real t_vals[],
+	 const int n, Real t[], Real v[])
 {
   int k, segment;
 
@@ -385,13 +395,13 @@ bspline3(const int N_knots,
  * spline) in those cases. */
 
 void
-bspline3_eval_derivs(const int N_knots, const double knot[],
-	    const double control[], const double currT,
-		     double result[])
+bspline3_eval_derivs(const int N_knots, const Real knot[],
+	    const Real control[], const Real currT,
+		     Real result[])
 {
   int segment = 0;
-  double values[4];
-  double tvals[4] = {currT, currT+1.0, currT+2.0, currT+3.0};
+  Real values[4];
+  Real tvals[4] = {currT, currT+1.0, currT+2.0, currT+3.0};
   segment = find_interval(N_knots, knot, currT);
   eval_points(N_knots, knot, control, segment, 4, tvals, values);
   result[0] = (-1.833333*values[0] + 3.0*values[1] - 1.5*values[2] + 0.333333*values[3]);
@@ -407,16 +417,16 @@ bspline3_eval_derivs(const int N_knots, const double knot[],
  */
 
 int
-bspline3_interpolate(const int N_data, double data[],
-		     double control[], double work[])
+bspline3_interpolate(const int N_data, Real data[],
+		     Real control[], Real work[])
 {
   int i;
 
   /* FIXME need test cases. */
-  double* bvect = control; /*N_data + 2*/
-  double* ldiag = work; /*N_data + 1*/
-  double* mdiag = work + (N_data + 1); /*N_data + 2*/
-  double* udiag = work + (2*N_data + 3); /*N_data + 1*/
+  Real* bvect = control; /*N_data + 2*/
+  Real* ldiag = work; /*N_data + 1*/
+  Real* mdiag = work + (N_data + 1); /*N_data + 2*/
+  Real* udiag = work + (2*N_data + 3); /*N_data + 1*/
 
   ldiag[0] = -0.3;
   ldiag[1] = 0.25;
@@ -444,7 +454,7 @@ bspline3_interpolate(const int N_data, double data[],
   bvect[0] = data[0];
   /* bvect[1] = (data[1] - data[0]) * N_data; */ /* estimate dx/dt at beginning */
   bvect[1] = 0;
-  memcpy(&bvect[2], &data[1], (N_data - 2)*(sizeof(double)));
+  memcpy(&bvect[2], &data[1], (N_data - 2)*(sizeof(Real)));
   /* bvect[N_data] = (data[N_data - 1] - data[N_data - 2]) * N_data; */ /* estimate dx/dt at end */
   bvect[N_data] = 0;
   bvect[N_data + 1] = data[N_data - 1];
@@ -464,7 +474,7 @@ bspline3_interpolate(const int N_data, double data[],
 #include <math.h>
 
 /* Print an error if a is not within tolerance of b. */
-void check(double a, double b, double tol)
+void check(Real a, Real b, Real tol)
 {
   if (fabs(a-b) > tol) {
     fprintf(stderr,"%g != %g within tolerance %g [a-b=%g]\n",a,b,tol,fabs(a-b));
@@ -472,7 +482,7 @@ void check(double a, double b, double tol)
 }
 
 /* Print an error if vector a is not within tolerance of b. */
-void checkv(int k, const double a[], const double b[], double tol)
+void checkv(int k, const Real a[], const Real b[], Real tol)
 {
   int i, error=0;
   for (i=0; i < k; i++) error += (fabs(a[i]-b[i]) > tol);
@@ -487,19 +497,19 @@ void checkv(int k, const double a[], const double b[], double tol)
 #define NT 10100
 int main(int argc, char *argv[])
 {
-  const double knot1[] = { 0, 0, 0, 1, 1, 3, 4, 6, 6, 6 };
-  const double knot2[] = { 0, 0, 0, 0, 1, 4, 5, 5, 5, 5 };
-  const double knot3[] = { -1, 0, 0, 1, 1, 3, 4, 6, 6, 7 };
-  const double c1[] = { 0, 0, 0, 0, 0, 0 };
-  const double c2[] = { 1, 1, 1, 1, 1, 1 };
-  const double c3[] = { 1, 2, 3, 4, 5, 6 };
-  const double c4[] = {1e-5, 2e-5, 3e-5, 2e-5, 1e-5, 2e-5};
-  const double t0 = knot3[0];
-  double t[NT], v[NT];
+  const Real knot1[] = { 0, 0, 0, 1, 1, 3, 4, 6, 6, 6 };
+  const Real knot2[] = { 0, 0, 0, 0, 1, 4, 5, 5, 5, 5 };
+  const Real knot3[] = { -1, 0, 0, 1, 1, 3, 4, 6, 6, 7 };
+  const Real c1[] = { 0, 0, 0, 0, 0, 0 };
+  const Real c2[] = { 1, 1, 1, 1, 1, 1 };
+  const Real c3[] = { 1, 2, 3, 4, 5, 6 };
+  const Real c4[] = {1e-5, 2e-5, 3e-5, 2e-5, 1e-5, 2e-5};
+  const Real t0 = knot3[0];
+  Real t[NT], v[NT];
 
   if (argc > 1) {
     int n = atoi(argv[1]);
-    double dt = (knot3[9]-knot3[0])/n;
+    Real dt = (knot3[9]-knot3[0])/n;
     int sumk = 0;
     while (sumk < n) {
       const int k = (n-sumk < NT ? n-sumk : NT);
@@ -510,14 +520,14 @@ int main(int argc, char *argv[])
     }
   } else {
     int i;
-    double expected_t[] = {
+    Real expected_t[] = {
       -1, -0.2, 0.6, 1.4, 2.2, 3, 3.8, 4.6, 5.4, 6.2, 7
     } ;
-    double expected_v[] = {
+    Real expected_v[] = {
       1, 1, 1.72, 2.58542222222222, 2.41973333333333, 1.84444444444444,
       1.41137777777778, 1.49257777777778, 1.8572, 2, 2
     } ;
-    double dt;
+    Real dt;
 
     printf("# Checking single points\n");
     bspline3(10, knot1, c1, 2.2, 1., 1, t, v);

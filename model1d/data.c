@@ -47,10 +47,10 @@ void data_print(const fitdata *data)
 }
 
 
-#define LN10 2.30258509299404568402  /* log_e 10 */
-#define INF 1.e308
+#define LN10 (Real)(2.30258509299404568402)  /* log_e 10 */
+#define INF (Real)(1.e308)
 
-static void log2lin(int n, double *y, double *dy)
+static void log2lin(int n, Real *y, Real *dy)
 {
   int i;
   for (i=0; i < n; i++) {
@@ -106,7 +106,7 @@ int data_create(fitdata *data, int n)
 {
   if (data->capacity >= n || n==0) return 1;
   data_destroy(data);
-  data->Q = malloc(4*sizeof(double)*n);
+  data->Q = malloc(4*sizeof(Real)*n);
   if (data->Q != NULL) {
     data->dQ = data->Q + n;
     data->R = data->dQ + n;
@@ -173,9 +173,9 @@ int data_load(fitdata *data, const char *file)
       double c1,c2,c3,c4,c5;
       int c = sscanf(buf, "%lf %lf %lf %lf %lf", &c1, &c2, &c3, &c4, &c5);
       if (c!=columns) {
-	if (columns) {
-	  data_destroy(data);
-	  fclose(f);
+        if (columns) {
+          data_destroy(data);
+          fclose(f);
 	  return BAD_COLUMN_CONSISTENCY;
 	} else if (c < 2 || c > 4) {
 	  data_destroy(data);
@@ -238,12 +238,12 @@ int data_load(fitdata *data, const char *file)
 
 typedef enum {RES_VARYING, RES_FIXED, RES_DQOQ} resolution_style;
 static void
-calc_resolution(fitdata *data, double L, double dLoL,
-		double Qlo, double Qhi, double T, resolution_style res)
+calc_resolution(fitdata *data, Real L, Real dLoL,
+		Real Qlo, Real Qhi, Real T, resolution_style res)
 {
   int lo, hi, n=data->n;
-  const double *Q = data->Q;
-  double *dQ = data->dQ;
+  const Real *Q = data->Q;
+  Real *dQ = data->dQ;
   data->have_resolution = 1;
   if (n == 0) return;
   if (Q[0] < 0.) {
@@ -274,37 +274,37 @@ calc_resolution(fitdata *data, double L, double dLoL,
 }
 
 void
-data_constant_resolution(fitdata *data, double res)
+data_constant_resolution(fitdata *data, Real res)
 {
   constant_resolution(res, data->n, data->dQ);
 }
 
 void
-data_resolution_fixed(fitdata *data, double L, double dLoL,
-		      double Qlo, double Qhi, double dT)
+data_resolution_fixed(fitdata *data, Real L, Real dLoL,
+		      Real Qlo, Real Qhi, Real dT)
 {
   calc_resolution(data,L,dLoL,Qlo,Qhi,dT,RES_FIXED);
 }
 
 void
-data_resolution_varying(fitdata *data, double L, double dLoL,
-			double Qlo, double Qhi, double dToT)
+data_resolution_varying(fitdata *data, Real L, Real dLoL,
+			Real Qlo, Real Qhi, Real dToT)
 {
   calc_resolution(data,L,dLoL,Qlo,Qhi,dToT,RES_VARYING);
 }
 
 void
-data_resolution_fv(fitdata *data, double L, double dLoL,
-		   double Qlo, double dTlo, double dToT)
+data_resolution_fv(fitdata *data, Real L, Real dLoL,
+		   Real Qlo, Real dTlo, Real dToT)
 {
   calc_resolution(data,L,dLoL, 0.,Qlo,dTlo,RES_FIXED);
   calc_resolution(data,L,dLoL,Qlo,0.,dToT,RES_VARYING);
 }
 
 void
-data_resolution_fvf(fitdata *data, double L, double dLoL,
-		    double Qlo, double Qhi,
-		    double dTlo, double dToT, double dThi)
+data_resolution_fvf(fitdata *data, Real L, Real dLoL,
+		    Real Qlo, Real Qhi,
+		    Real dTlo, Real dToT, Real dThi)
 {
   calc_resolution(data,L,dLoL, 0.,Qlo,dTlo,RES_FIXED);
   calc_resolution(data,L,dLoL,Qlo,Qhi,dToT,RES_VARYING);
@@ -312,7 +312,7 @@ data_resolution_fvf(fitdata *data, double L, double dLoL,
 }
 
 void
-data_resolution_dQoQ(fitdata *data, double dQoQ, double Qlo, double Qhi)
+data_resolution_dQoQ(fitdata *data, Real dQoQ, Real Qlo, Real Qhi)
 {
   calc_resolution(data,0.,dQoQ,Qlo,Qhi,0.,RES_DQOQ);
 }
@@ -323,7 +323,7 @@ data_resolution_dQoQ(fitdata *data, double dQoQ, double Qlo, double Qhi)
    later.
 */
 int data_printfit_subset(const char *file, const fitdata *data,
-			 int nQ, const double fitQ[], const double fitR[])
+			 int nQ, const Real fitQ[], const Real fitR[])
 {
   FILE *f;
   int i,j;
@@ -343,7 +343,7 @@ int data_printfit_subset(const char *file, const fitdata *data,
 }
 #endif
 
-int data_printfit(const char *file, const fitdata *data, const double fitR[])
+int data_printfit(const char *file, const fitdata *data, const Real fitR[])
 {
   FILE *f;
   int i;
@@ -362,11 +362,11 @@ int data_printfit(const char *file, const fitdata *data, const double fitR[])
 /* Warning: assumes fit and data are ordered from smallest to largest */
 /* Warning: uses == rather than fabs(x-Tx) to align points */
 void
-wsumsq(const int n, const double x[], const double y[], const double dy[],
-       const int Tn, const double Tx[], const double Ty[], const double Tdy[],
-       int *df, double *sumsq)
+wsumsq(const int n, const Real x[], const Real y[], const Real dy[],
+       const int Tn, const Real Tx[], const Real Ty[], const Real Tdy[],
+       int *df, Real *sumsq)
 {
-  double v = 0.;
+  Real v = 0.;
   int match = 0;
   int found, i, Ti;
 
@@ -402,7 +402,7 @@ wsumsq(const int n, const double x[], const double y[], const double dy[],
     for (i=found; i < n; i++) {
       while (Ti < Tn-1 && Tx[Ti] < x[i]) Ti++;
       if (x[i] == Tx[Ti]) {
-	double wdiff = (Ty[Ti]-y[i])/(Tdy[Ti]+dy[i]);
+	Real wdiff = (Ty[Ti]-y[i])/(Tdy[Ti]+dy[i]);
 	v += wdiff*wdiff;
 	match++;
       } else if (x[i] > Tx[Ti]) break;
@@ -411,7 +411,7 @@ wsumsq(const int n, const double x[], const double y[], const double dy[],
     for (i=found; i < n; i++) {
       while (Ti < Tn-1 && Tx[Ti] < x[i]) Ti++;
       if (x[i] == Tx[Ti]) {
-	double wdiff = (Ty[Ti]-y[i])/dy[i];
+	Real wdiff = (Ty[Ti]-y[i])/dy[i];
 	v += wdiff*wdiff;
 	match++;
       } else if (x[i] > Tx[Ti]) break;
@@ -420,7 +420,7 @@ wsumsq(const int n, const double x[], const double y[], const double dy[],
     for (i=found; i < n; i++) {
       while (Ti < Tn-1 && Tx[Ti] < x[i]) Ti++;
       if (x[i] == Tx[Ti]) {
-	double wdiff = (Ty[Ti]-y[i]);
+	Real wdiff = (Ty[Ti]-y[i]);
 	v += wdiff*wdiff;
 	match++;
       } else if (x[i] > Tx[Ti]) break;
@@ -432,8 +432,8 @@ wsumsq(const int n, const double x[], const double y[], const double dy[],
 
 void
 data_wsumsq(const fitdata *data,
-	    const int fitn, const double fitQ[], const double fitR[],
-	    int *n, double *sumsq)
+	    const int fitn, const Real fitQ[], const Real fitR[],
+	    int *n, Real *sumsq)
 {
   if (data->n == 0) {
     /* n && sumsq are cumulative, so no need to reset them before returning */
@@ -450,8 +450,8 @@ data_wsumsq(const fitdata *data,
 
 void
 data_sumsq(const fitdata *data,
-	   const int fitn, const double fitQ[], const double fitR[],
-	   int *n, double *sumsq)
+	   const int fitn, const Real fitQ[], const Real fitR[],
+	   int *n, Real *sumsq)
 {
   if (data->n == 0) {
     /* n && sumsq are cumulative, so no need to reset them before returning */
@@ -466,7 +466,7 @@ data_countQ(const fitdata *A, const fitdata *B,
 	    const fitdata *C, const fitdata *D)
 {
   int n,iA,iB,iC,iD;
-  double Q, nextA, nextB, nextC, nextD;
+  Real Q, nextA, nextB, nextC, nextD;
 
   Q = -INF;
   n = 0;
@@ -500,10 +500,10 @@ data_countQ(const fitdata *A, const fitdata *B,
 void
 data_mergeQ(const fitdata *A, const fitdata *B,
 	    const fitdata *C, const fitdata *D,
-	    double merge[])
+	    Real merge[])
 {
   int n,iA,iB,iC,iD;
-  double Q, nextA, nextB, nextC, nextD;
+  Real Q, nextA, nextB, nextC, nextD;
 
   Q = -INF;
   n = 0;

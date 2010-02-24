@@ -7,10 +7,18 @@
 #include "lm.h"
 #include "nlls.h"
 
-typedef void (*lmfn)(double *p, double *hx, int m, int n, void *adata);
+#ifdef USE_SINGLE
+# define levmar_dif slevmar_dif
+# define levmar_bc_dif slevmar_bc_dif
+#else
+# define levmar_dif dlevmar_dif
+# define levmar_bc_dif dlevmar_bc_dif
+#endif
+
+typedef void (*lmfn)(Real *p, Real *hx, int m, int n, void *adata);
 
 
-void nlls_printstop(double info[])
+void nlls_printstop(Real info[])
 {
   switch ((int)(rint(info[6]))) {
   case 1: printf("small gradient\n"); break;
@@ -29,38 +37,39 @@ int nlls_worksize(int n, int k)
 }
 
 void nlls(nlls_fn f, int n, int k, 
-	  const double x[], const double y[], double p[], double covar[])
+	  const Real x[], const Real y[], Real p[], Real covar[])
 {
-  double info[LM_INFO_SZ];
-  double opts[LM_OPTS_SZ];
+  Real info[LM_INFO_SZ];
+  Real opts[LM_OPTS_SZ];
   opts[0]=LM_INIT_MU; /* Initial scale */
   opts[1]=opts[2]=opts[3]=1e-4; /* Stopping threshhold */
   opts[4]=LM_DIFF_DELTA; /* dx for numerical differentiation */
-  dlevmar_dif((lmfn)f, 
-	      p, (double *)y, n, k, 
-	      500,  /* itmax */ 
-	      opts, /* opts[5] = { mu, e1, e2, e3, delta } */
-	      info, /* info[LM_INFO_SZ] */
-	      NULL, /* work vector of size LM_DIF_WORKSZ(3,k) */
+  levmar_dif((lmfn)f, \
+	      p, (Real *)y, n, k, \
+	      500,  /* itmax */ \
+	      opts, /* opts[5] = { mu, e1, e2, e3, delta } */ \
+	      info, /* info[LM_INFO_SZ] */ \
+	      NULL, /* work vector of size LM_DIF_WORKSZ(3,k) */ \
 	      covar, (void *)x);
+  nlls_printstop(info);
 }
 
 void box_nlls(nlls_fn f, int n, int k, 
-	      const double x[], const double y[], 
-	      const double bounds[], double p[], double covar[])
+	      const Real x[], const Real y[],
+	      const Real bounds[], Real p[], Real covar[])
 {
-  double info[LM_INFO_SZ];
-  double opts[LM_OPTS_SZ];
+  Real info[LM_INFO_SZ];
+  Real opts[LM_OPTS_SZ];
   opts[0]=LM_INIT_MU; /* Initial scale */
   opts[1]=opts[2]=opts[3]=1e-4; /* Stopping threshhold */
   opts[4]=LM_DIFF_DELTA; /* dx for numerical differentiation */
-  dlevmar_bc_dif((lmfn)f, 
-		 p, (double *)y, n, k,
-		 (double *)bounds, (double *)bounds+n,
-		 500,  /* itmax */
-		 opts, /* opts[5] = { mu, e1, e2, e3, delta } */
-		 info, /* info[LM_INFO_SZ] */
-		 NULL, /* work vector of size LM_DIF_WORKSZ(3,k) */
+  levmar_bc_dif((lmfn)f, \
+		 p, (Real *)y, n, k, \
+		 (Real *)bounds, (Real *)bounds+n, \
+		 500,  /* itmax */ \
+		 opts, /* opts[5] = { mu, e1, e2, e3, delta } */ \
+		 info, /* info[LM_INFO_SZ] */ \
+		 NULL, /* work vector of size LM_DIF_WORKSZ(3,k) */ \
 		 covar, (void *)x);
   nlls_printstop(info);
 }

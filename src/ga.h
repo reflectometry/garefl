@@ -1,17 +1,21 @@
 #ifndef _GA_H
 #define _GA_H 1
 
+#ifndef Real
+# define Real double
+#endif
+
 #define NMAX 250
 #define PMAX 1024
 
 // Individual
 typedef struct {
   // Chromosome representation
-  double *value;
+  Real *value;
   int    *chromo;
   int    nParams;
   int    nPrec;
-  double fitness;
+  Real fitness;
   int    rank;
   int    encoded;
 } Individual;
@@ -34,18 +38,18 @@ typedef struct {
   // Encoding constant
   int nd;
   // Cross probability
-  double pCross;
+  Real pCross;
   // Mutation probability
-  double pMutate;
+  Real pMutate;
   // Number of generations
   int nGenerations;
   // Mutation probability adjustment parameter
   int iMutate;
-  double pMutateMin;
-  double pMutateMax;
-  double fitnessSlope;
+  Real pMutateMin;
+  Real pMutateMax;
+  Real fitnessSlope;
   // Fitness function
-  double (*function)(int n, const double*v, void*p);
+  Real (*function)(int n, const Real*v, void*p);
   void *funcParms;
   int popOption;
   int algo_type;
@@ -62,17 +66,17 @@ typedef struct {
 } Settings;
 
 /** Random number generator */
-double frandom();
+Real frandom();
 
 /** get/set chromosomes */
 /** Find the fittest individual */
-double getChromosome(Settings *set, int n, double *d);
-void setChromosome(Settings *set, int n, double *d);
+Real getChromosome(Settings *set, int n, Real *d);
+void setChromosome(Settings *set, int n, Real *d);
 int fittest(Settings *set);
 
 /** Perform fit */
-void ga_init( Settings *set, double *params );
-double ga_fit( Settings *set, int nGenerations );
+void ga_init( Settings *set, Real *params );
+Real ga_fit( Settings *set, int nGenerations );
 
 /** Read and write population */
 int write_pop_backup( Settings *set);
@@ -84,7 +88,7 @@ void randomizePop( Settings *set, int par );
 int GetGen( Settings *set );
 
 /** Sets a parameter to a given value for all members of the current population */
-void setParValue( Settings *set, int ipar, double value);
-void setRange( Settings *set, int ipar, double oldmin, double oldrange,
-                double newmin, double newrange );
+void setParValue( Settings *set, int ipar, Real value);
+void setRange( Settings *set, int ipar, Real oldmin, Real oldrange,
+                Real newmin, Real newrange );
 #endif

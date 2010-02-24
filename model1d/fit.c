@@ -8,7 +8,7 @@
 #include "refl.h"
 #include "reflcalc.h"
 
-static double frandom(void) { return (double)rand()/RAND_MAX; }
+static Real frandom(void) { return (Real)rand()/RAND_MAX; }
 
 /** \file
  * Correct for intensity, background and for Q<0, absorption through
@@ -26,11 +26,11 @@ static double frandom(void) { return (double)rand()/RAND_MAX; }
  * resolution calculation.
  */
 void
-beam_apply(const beaminfo *beam, int N, const double Q[], double R[])
+beam_apply(const beaminfo *beam, int N, const Real Q[], Real R[])
 {
-  const double r=beam->backabsorption;
-  const double I=beam->intensity;
-  const double B=beam->background;
+  const Real r=beam->backabsorption;
+  const Real I=beam->intensity;
+  const Real B=beam->background;
   int i;
 
   for (i=0; i < N; i++) R[i] = (Q[i]<0?r:1.) * I * R[i] + B;
@@ -226,7 +226,7 @@ void fit_destroy(fitinfo *fit)
   fit->worksize = 0;
 }
 
-void fit_wsumsq(const fitinfo *fit, int *n, double *sumsq)
+void fit_wsumsq(const fitinfo *fit, int *n, Real *sumsq)
 {
   if (fit->datatype == FIT_POLARIZED) {
     data_wsumsq(&fit->dataA, fit->dataA.n, fit->dataA.Q, fit->fitA, n, sumsq);
@@ -237,7 +237,7 @@ void fit_wsumsq(const fitinfo *fit, int *n, double *sumsq)
 #undef DOTEST
 #ifdef DOTEST
     int i,n1=0,n2=0;
-    double sum1=0.,sum2=0.;
+    Real sum1=0.,sum2=0.;
     /* Test case to check that single point sumsq is working. */
     printf("Testing single point sumsq\n");
     for (i=0; i < fit->dataA.n; i++)
@@ -254,7 +254,7 @@ void fit_wsumsq(const fitinfo *fit, int *n, double *sumsq)
   *sumsq *= fit->weight;
 }
 
-void fit_sumsq(const fitinfo *fit, int *n, double *sumsq)
+void fit_sumsq(const fitinfo *fit, int *n, Real *sumsq)
 {
   if (fit->datatype == FIT_POLARIZED) {
     data_sumsq(&fit->dataA, fit->dataA.n, fit->dataA.Q, fit->fitA, n, sumsq);
@@ -267,17 +267,17 @@ void fit_sumsq(const fitinfo *fit, int *n, double *sumsq)
   *sumsq *= fit->weight;
 }
 
-double fit_chisq(const fitinfo *fit)
+Real fit_chisq(const fitinfo *fit)
 {
-  double sumsq = 0.;
+  Real sumsq = 0.;
   int n = 0;
   fit_sumsq(fit,&n,&sumsq);
   return sumsq / (n - fit->pars.n);
 }
 
-double fit_wchisq(const fitinfo *fit)
+Real fit_wchisq(const fitinfo *fit)
 {
-  double sumsq = 0.;
+  Real sumsq = 0.;
   int n = 0;
   fit_wsumsq(fit,&n,&sumsq);
   return sumsq / (n - fit->pars.n);
@@ -371,7 +371,7 @@ static void find_target_Q(fitinfo *fit)
    */
 	if (5*nQ >= fit->capacity) {
     if (fit->capacity > 0) free(fit->fitQ);
-    fit->fitQ = malloc(5*nQ*sizeof(double));
+    fit->fitQ = malloc(5*nQ*sizeof(Real));
     assert(fit->fitQ != NULL); /* FIXME don't abort */
     fit->capacity = 5*nQ;
     fit->fitA = fit->fitQ+nQ;
@@ -390,7 +390,7 @@ static void find_target_Q(fitinfo *fit)
   /*{ int i; for (i=0; i < nQ; i++) printf("Q[%d]: %g\n",i,fit->fitQ[i]); }*/
 }
 
-static void apply_beam_parameters(fitinfo *fit, double *cross_section,
+static void apply_beam_parameters(fitinfo *fit, Real *cross_section,
 				  fitdata *data)
 {
   /* Account for back absorption, background and intensity.
@@ -409,7 +409,7 @@ static void apply_beam_parameters(fitinfo *fit, double *cross_section,
     assert(data->n <= fit->nQ);
     resolution(fit->nQ, fit->fitQ, cross_section,
                data->n, data->Q, data->dQ, fit->work);
-    memcpy(cross_section, fit->work, sizeof(double)*data->n);
+    memcpy(cross_section, fit->work, sizeof(Real)*data->n);
   } else {
     assert(data->n == fit->nQ);
     /* FIXME --- with no resolution, need to copy/interpolate raw data
@@ -425,7 +425,7 @@ static void extend_work(fitinfo *fit, int worksize)
 {
   if (fit->worksize < worksize) {
     if (fit->worksize) free(fit->work);
-    fit->work = malloc(sizeof(double)*worksize);
+    fit->work = malloc(sizeof(Real)*worksize);
     assert(fit->work != NULL);
     fit->worksize = worksize;
   }
@@ -480,7 +480,7 @@ void _write_refl(const fitinfo *fit, const char name[])
     fprintf(f,"\n# %10s %10s %18s %18s %18s %18s\n","Q","dQ","A","B","C","D");
     j = 0;
     for (i=0; i < fit->nQ; i++) {
-      double dQ;
+      Real dQ;
       while (j<fit->dataA.n && fit->dataA.Q[j] < fit->fitQ[i]) j++;
       dQ = (j<fit->dataA.n && fit->dataA.Q[j] == fit->fitQ[i] ?
 	    fit->dataA.dQ[j]: 0.);
@@ -492,7 +492,7 @@ void _write_refl(const fitinfo *fit, const char name[])
     fprintf(f,"\n# %10s %10s %18s\n","Q","dQ","R");
     j = 0;
     for (i=0; i < fit->nQ; i++) {
-      double dQ;
+      Real dQ;
       while (j<fit->dataA.n && fit->dataA.Q[j] < fit->fitQ[i]) j++;
       dQ = (j<fit->dataA.n && fit->dataA.Q[j] == fit->fitQ[i] ?
 	    fit->dataA.dQ[j]: 0.);
@@ -506,10 +506,10 @@ void _write_refl(const fitinfo *fit, const char name[])
 static void incoherent_polarized_theory(fitinfo *fit)
 {
 #ifdef HAVE_MAGNETIC
-	double total_weight; /* Total weight of all models */
+	Real total_weight; /* Total weight of all models */
 	int i, k;
 	profile p; /* Incoherent model profile */
-	double *A,*B,*C,*D;
+	Real *A,*B,*C,*D;
 
 	/* Make space for incoherent models. */
  	extend_work(fit,4*fit->nQ);
@@ -554,10 +554,10 @@ static void incoherent_polarized_theory(fitinfo *fit)
 /* Incoherent sum of multiple models for unpolarized reflectometry */
 static void incoherent_unpolarized_theory(fitinfo *fit)
 {
-	double total_weight; /* Total weight of all models */
+	Real total_weight; /* Total weight of all models */
 	int i, k;
 	profile p; /* Incoherent model profile */
-	double *A, *B, *C, *D;
+	Real *A, *B, *C, *D;
 
 	/* Make space for incoherent models. */
  	extend_work(fit,4*fit->nQ);
@@ -687,7 +687,7 @@ static void calc_real(fitinfo *fit)
   if (fit->work != NULL) {
     resolution(fit->nQ, fit->fitQ, fit->fitA,
                fit->dataA.n, fit->dataA.Q, fit->dataA.dQ, fit->work);
-    memcpy(fit->fitA, fit->work, sizeof(double)*fit->dataA.n);
+    memcpy(fit->fitA, fit->work, sizeof(Real)*fit->dataA.n);
   }
 
   /* FIXME sumsq is now based on data Q values rather than
@@ -715,7 +715,7 @@ static void calc_imaginary(fitinfo *fit)
   if (fit->work != NULL) {
     resolution(fit->nQ, fit->fitQ, fit->fitA,
                fit->dataA.n, fit->dataA.Q, fit->dataA.dQ, fit->work);
-    memcpy(fit->fitA, fit->work, sizeof(double)*fit->dataA.n);
+    memcpy(fit->fitA, fit->work, sizeof(Real)*fit->dataA.n);
   }
 
   /* FIXME sumsq is now based on data Q values rather than
@@ -725,7 +725,7 @@ static void calc_imaginary(fitinfo *fit)
 
 #if 0 /* Experimental code to evaluate only a portion of the Q values */
 /* Strongly favour low Q just beyond Qc */
-static double Qweight(double minusQc, double plusQc, double Q)
+static Real Qweight(Real minusQc, Real plusQc, Real Q)
 {
   if (Q <= minusQc) return 1./(1+minusQc-Q);
   else if (Q < plusQc) return 0.01;
@@ -734,11 +734,11 @@ static double Qweight(double minusQc, double plusQc, double Q)
 
 /* Generate approximately the correct portion of Q values */
 static int
-generate_subset(const int n, const double Q[], double subQ[],
-		const double mQc, const double pQc, const double portion)
+generate_subset(const int n, const Real Q[], Real subQ[],
+		const Real mQc, const Real pQc, const Real portion)
 {
   int i, j;
-  double total = 0.;
+  Real total = 0.;
 
   /* Compute probability for each Q */
   for (i=0; i < n; i++) total += Qweight(mQc,pQc,Q[i]);
@@ -753,14 +753,14 @@ generate_subset(const int n, const double Q[], double subQ[],
   return j;
 }
 
-void fit_portion_update(fitinfo *fit, double portion)
+void fit_portion_update(fitinfo *fit, Real portion)
 {
   int worksize = 0;
 
   /* Generate the profile from the model */
   model_profile(&fit->m, &fit->p);
 
-  /* For convolution, we need one double per Q value. */
+  /* For convolution, we need one Real per Q value. */
   if (worksize < fit->totalQ) worksize += fit->totalQ;
   extend_work(fit,worksize);
 
@@ -772,9 +772,9 @@ void fit_portion_update(fitinfo *fit, double portion)
     fit->nQ = fit->totalQ;
   } else {
     /* Weight Q selection according to Qc */
-    double rhoV = fit->m.rho[0];
-    double rhoS = fit->m.rho[fit->m.n-1];
-    double pQc, mQc;
+    Real rhoV = fit->m.rho[0];
+    Real rhoS = fit->m.rho[fit->m.n-1];
+    Real pQc, mQc;
     if (rhoS<=rhoV) {
       mQc = -sqrt(16.*M_PI*(rhoV-rhoS));
       pQc = 0.;
@@ -800,7 +800,7 @@ void fit_update(fitinfo *fit, int approx)
   /* Find the Q points at which we need to calculate the theory */
   find_target_Q(fit);
 
-  /* For convolution, we need one double per Q value. */
+  /* For convolution, we need one Real per Q value. */
   if (worksize < fit->nQ) worksize += fit->nQ;
   extend_work(fit,worksize);
 
@@ -814,9 +814,9 @@ void fit_update(fitinfo *fit, int approx)
 
 #define NOVALUE 1e308
 static void
-partial_point(fitinfo *fit, int k, double Q[],
-	      double A[], double B[], double C[], double D[],
-	      int weighted, int *df, double *sumsq)
+partial_point(fitinfo *fit, int k, Real Q[],
+	      Real A[], Real B[], Real C[], Real D[],
+	      int weighted, int *df, Real *sumsq)
 {
   /* FIXME don't remove this without fixing fit_w?sumsq.  In particular,
      it is now assuming fitQ matches data.Q, which is not true for this
@@ -847,13 +847,13 @@ partial_point(fitinfo *fit, int k, double Q[],
 }
 
 void
-fit_partial(fitinfo *fit, int approx, double portion, double best,
-	    int weighted, int *totaldf, double *totalsumsq)
+fit_partial(fitinfo *fit, int approx, Real portion, Real best,
+	    int weighted, int *totaldf, Real *totalsumsq)
 {
   int i, samples;
-  double *work, *Q, *A, *B, *C, *D;
+  Real *work, *Q, *A, *B, *C, *D;
   int nQ, worksize;
-  double sumsq = 0.;
+  Real sumsq = 0.;
   int df = 0;
 
   /* FIXME kill partial for now --- we need to refactor the

@@ -4,7 +4,7 @@
 #include "reflcalc.h"
 #define MODELS 2
 /* initialising non-standard fitting variables */
-double vol_fract_spacer, vol_fract_alkyl, rho_spacer, rho_alkyl, global_rough;
+Real vol_fract_spacer, vol_fract_alkyl, rho_spacer, rho_alkyl, global_rough;
 
 /*=========== CONSTRAINTS =====================*/
 void constr_models(fitinfo *fit)
@@ -50,7 +50,7 @@ void constr_models(fitinfo *fit)
 fitinfo* setup_models(int *models)
 {
   static fitinfo fit[MODELS];
-  static double incoh_w[1] = {1.}; /* Start with equal weighting */
+  static Real incoh_w[1] = {1.}; /* Start with equal weighting */
   static model *incoh_m[1];
   int i;
   fitpars *pars = &fit[0].pars;
@@ -69,8 +69,8 @@ fitinfo* setup_models(int *models)
 
   /* Initialize instrument parameters for each model.*/
   for (i=0; i < MODELS; i++) {
-    const double L = 5.0042,dLoL=0.020,d=1890.0;
-    double Qlo,Tlo, dTlo,dToT,s1,s2;
+    const Real L = 5.0042,dLoL=0.020,d=1890.0;
+    Real Qlo,Tlo, dTlo,dToT,s1,s2;
     Qlo=0.0154,Tlo=0.35;
     s1=0.21, s2=s1;
     dTlo=resolution_dT(s1,s2,d);
@@ -83,7 +83,7 @@ fitinfo* setup_models(int *models)
 
   /*============= MODEL =====================================*/
 
-  /* Add layers: d (thickness, ), rho (Nb, -2), mu (absorption, ?), rough (interlayer roughness, ) */
+  /* Add layers: d (thickness, ï¿½), rho (Nb, ï¿½-2), mu (absorption, ï¿½?), rough (interlayer roughness, ï¿½) */
   for (i=0; i < MODELS; i++) {
     model_layer(&fit[i].m, 0.000, 2.07e-6, 0.0e-8, 10.00); /* 0 substrate */
     model_layer(&fit[i].m, 12.000, 3.60e-6, 0.0e-8, 10.00); /* 1 oxide */

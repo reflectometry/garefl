@@ -101,12 +101,12 @@ int model_extend(model *m, int n)
     new_size += new_size/10 + 20; /* 10% spare */
     if (new_size < MODEL_LENGTH_DEFAULT) new_size = MODEL_LENGTH_DEFAULT;
     if (m->capacity <= 0) {
-      m->mu = malloc(MODEL_FIELDS*sizeof(double)*new_size);
+      m->mu = malloc(MODEL_FIELDS*sizeof(Real)*new_size);
     } else {
-      m->mu = realloc(m->mu,MODEL_FIELDS*sizeof(double)*new_size);
+      m->mu = realloc(m->mu,MODEL_FIELDS*sizeof(Real)*new_size);
       if (m->mu != NULL) {
 	for (i=MODEL_FIELDS-1; i>0; i--) {
-	  memmove(m->mu+i*new_size,m->mu+i*old_size,old_size*sizeof(double));
+	  memmove(m->mu+i*new_size,m->mu+i*old_size,old_size*sizeof(Real));
 	}
       }
     }
@@ -138,7 +138,7 @@ void model_destroy(model *m)
 }
 
 void
-model_layer(model *m, double d, double rho, double mu, double rough)
+model_layer(model *m, Real d, Real rho, Real mu, Real rough)
 {
   int n = m->n;
 
@@ -158,8 +158,8 @@ model_layer(model *m, double d, double rho, double mu, double rough)
 }
 
 void
-model_magnetic(model *m, double d, double rho, double mu, double rough,
-	       double P, double Prough, double theta, double thetarough)
+model_magnetic(model *m, Real d, Real rho, Real mu, Real rough,
+	       Real P, Real Prough, Real theta, Real thetarough)
 {
 #ifdef HAVE_MAGNETIC
   int n = m->n;
@@ -264,10 +264,10 @@ add_half_interface(model *m, profile *p, int above, int below, int leftside)
 {
   interface *rm=m->rm;
   int i, j, midpoint = (rm->n+1)/2;
-  double rP = m->Prough[below];
-  double rrho = m->rough[below];
-  double rtheta = m->thetarough[below];
-  double sm, med, big, z, c;
+  Real rP = m->Prough[below];
+  Real rrho = m->rough[below];
+  Real rtheta = m->thetarough[below];
+  Real sm, med, big, z, c;
   int n = p->n;
 
 
@@ -335,7 +335,7 @@ add_half_interface(model *m, profile *p, int above, int below, int leftside)
     /* reverse the slices, and measure from -z to 0 rather than 0 to z */
     // printf("reversing\n");
     for (i=p->n, j=n-1; i < j; i++,j--) {
-      double temp = p->d[i];
+      Real temp = p->d[i];
       p->d[i] = p->d[j];
       p->d[j] = temp;
     }
@@ -373,11 +373,11 @@ add_half_interface(model *m, profile *p, int above, int below, int leftside)
 
   /* Fill in the slices */
   while (p->n < n) {
-    double d = p->d[p->n];
-    double zmid = z + d/2;
-    double wrho = interface_value(m->rm, zmid/rrho);
-    double wtheta = interface_value(m->rm, zmid/rtheta);
-    double wP = interface_value(m->rm, zmid/rP);
+    Real d = p->d[p->n];
+    Real zmid = z + d/2;
+    Real wrho = interface_value(m->rm, zmid/rrho);
+    Real wtheta = interface_value(m->rm, zmid/rtheta);
+    Real wP = interface_value(m->rm, zmid/rP);
     // printf("add_half_interface slice %d: Adding %g at %g using %d->%d with %g\n",p->n,d,zmid,above,below,wrho);
     profile_slice(p, d,
 		  interface_average(m->rho[above],m->rho[below],wrho),
@@ -444,20 +444,20 @@ add_interface_right(model *m, profile *p, int above, int below)
 
 static void
 add_overlapping_slice(model *m, profile *p, int above, int layer, int below,
-		      double position, double width)
+		      Real position, Real width)
 {
-  double rho_weight_above =
+  Real rho_weight_above =
     interface_value(m->rm, position/m->rough[layer]);
-  double rho_weight_below =
+  Real rho_weight_below =
     interface_value(m->rm, (position-m->d[layer])/m->rough[below]);
 #ifdef HAVE_MAGNETIC
-  double P_weight_above =
+  Real P_weight_above =
     interface_value(m->rm, position/m->Prough[layer]);
-  double P_weight_below =
+  Real P_weight_below =
     interface_value(m->rm, (position-m->d[layer])/m->Prough[below]);
-  double theta_weight_above =
+  Real theta_weight_above =
     interface_value(m->rm, position/m->thetarough[layer]);
-  double theta_weight_below =
+  Real theta_weight_below =
     interface_value(m->rm, (position-m->d[layer])/m->thetarough[below]);
 #endif
 
@@ -479,7 +479,7 @@ add_overlapping_slice(model *m, profile *p, int above, int layer, int below,
 static void
 add_layer(model *m, profile *p, int above, int layer, int below)
 {
-  double rtop, rbottom, bulk_depth;
+  Real rtop, rbottom, bulk_depth;
   interface *rm = m->rm;
   /* Make sure there is room for the slices, and then some */
   if (!profile_extend(p,2*rm->n+2)) return;
@@ -516,7 +516,7 @@ add_layer(model *m, profile *p, int above, int layer, int below)
 #endif
 #if 0
     /* Simple model: equal width slices sampled at the centers */
-    double step = m->d[layer] / (n+1.);
+    Real step = m->d[layer] / (n+1.);
     int i;
 
     for (i=0; i <= n; i++)
@@ -526,7 +526,7 @@ add_layer(model *m, profile *p, int above, int layer, int below)
      * and last slices are half-width and the remaining equally-spaced
      * slices are full-width.
      */
-    double step = m->d[layer] / n;
+    Real step = m->d[layer] / n;
     int i;
 
     add_overlapping_slice(m,p,above,layer,below,step/4.,step/2.);

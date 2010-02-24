@@ -106,12 +106,12 @@ regular spacing when you are undersampling?
 */
 
 /* Trapezoid rule for numerical integration of convolution */
-double
-convolve_point(const double Qin[], const double Rin[], int k, int n,
-	       double Qo, double limit, double sigma)
+Real
+convolve_point(const Real Qin[], const Real Rin[], int k, int n,
+	       Real Qo, Real limit, Real sigma)
 {
-  const double two_sigma_sq = 2. * sigma * sigma;
-  double z, Glo, RGlo, R, norm;
+  const Real two_sigma_sq = 2. * sigma * sigma;
+  Real z, Glo, RGlo, R, norm;
 
   z = Qo - Qin[k];
   Glo = exp(-z*z/two_sigma_sq);
@@ -119,10 +119,10 @@ convolve_point(const double Qin[], const double Rin[], int k, int n,
   norm = R = 0.;
   while (++k < n) {
     /* Compute the next endpoint */
-    const double zhi = Qo - Qin[k];
-    const double Ghi = exp(-zhi*zhi/two_sigma_sq);
-    const double RGhi = Rin[k] * Ghi;
-    const double halfstep = 0.5*(Qin[k] - Qin[k-1]);
+    const Real zhi = Qo - Qin[k];
+    const Real Ghi = exp(-zhi*zhi/two_sigma_sq);
+    const Real RGhi = Rin[k] * Ghi;
+    const Real halfstep = 0.5*(Qin[k] - Qin[k-1]);
 
     /* Add the trapezoidal area. */
     norm += halfstep * (Ghi + Glo);
@@ -148,12 +148,12 @@ convolve_point(const double Qin[], const double Rin[], int k, int n,
 
 /* Analytic convolution of gaussian with linear spline */
 /* More expensive but more reliable */
-double
-convolve_point(const double Qin[], const double Rin[], int k, int n,
-	       double Qo, double limit, double sigma)
+Real
+convolve_point(const Real Qin[], const Real Rin[], int k, int n,
+	       Real Qo, Real limit, Real sigma)
 {
-  const double two_sigma_sq = 2. * sigma * sigma;
-  double z, Glo, erflo, erfmin, R;
+  const Real two_sigma_sq = 2. * sigma * sigma;
+  Real z, Glo, erflo, erfmin, R;
 
   z = Qo - Qin[k];
   Glo = exp(-z*z/two_sigma_sq);
@@ -162,11 +162,11 @@ convolve_point(const double Qin[], const double Rin[], int k, int n,
   /* printf("%5.3f: (%5.3f,%11.5g)",Qo,Qin[k],Rin[k]); */
   while (++k < n) {
     /* Compute the next endpoint */
-    const double zhi = Qo - Qin[k];
-    const double Ghi = exp(-zhi*zhi/two_sigma_sq);
-    const double erfhi = erf(-zhi/(SQRT2*sigma));
-    const double m = (Rin[k]-Rin[k-1])/(Qin[k]-Qin[k-1]);
-    const double b = Rin[k] - m * Qin[k];
+    const Real zhi = Qo - Qin[k];
+    const Real Ghi = exp(-zhi*zhi/two_sigma_sq);
+    const Real erfhi = erf(-zhi/(SQRT2*sigma));
+    const Real m = (Rin[k]-Rin[k-1])/(Qin[k]-Qin[k-1]);
+    const Real b = Rin[k] - m * Qin[k];
 
     /* Add the integrals. */
     R += 0.5*(m*Qo+b)*(erfhi-erflo) - sigma/SQRT2PI*m*(Ghi-Glo);
@@ -195,8 +195,8 @@ convolve_point(const double Qin[], const double Rin[], int k, int n,
 #endif /* !USE_TRAPEZOID_RULE */
 
 void
-resolution(int Nin, const double Qin[], const double Rin[],
-	   int N, const double Q[], const double dQ[], double R[])
+resolution(int Nin, const Real Qin[], const Real Rin[],
+	   int N, const Real Q[], const Real dQ[], Real R[])
 {
   int lo,out;
 
@@ -207,9 +207,9 @@ resolution(int Nin, const double Qin[], const double Rin[],
   lo = 0;
   for (out=0; out < N; out++) {
     /* width of resolution window for Q is w = 2 dQ^2. */
-    const double sigma = dQ[out];
-    const double Qo = Q[out];
-    const double limit = sqrt(-2.*sigma*sigma* LOG_RESLIMIT);
+    const Real sigma = dQ[out];
+    const Real Qo = Q[out];
+    const Real limit = sqrt(-2.*sigma*sigma* LOG_RESLIMIT);
 
     /* if (out%20==0) printf("%d: Q,dQ = %g,%g\n",out,Qo,sigma); */
 
@@ -227,13 +227,13 @@ resolution(int Nin, const double Qin[], const double Rin[],
       R[out] = convolve_point(Qin,Rin,lo,Nin,Qo,limit,sigma);
     } else if (lo < Nin-1) {
       /* Linear interpolation */
-      double m = (Rin[lo+1]-Rin[lo])/(Qin[lo+1]-Qin[lo]);
-      double b = Rin[lo] - m*Qin[lo];
+      Real m = (Rin[lo+1]-Rin[lo])/(Qin[lo+1]-Qin[lo]);
+      Real b = Rin[lo] - m*Qin[lo];
       R[out] = m*Qo + b;
     } else if (lo > 0) {
       /* Linear extrapolation */
-      double m = (Rin[lo]-Rin[lo-1])/(Qin[lo]-Qin[lo-1]);
-      double b = Rin[lo] - m*Qin[lo];
+      Real m = (Rin[lo]-Rin[lo-1])/(Qin[lo]-Qin[lo-1]);
+      Real b = Rin[lo] - m*Qin[lo];
       R[out] = m*Qo + b;
     } else {
       /* Can't happen because there is more than one point in Qin. */
@@ -350,8 +350,8 @@ This result is stable even for Q = 0.
 ============================================================ */
 
 void
-resolution_varying(double L, double dLoL, double dToT,
-		   int n, const double Q[], double dQ[])
+resolution_varying(Real L, Real dLoL, Real dToT,
+		   int n, const Real Q[], Real dQ[])
 {
   /* Given:
        T = asin(Q L / 4 pi)
@@ -366,22 +366,22 @@ resolution_varying(double L, double dLoL, double dToT,
      equivalent to dividing S1^2, S2^2 and S3^2 by 8ln2, which
      is what I've done in the definitions below.
   */
-  const double Lo4pi = L / PI4;
-  const double S1sq = dToT * dToT / ( Lo4pi * Lo4pi * LN256);
-  const double S2sq = dLoL * dLoL / LN256;
-  const double S3sq = dToT * dToT / LN256;
+  const Real Lo4pi = L / PI4;
+  const Real S1sq = dToT * dToT / ( Lo4pi * Lo4pi * LN256);
+  const Real S2sq = dLoL * dLoL / LN256;
+  const Real S3sq = dToT * dToT / LN256;
   int j;
 
   for (j=0; j < n; j++) {
-    const double T = asin(Q[j] * Lo4pi);
-    const double Tsq = T*T;
-    const double Qsq = Q[j]*Q[j];
+    const Real T = asin(Q[j] * Lo4pi);
+    const Real Tsq = T*T;
+    const Real Qsq = Q[j]*Q[j];
     dQ[j] = sqrt( S1sq * Tsq + S2sq * Qsq - S3sq * Tsq * Qsq );
   }
 }
 
 void
-constant_resolution(double res, int n, double dQ[])
+constant_resolution(Real res, int n, Real dQ[])
 {
   int j;
 
@@ -392,8 +392,8 @@ constant_resolution(double res, int n, double dQ[])
 
 
 void
-resolution_fixed(double L, double dLoL, double dT,
-		 int n, const double Q[], double dQ[])
+resolution_fixed(Real L, Real dLoL, Real dT,
+		 int n, const Real Q[], Real dQ[])
 {
 #if 1
   /* Given:
@@ -410,9 +410,9 @@ resolution_fixed(double L, double dLoL, double dT,
      equivalent to dividing S1 and S2 by 8ln2, which is what I've
      done in the definitions below.
   */
-  const double pi4dToL = (PI4 * dT / L);
-  const double S1 = pi4dToL * pi4dToL / LN256;
-  const double S2 = (dLoL * dLoL - dT * dT) / LN256;
+  const Real pi4dToL = (PI4 * dT / L);
+  const Real S1 = pi4dToL * pi4dToL / LN256;
+  const Real S2 = (dLoL * dLoL - dT * dT) / LN256;
   int j;
 
   for (j=0; j < n; j++) dQ[j] = sqrt( S1 + S2 * Q[j]*Q[j]);
@@ -427,7 +427,7 @@ resolution_fixed(double L, double dLoL, double dT,
 }
 
 void
-resolution_dQoQ(double dQoQ, int n, const double Q[], double dQ[])
+resolution_dQoQ(Real dQoQ, int n, const Real Q[], Real dQ[])
 {
   int j;
   for (j=0; j < n; j++) dQ[j] = dQoQ * Q[j];
@@ -435,12 +435,12 @@ resolution_dQoQ(double dQoQ, int n, const double Q[], double dQ[])
 
 
 
-double resolution_dT(double s1,double s2,double d)
+Real resolution_dT(Real s1,Real s2,Real d)
 {
   return (s1+s2)/(2*d);
 }
 
-double resolution_dToT(double s1,double s2,double d,double A3)
+Real resolution_dToT(Real s1,Real s2,Real d,Real A3)
 {
   return resolution_dT(s1,s2,d)/(A3*PI_180);
 }
@@ -451,9 +451,9 @@ double resolution_dToT(double s1,double s2,double d,double A3)
  * to a value of 0.1% of the value at the peak for RESLIMIT=0.001.
  */
 int
-resolution_padding(double step, double sigma)
+resolution_padding(Real step, Real sigma)
 {
-  const double limit = sqrt(-2.*sigma*sigma * LOG_RESLIMIT);
+  const Real limit = sqrt(-2.*sigma*sigma * LOG_RESLIMIT);
   return ceil(limit/step);
 }
 

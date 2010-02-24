@@ -16,6 +16,17 @@ dnl Check if we are building fat binaries for OS X
 dnl AX_CFLAGS_GCC_OPTION(-arch ppc -arch i386,ARCHFLAGS)
 dnl AC_SUBST(ARCHFLAGS)
 
+dnl If single precision is to be used (with CUDA or OpenCL for example)
+AC_MSG_CHECKING([whether to turn on double precision])
+AC_ARG_ENABLE(double,
+    [  --disable-double        use single precision numbers when modeling],
+    [],
+    [enable_double=yes])
+AC_MSG_RESULT([$enable_double])
+ENABLE_DOUBLE=$enable_double
+AC_SUBST(ENABLE_DOUBLE)
+
+
 dnl If magnetic is to be used (requires Fortran compiler)
 AC_MSG_CHECKING([whether to turn on magnetic])
 AC_ARG_ENABLE(magnetic,

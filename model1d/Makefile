@@ -6,11 +6,11 @@ OBJECTS = model.o profile.o interface.o reflectivity.o resolution.o \
 	  pars.o data.o fit.o fresnel.o reflrough.o
 
 ifeq ($(ENABLE_MAGNETIC),yes)
-  OBJECTS:=$(OBJECTS) r4xa.o magnetic.o
+  OBJECTS:=$(OBJECTS) magnetic.o
 
   # FIXME ENABLE_MAGNETIC is a code word for no fortran compiler available.
   # Suppress bspline and dgtsv if that is the case
-  OBJECTS:=$(OBJECTS) dgtsv.o bspline.o
+  OBJECTS:=$(OBJECTS) dgtsv.o sgtsv.o bspline.o
 endif
 
 # To crosscheck the matrix formalism against Parrat, uncomment

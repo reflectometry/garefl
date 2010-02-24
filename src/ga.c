@@ -33,10 +33,10 @@ static int selectPar( Settings *set );
 static void encode( Individual *indiv );
 
 /** Cross two parents to create offsprings */
-static void cross( double pCross, Individual *indiv1, Individual *indiv2 );
+static void cross( Real pCross, Individual *indiv1, Individual *indiv2 );
 
 /** Uniform mutation */
-static void mutate( double pmut, Individual *indiv );
+static void mutate( Real pmut, Individual *indiv );
 
 /** Decode chromos... */
 static void decode( Individual *indiv );
@@ -45,16 +45,16 @@ static void decode( Individual *indiv );
 static void newpop( Settings *set);
 
 /** Adjust mutation probability */
-static double adjmut(Settings *set);
+static Real adjmut(Settings *set);
 
 
 
 // Random number generator
-double frandom(void) { return (double)rand()/RAND_MAX; }
+Real frandom(void) { return (Real)rand()/RAND_MAX; }
 
 //-------------------------------------------------------------
 // Element table used for sorting 
-struct element {int i; double data;} Table[PMAX];
+struct element {int i; Real data;} Table[PMAX];
 
 //-------------------------------------------------------------
 /** Find the fittest individual */
@@ -74,8 +74,8 @@ int fittest( Settings *set)
 //-------------------------------------------------------------
 // Comparison function used for sorting
 static int compare(const void *e1, const void *e2) {
-  double v1 = ((struct element *)e1)->data;
-  double v2 = ((struct element *)e2)->data;
+  Real v1 = ((struct element *)e1)->data;
+  Real v2 = ((struct element *)e2)->data;
   return (v1<v2) ? -1 : (v1>v2) ? 1 : 0;
 }
 
@@ -99,7 +99,7 @@ static int rankPop( Settings *set ) {
 /** Select parents from the population */
 static int selectPar( Settings *set ) { 
   int i;
-  double dice, rtfit;
+  Real dice, rtfit;
   
   dice = frandom()*set->np*(set->np+1);
   rtfit=0;
@@ -113,7 +113,7 @@ static int selectPar( Settings *set ) {
 //-------------------------------------------------------------
 /** Encode parameter values */
 static void encode( Individual *indiv ) { 
-  double z;
+  Real z;
   int ip, i, j, k;
 
   //~ if(indiv->encoded==1) return;
@@ -133,7 +133,7 @@ static void encode( Individual *indiv ) {
 
 //-------------------------------------------------------------
 /** Cross two parents to create offsprings */
-static void cross( double pCross, Individual *indiv1, Individual *indiv2 ) {
+static void cross( Real pCross, Individual *indiv1, Individual *indiv2 ) {
 
   if(frandom()<pCross) {
     // cross-over point
@@ -151,7 +151,7 @@ static void cross( double pCross, Individual *indiv1, Individual *indiv2 ) {
 
 //-------------------------------------------------------------
 /** Uniform mutation */
-static void mutate( double pmut, Individual *indiv ) { 
+static void mutate( Real pmut, Individual *indiv ) {
   int i;
   for(i=0;i<indiv->nParams*indiv->nPrec;i++) 
     if(frandom()<pmut) indiv->chromo[i] = (int)(frandom()*10.0);
@@ -160,7 +160,7 @@ static void mutate( double pmut, Individual *indiv ) {
 //-------------------------------------------------------------
 /** Decode chromos... */
 static void decode( Individual *indiv ){
-  double z;
+  Real z;
   int ip, i, j, k;
   z = pow(10.0,-(indiv->nPrec));
   k=0;
@@ -196,7 +196,7 @@ static void newpop( Settings *set ) {
 
 
 //-------------------------------------------------------------
-void setChromosome(Settings *set, int n, double *d)
+void setChromosome(Settings *set, int n, Real *d)
 {
   int i;
 
@@ -207,7 +207,7 @@ void setChromosome(Settings *set, int n, double *d)
 }
 
 //-------------------------------------------------------------
-double getChromosome(Settings *set, int n, double *d)
+Real getChromosome(Settings *set, int n, Real *d)
 {
   int i;
 
@@ -217,9 +217,9 @@ double getChromosome(Settings *set, int n, double *d)
 }  
 
 //-------------------------------------------------------------
-//~ double adjmut(Settings *set, int *ifit, double *fitness){
-static double adjmut( Settings *set ){
-  double rdif=0, rdiflo=0.05, rdifhi=0.25, delta=1.5, old_value;
+//~ Real adjmut(Settings *set, int *ifit, Real *fitness){
+static Real adjmut( Settings *set ){
+  Real rdif=0, rdiflo=0.05, rdifhi=0.25, delta=1.5, old_value;
   int i;
   
   // Adjustment based on fitness differential
@@ -321,7 +321,7 @@ int read_pop( Settings *set, const char *filename ) {
     } else {
       k++;
     }
-    set->pop->indiv[ip].value[k] = (double)buffer;
+    set->pop->indiv[ip].value[k] = (Real)buffer;
   }
   fclose(file);
   if (ip != set->np-1 || k != set->nParams-1) {
@@ -344,7 +344,7 @@ void statReportHeader( Settings *set ) {
 //-------------------------------------------------------------
 void statReport( Settings *set ) {
   int i;
-  double fitmin=-1, fitmax=-1, fitsum=0;
+  Real fitmin=-1, fitmax=-1, fitsum=0;
   FILE *file;
   if (!set->print_stats) return;
   for(i=0; i<set->np; i++) {
@@ -362,7 +362,7 @@ void statReport( Settings *set ) {
 
 
 //-------------------------------------------------------------
-void setParValue( Settings *set, int ipar, double value ) {
+void setParValue( Settings *set, int ipar, Real value ) {
     int ip;
     for(ip=0; ip<set->np; ip++) {
         set->pop->indiv[ip].value[ipar] = value;
@@ -371,10 +371,10 @@ void setParValue( Settings *set, int ipar, double value ) {
     }
 }
 //-------------------------------------------------------------
-void setRange( Settings *set, int ipar, double oldmin, double oldrange,
-                double newmin, double newrange ) {
+void setRange( Settings *set, int ipar, Real oldmin, Real oldrange,
+                Real newmin, Real newrange ) {
     int ip;
-    double oldvalue;
+    Real oldvalue;
     for(ip=0; ip<set->np; ip++) {
         oldvalue = set->pop->indiv[ip].value[ipar];
         set->pop->indiv[ip].value[ipar] = (oldmin+oldrange*oldvalue-newmin)/newrange;
@@ -449,9 +449,9 @@ void initPop( Settings *set ) {
   set->pop = (Population *) malloc(sizeof(Population));
   for(i=0;i<set->np;i++) {
     set->pop->indiv[i].fitness = 0.;
-      set->pop->indiv[i].value = (double *)malloc(set->nParams*sizeof(double));
+      set->pop->indiv[i].value = (Real *)malloc(set->nParams*sizeof(Real));
       set->pop->indiv[i].chromo = (int *)malloc(set->nParams*set->nd*sizeof(int));
-      set->pop->newph[i].value = (double *)malloc(set->nParams*sizeof(double));
+      set->pop->newph[i].value = (Real *)malloc(set->nParams*sizeof(Real));
       set->pop->newph[i].chromo = (int *)malloc(set->nParams*set->nd*sizeof(int));
       set->pop->indiv[i].nParams = set->nParams;
       set->pop->indiv[i].nPrec = set->nd;
@@ -462,7 +462,7 @@ void initPop( Settings *set ) {
 
 //-------------------------------------------------------------
 void initIndividual( Settings *set, Individual *indiv ) {
-    indiv->value = (double *)malloc(set->nParams*sizeof(double));
+    indiv->value = (Real *)malloc(set->nParams*sizeof(Real));
     indiv->chromo = (int *)malloc(set->nParams*set->nd*sizeof(int));
     indiv->nParams = set->nParams;
     indiv->nPrec = set->nd;
@@ -481,7 +481,7 @@ void copyValues( Individual *in, Individual *out ) {
 
 //-------------------------------------------------------------
 //Population initialization
-void ga_init( Settings *set, double *params ) {
+void ga_init( Settings *set, Real *params ) {
   int n             = set->nParams;
   int np            = set->np;
   int ip, k;
@@ -527,10 +527,10 @@ void ga_init( Settings *set, double *params ) {
 }
 
 // Main fit loop
-double ga_fit( Settings *set, int ngenerations ) {
+Real ga_fit( Settings *set, int ngenerations ) {
   int np            = set->np;
-  double pcross     = set->pCross;
-  double pmut       = set->pMutate;
+  Real pcross     = set->pCross;
+  Real pmut       = set->pMutate;
   int ip, ig;
   int ip1, ip2;
   Individual indiv1, indiv2;
@@ -604,8 +604,8 @@ double ga_fit( Settings *set, int ngenerations ) {
 
 //-------------------------------------------------------------
 // Fake fitness function for testing
-static double fakefunk( int n, double *vars, void *dummy ) {
-  double r;
+static Real fakefunk( int n, Real *vars, void *dummy ) {
+  Real r;
   r = (vars[0]-0.5)*(vars[0]-0.5) + (vars[1]-0.5)*(vars[1]-0.5);
   return cos(9.0*acos(-1)*r)*cos(9.0*acos(-1)*r)*exp(-r*r/0.15);
 }
@@ -613,8 +613,8 @@ static double fakefunk( int n, double *vars, void *dummy ) {
 int main(int argc, char *argv[]) {
 
   // Fit parameters
-  double parms[2];
-  double f;
+  Real parms[2];
+  Real f;
   int i;
   
   Settings set;

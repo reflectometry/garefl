@@ -119,7 +119,7 @@ void set_signal_handlers(void)
 }
 #endif /* !USE_WIN32_SIGINT */
 
-void cpulimit(double hours)
+void cpulimit(Real hours)
 {
 #ifdef HAVE_SETRLIMIT
   struct rlimit r;
@@ -134,12 +134,12 @@ void cpulimit(double hours)
 
 /* Application control parameters */
 int MODELS;
-double CHI_CUT = 500.0;
-double bestchi=1e308;
-double *bestpars=NULL;
+Real CHI_CUT = 500.0;
+Real bestchi=1e308;
+Real *bestpars=NULL;
 int weighted = 1;
 int approximate_roughness = 0;
-double portion = 1.;
+Real portion = 1.;
 char  parFile[64];
 int log_improvement = 0;
 FILE *parFD;
@@ -150,7 +150,7 @@ fit_output *output_model = NULL;
 fit_constraints *constraints = NULL;
 int step_num = 0;
 int start_step = 0;
-double trust_region = 0.1;
+Real trust_region = 0.1;
 int save_zero_one = 0;
 
 void tic(void)
@@ -164,9 +164,9 @@ void toc(void)
 }
 
 /* GA is a minimizer, so convert chisq to GA fitness value. */
-double chisq2fitness(double chisq)
+Real chisq2fitness(Real chisq)
 {
-  double fitness;
+  Real fitness;
   
   /* ga maximizes so invert chisq */
   fitness = CHI_CUT*MODELS - chisq;
@@ -177,9 +177,9 @@ double chisq2fitness(double chisq)
   return fitness;	   
 }
 
-double fitness2chisq(double fitness)
+Real fitness2chisq(Real fitness)
 {
-  double chisq;
+  Real chisq;
   
   /* Unsqueeze poor models from the range 0-1 */
   if (fitness < 1.) fitness = tan((fitness + 1.)*M_PI/2.) + 1.;
@@ -201,7 +201,7 @@ void write_ga_pop(const char filename[])
   }
   fprintf(file,"    %25s: ","fitness");
   for (i=0; i < set.np; i++) {
-  	double chisq = fitness2chisq(set.pop->indiv[i].fitness);
+  	Real chisq = fitness2chisq(set.pop->indiv[i].fitness);
   	fprintf(file,"%15g ",chisq);
   }
   fprintf(file,"\n");
@@ -220,11 +220,11 @@ void write_ga_pop(const char filename[])
 
 void check_halt(void);
 void improvement(int store_model);
-double do_step(fitinfo *fit, double portion);
-double update_models(fitinfo *fit);
-double partial_update_models(fitinfo *fit,double portion,double best);
+Real do_step(fitinfo *fit, Real portion);
+Real update_models(fitinfo *fit);
+Real partial_update_models(fitinfo *fit,Real portion,Real best);
 
-static void chisq_plot(fitinfo *fit, int nth, double portion, int steps)
+static void chisq_plot(fitinfo *fit, int nth, Real portion, int steps)
 {
   FILE *file;
   file = fopen("chisq.dat","w");
@@ -236,8 +236,8 @@ static void chisq_plot(fitinfo *fit, int nth, double portion, int steps)
   /* chisq plot for the nth parameter */
   if (nth >= 0 && nth < fit[0].pars.n) {
     int i,k;
-    double d = pars_min(&fit[0].pars,nth);
-    double step = (pars_max(&fit[0].pars,nth)-d)/steps;
+    Real d = pars_min(&fit[0].pars,nth);
+    Real step = (pars_max(&fit[0].pars,nth)-d)/steps;
 
     /* Print headers */
     printf("Chisq plot for %s [%i]\n%12s %12s",
@@ -253,7 +253,7 @@ static void chisq_plot(fitinfo *fit, int nth, double portion, int steps)
 
     /* Print data */
     for (i=0; i <= steps; i++) {
-      double chisq;
+      Real chisq;
 
       /* Set parameter in model */
       pars_poke(&fit[0].pars,nth,d);
@@ -281,7 +281,7 @@ static void chisq_plot(fitinfo *fit, int nth, double portion, int steps)
   fclose(file);
 }
 
-static void chisq_surf(fitinfo *fit, int n1, int n2, double portion, int steps)
+static void chisq_surf(fitinfo *fit, int n1, int n2, Real portion, int steps)
 {
   FILE *file;
   file = fopen("chisqsurf.dat","w");
@@ -295,10 +295,10 @@ static void chisq_surf(fitinfo *fit, int n1, int n2, double portion, int steps)
     pars_print(&fit[0].pars);
   } else {
     int i,j,k;
-    double d1 = pars_min(&fit[0].pars,n1);
-    double d2 = pars_min(&fit[0].pars,n2);
-    double step1 = (pars_max(&fit[0].pars,n1)-d1)/steps;
-    double step2 = (pars_max(&fit[0].pars,n2)-d2)/steps;
+    Real d1 = pars_min(&fit[0].pars,n1);
+    Real d2 = pars_min(&fit[0].pars,n2);
+    Real step1 = (pars_max(&fit[0].pars,n1)-d1)/steps;
+    Real step2 = (pars_max(&fit[0].pars,n2)-d2)/steps;
 
 
     /* Print headers */
@@ -317,9 +317,9 @@ static void chisq_surf(fitinfo *fit, int n1, int n2, double portion, int steps)
 
     /* Print data */
     for (i=0; i <= steps; i++) {
-      double d = d2;
+      Real d = d2;
       for (j=0; j <= steps; j++) {
-        double chisq;
+        Real chisq;
 
         /* Set parameter in model */
         pars_poke(&fit[0].pars,n1,d1);
@@ -350,10 +350,10 @@ static void chisq_surf(fitinfo *fit, int n1, int n2, double portion, int steps)
   fclose(file);
 }
 
-double step_fn(int n, const double p[], void *user_data)
+Real step_fn(int n, const Real p[], void *user_data)
 {
   fitinfo* fit = (fitinfo*)user_data;
-  double chisq;
+  Real chisq;
 
   check_halt();
   pars_set(&fit[0].pars, p);
@@ -367,10 +367,10 @@ double step_fn(int n, const double p[], void *user_data)
 }
 
 
-double step_fn01(const int n, const double p[], void *user_data)
+Real step_fn01(const int n, const Real p[], void *user_data)
 {
   fitinfo* fit = (fitinfo*)user_data;
-  double chisq;
+  Real chisq;
 
   check_halt();
   pars_set01(&fit[0].pars, p);
@@ -383,7 +383,7 @@ double step_fn01(const int n, const double p[], void *user_data)
   return chisq;
 }
  
-double fortran_step_fn01(const int *n, const double p[], void *user_data)
+Real fortran_step_fn01(const int *n, const Real p[], void *user_data)
 {
   return step_fn01(*n, p, user_data);
 }
@@ -398,9 +398,9 @@ void cmd_quadfit(void)
 {
   const int n = fit[0].pars.n;
   const int npnt = 2*n;
-  double *p = (double *)malloc(sizeof(double)*(NEWUOA_WORKSIZE(n,npnt)+n));
-  double *work = p+n;
-  double rhobeg,rhoend;
+  Real *p = (Real *)malloc(sizeof(Real)*(NEWUOA_WORKSIZE(n,npnt)+n));
+  Real *work = p+n;
+  Real rhobeg,rhoend;
   int print, maxiter;
 
   assert(work != NULL);
@@ -427,11 +427,11 @@ void cmd_quadfit(void)
 void cmd_amoeba(void)
 {
   simplex s;
-  double *pbest;
+  Real *pbest;
   int ndim = fit[0].pars.n;
-  double *work = (double *)malloc((2*ndim+amoeba_worksize(ndim))*sizeof(double));
-  double *bounds = work+amoeba_worksize(ndim);
-  double *po;
+  Real *work = (Real *)malloc((2*ndim+amoeba_worksize(ndim))*sizeof(Real));
+  Real *bounds = work+amoeba_worksize(ndim);
+  Real *po;
   int i,j;
 
   write_pop_backup(&set); /* In case fit crashes */
@@ -461,7 +461,7 @@ void cmd_amoeba(void)
   /* Random restart */
   /* Note: consider using a normal ball instead of a complete space search */
   for (i=1; i <= ndim; i++) {
-    double *pi = amoeba_VERTEX(&s,i);
+    Real *pi = amoeba_VERTEX(&s,i);
     for (j=0; j < ndim; j++) pi[j] = fmod(po[j]+frandom()*trust_region, 1.);
     pars_set01(&fit[0].pars,pi);
     amoeba_VALUE(&s,i) = update_models(fit);
@@ -514,7 +514,8 @@ void cmd_save_staj(void)
   if (*constraints) (*constraints)(fit);
   /* Print to file */
   save_all_staj();
-}
+}      const Real pi4=1.2566370614359172e1;       // = 1/4 * 16 pi
+
 
 
 void cmd_accelerate(void)
@@ -540,7 +541,7 @@ void cmd_change_range(void)
 {
   char buffer[100];
   const char *name;
-  double pmin, pmax;
+  Real pmin, pmax;
   int ipar = -1;
 
   ipar = pars_select(&fit[0].pars);
@@ -579,7 +580,7 @@ void cmd_change_range(void)
 void cmd_change_parameter(void)
 {
   int ipar;
-  double val;
+  Real val;
 
   bestchi = 1e308;
   pars_set(&fit[0].pars, bestpars);
@@ -623,7 +624,7 @@ void cmd_chisq_plot(void)
 void cmd_print_best(void)
 {
   int i;
-  double chisq;
+  Real chisq;
 
   /* Compute partial chisq of best */
   pars_set(&fit[0].pars, bestpars);
@@ -683,9 +684,11 @@ void cmd_change_trust_region(void)
 	 trust_region);
   fflush(stdout);
   if (fgets(buffer,sizeof(buffer),stdin)!=NULL) {
-    if (sscanf(buffer,"%lg",&trust_region)>0) {
-      if (trust_region<1e-5) trust_region = 1e-5;
-      else if (trust_region>1.) trust_region = 1.;
+	double v;
+	if (sscanf(buffer,"%lg",&v)>0) {
+      if (v<1e-5) trust_region = 1e-5;
+      else if (v>1.) trust_region = 1.;
+      else trust_region = (Real)v;
       if (parFD != NULL)
 	fprintf(parFD,"# %15d   Changing trust region power to %g\n", 
 		GetGen(&set),trust_region);
@@ -766,16 +769,16 @@ void check_halt(void)
   }
 }
 
-double update_models(fitinfo *fit)
+Real update_models(fitinfo *fit)
 {
   int n = 0;
-  double sumsq = 0.;
+  Real sumsq = 0.;
   int i;
 
   if (*constraints) (*constraints)(fit);
   for (i=0; i < MODELS; i++) {
     int n_i = 0;
-    double sumsq_i = 0.;
+    Real sumsq_i = 0.;
     fit_update(&fit[i], approximate_roughness);
     if (weighted) fit_wsumsq(&fit[i],&n_i,&sumsq_i);
     else fit_sumsq(&fit[i],&n_i,&sumsq_i);
@@ -787,10 +790,10 @@ double update_models(fitinfo *fit)
   return n < fit[0].pars.n ? sumsq : sumsq / (n - fit[0].pars.n) ;
 }
 
-double partial_update_models(fitinfo *fit, double portion, double best)
+Real partial_update_models(fitinfo *fit, Real portion, Real best)
 {
   int n = 0;
-  double sumsq = 0.;
+  Real sumsq = 0.;
   int i;
   
   if (*constraints) (*constraints)(fit);
@@ -875,7 +878,7 @@ void improvement(int store_model)
   if (parFD != NULL) {
     fprintf(parFD,"%17d %17g", GetGen(&set), bestchi);
     for (i=0; i < fit->pars.n; i++) {
-      const double v = save_zero_one
+      const Real v = save_zero_one
                      ? pars_peek01(&fit[0].pars,i)
                      : pars_peek(&fit[0].pars,i);
       fprintf(parFD," %17g",v);
@@ -889,10 +892,10 @@ void improvement(int store_model)
 }
 
 /* Evaluate model with current parameters */
-double do_step(fitinfo *fit, double portion)
+Real do_step(fitinfo *fit, Real portion)
 {
   int i;
-  double chisq;
+  Real chisq;
 
   step_num++;
 
@@ -970,9 +973,9 @@ void tied_parameters(fitinfo fit[])
     pars_poke(&fit[1].pars, i, fit[1].pars.value[i]);
 }
 
-double step_ga(int n, const double *p, void *user_data)
+Real step_ga(int n, const Real *p, void *user_data)
 {
-  double chisq;
+  Real chisq;
 
   chisq = step_fn01(n,p,user_data);
   return chisq2fitness(chisq);
@@ -1088,14 +1091,14 @@ void print_usage(void)
 
 /* Scale space by factor g, and randomize the start condition */
 /* The condition min>=0 will be preserved if it is true. */
-static void explode(fitpars *p, double g)
+static void explode(fitpars *p, Real g)
 {
   int n = p->n;
   int i;
   for (i=0; i < n; i++) {
-    double min = pars_min(p,i);
-    double max = pars_max(p,i);
-    double delta = (max-min)*g/2.;
+    Real min = pars_min(p,i);
+    Real max = pars_max(p,i);
+    Real delta = (max-min)*g/2.;
     if (min >= 0 && delta < min) {
       max += 2*delta - min;
       min = 0;
@@ -1117,7 +1120,7 @@ int main(int argc, char *argv[])
   int nth=0, n1=0, xdims=0, k, steps=20;
   int generations = 1000000000;
   int ch;
-  double hours = 18.;
+  Real hours = 18.;
 
   //~ fitinfo *fit;
   srand(time(NULL));
@@ -1165,11 +1168,11 @@ int main(int argc, char *argv[])
     case 'x':
       // Chi^2 plot of nth paramater
       do {
-	double lo,hi;
-	if (xdims++) n1=nth;
+    	double lo,hi;
+    	if (xdims++) n1=nth;
         int n = sscanf(optarg,"%d:%lg:%lg:%d",&nth,&lo,&hi,&steps);
         if (n>=3 && nth >= 0 && nth < fit[0].pars.n)
-	    pars_set_range(&fit[0].pars,nth,lo,hi);
+	    pars_set_range(&fit[0].pars,nth,(Real)lo,(Real)hi);
       } while(0);
       action = CHISQ;
       break;
@@ -1270,19 +1273,19 @@ int main(int argc, char *argv[])
 
     case 'r':
       do {
-	double lo=0., hi=0.;
-	int k,n;
-	n = sscanf(optarg,"%d:%lg:%lg",&k,&lo,&hi);
+    	double lo=0., hi=0.;
+    	int k,n;
+    	n = sscanf(optarg,"%d:%lg:%lg",&k,&lo,&hi);
         if (n==3 && k >= 0 && k < fit[0].pars.n)
-	    pars_set_range(&fit[0].pars,k,lo,hi);
+	    pars_set_range(&fit[0].pars,k,(Real)lo,(Real)hi);
         else if (n==2 && k >= 0 && k < fit[0].pars.n)
-	    pars_poke(&fit[0].pars,k,lo);
+	    pars_poke(&fit[0].pars,k,(Real)lo);
       } while (0);
       break;
 
     case 'X':
       do {
-        double factor = atof(optarg);
+        Real factor = atof(optarg);
         if (factor > 0. && factor != 1.) explode(&fit[0].pars,factor);
       } while (0);
       break;
@@ -1297,7 +1300,7 @@ int main(int argc, char *argv[])
   cpulimit(hours);
 
   /* Some place to save the best parameters */
-  bestpars = (double *)malloc(sizeof(*bestpars)*fit[0].pars.n);
+  bestpars = (Real *)malloc(sizeof(*bestpars)*fit[0].pars.n);
   assert(bestpars != NULL);
 
 #if 0

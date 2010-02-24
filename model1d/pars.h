@@ -83,14 +83,14 @@ extern "C" {
 
 typedef struct fitpars_struct {
   int n, capacity;
-  double **address;
+  Real **address;
   const char ** name;
-  double *min, *range, *value;
+  Real *min, *range, *value;
   int mode;
 } fitpars;
 
-double pars_to_01(const fitpars *pars, int i, double v);
-double pars_from_01(const fitpars *pars, int i, double v);
+Real pars_to_01(const fitpars *pars, int i, Real v);
+Real pars_from_01(const fitpars *pars, int i, Real v);
 void pars_init(fitpars *pars);
 void pars_reset(fitpars *pars);
 void pars_destroy(fitpars *pars);
@@ -98,25 +98,25 @@ int pars_extend(fitpars *pars, int n);
 int pars_count(fitpars *pars);
 
 void pars_add(fitpars *pars, const char *name,
-	      double *d, double min, double max);
+	      Real *d, Real min, Real max);
 
-double* pars_vector(fitpars *pars);
+Real* pars_vector(fitpars *pars);
 const char* pars_name(const fitpars *pars, int n);
-double pars_min(const fitpars *pars, int i);
-double pars_max(const fitpars *pars, int i);
-double pars_peek(const fitpars *pars, int i);
-double pars_peek01(const fitpars *pars, int i);
-void pars_poke(const fitpars *pars, int i, double v);
-void pars_poke01(const fitpars *pars, int i, double v);
-void pars_set(const fitpars *pars, const double v[]);
-void pars_set01(const fitpars *pars, const double v[]);
-void pars_get(const fitpars *pars, double v[]);
-void pars_get01(const fitpars *pars, double v[]);
+Real pars_min(const fitpars *pars, int i);
+Real pars_max(const fitpars *pars, int i);
+Real pars_peek(const fitpars *pars, int i);
+Real pars_peek01(const fitpars *pars, int i);
+void pars_poke(const fitpars *pars, int i, Real v);
+void pars_poke01(const fitpars *pars, int i, Real v);
+void pars_set(const fitpars *pars, const Real v[]);
+void pars_set01(const fitpars *pars, const Real v[]);
+void pars_get(const fitpars *pars, Real v[]);
+void pars_get01(const fitpars *pars, Real v[]);
 
 void pars_print(fitpars *pars);
 int pars_select(fitpars *pars);
-int pars_enter_value(fitpars *pars, int ipar, double *v);
-void pars_set_range(fitpars *pars, int ipar, double newmin, double newmax);
+int pars_enter_value(fitpars *pars, int ipar, Real *v);
+void pars_set_range(fitpars *pars, int ipar, Real newmin, Real newmax);
 
 #define PARS_ZERO_ONE 0
 #define PARS_CONSTRAINED 1

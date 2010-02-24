@@ -102,101 +102,101 @@ Q of a given step size in order to reach 0.001 on a gaussian of width dQ
 #include <complex>
 #include <cmath>
 extern "C" {
-  typedef std::complex<double> refl_complex;
+  typedef std::complex<Real> refl_complex;
 #else
 #include <math.h>
-  typedef double refl_complex;
+  typedef Real refl_complex;
 #endif
 
-double
-adjust_alignment(double Q,double lambda,double alignment);
+Real
+adjust_alignment(Real Q,Real lambda,Real alignment);
 
 void
-reflectivity(const int layers, const double d[],
-	     const double rho[], const double mu[], const double lambda,
-             const double alignment,
-             const int points, const double Q[], double R[]);
+reflectivity(const int layers, const Real d[],
+	     const Real rho[], const Real mu[], const Real lambda,
+             const Real alignment,
+             const int points, const Real Q[], Real R[]);
 void
-reflectivity_amplitude(const int layers, const double d[],
-		       const double rho[], const double mu[], const double L,
-		       const double alignment,
-		       const int points, const double Q[], refl_complex R[]);
+reflectivity_amplitude(const int layers, const Real d[],
+		       const Real rho[], const Real mu[], const Real L,
+		       const Real alignment,
+		       const int points, const Real Q[], refl_complex R[]);
 void
-reflectivity_real(const int layers, const double d[],
-		  const double rho[], const double mu[], const double lambda,
-                  const double alignment,
-		  const int points, const double Q[], double R[]);
+reflectivity_real(const int layers, const Real d[],
+		  const Real rho[], const Real mu[], const Real lambda,
+                  const Real alignment,
+		  const int points, const Real Q[], Real R[]);
 
 void
-reflectivity_imag(const int layers, const double d[],
-		  const double rho[], const double mu[], const double lambda,
-                  const double alignment,
-		  const int points, const double Q[], double R[]);
+reflectivity_imag(const int layers, const Real d[],
+		  const Real rho[], const Real mu[], const Real lambda,
+                  const Real alignment,
+		  const int points, const Real Q[], Real R[]);
 
 void
-reflrough(const int layers, const double d[], const double sigma[],
-	  const double rho[], const double mu[], const double lambda,
-          const double alignment,
-	  const int points, const double Q[], double R[]);
+reflrough(const int layers, const Real d[], const Real sigma[],
+	  const Real rho[], const Real mu[], const Real lambda,
+          const Real alignment,
+	  const int points, const Real Q[], Real R[]);
 void
-reflrough_amplitude(const int layers, const double d[], const double sigma[],
-		    const double rho[], const double mu[], const double lambda,
-                    const double alignment,
-		    const int points, const double Q[], refl_complex R[]);
+reflrough_amplitude(const int layers, const Real d[], const Real sigma[],
+		    const Real rho[], const Real mu[], const Real lambda,
+                    const Real alignment,
+		    const int points, const Real Q[], refl_complex R[]);
 
 void
-magnetic_reflectivity(const int layers, const double d[],
-		      const double rho[], const double mu[], const double L,
-                      const double alignment,
-		      const double P[], const refl_complex expth[],
-		      const double Aguide, const int points, const double Q[],
-		      double Ra[], double Rb[], double Rc[], double Rd[]);
+magnetic_reflectivity(const int layers, const Real d[],
+		      const Real rho[], const Real mu[], const Real L,
+              const Real alignment,
+		      const Real P[], const refl_complex expth[],
+		      const Real Aguide, const int points, const Real Q[],
+		      Real Ra[], Real Rb[], Real Rc[], Real Rd[]);
 void
-magnetic_amplitude(const int layers, const double d[],
-		   const double rho[], const double mu[], const double L,
-                   const double alignment,
-		   const double P[], const refl_complex expth[],
-		   const double Aguide, const int points, const double Q[],
+magnetic_amplitude(const int layers, const Real d[],
+		   const Real rho[], const Real mu[], const Real L,
+           const Real alignment,
+		   const Real P[], const refl_complex expth[],
+		   const Real Aguide, const int points, const Real Q[],
 		   refl_complex Ra[], refl_complex Rb[],
 		   refl_complex Rc[], refl_complex Rd[]);
 
 void
-fresnel_reflectivity(const double vrho, const double srho,
-		     const double vmu, const double smu,
-		     int points, const double Q[], double R[],
-		     const double lambda);
+fresnel_reflectivity(const Real vrho, const Real srho,
+		     const Real vmu, const Real smu,
+		     int points, const Real Q[], Real R[],
+		     const Real lambda);
 void
-fresnel_amplitude(const double vrho, const double srho,
-		  const double vmu, const double smu,
-		  int points, const double Q[], refl_complex R[],
-		  const double lambda);
+fresnel_amplitude(const Real vrho, const Real srho,
+		  const Real vmu, const Real smu,
+		  int points, const Real Q[], refl_complex R[],
+		  const Real lambda);
 
 #define T2Q(L,T) (4.*M_PI/(L)*sin((T)*M_PI/180.))
 #define Q2T(L,Q) 180./M_PI*asin(Q*L/(4.*M_PI))
 void
-resolution(int Nin, const double Qin[], const double Rin[],
-	   int N, const double Q[], const double dQ[], double R[]);
-double
-resolution_dT(double s1,double s2,double d);
-double
-resolution_dToT(double s1,double s2,double d,double A3);
+resolution(int Nin, const Real Qin[], const Real Rin[],
+	   int N, const Real Q[], const Real dQ[], Real R[]);
+Real
+resolution_dT(Real s1,Real s2,Real d);
+Real
+resolution_dToT(Real s1,Real s2,Real d,Real A3);
 
 void
-constant_resolution(double res, int n, double dQ[]);
+constant_resolution(Real res, int n, Real dQ[]);
 
 void
-resolution_fixed(double L, double dLoL, double dT,
-		 int n, const double Q[], double dQ[]);
+resolution_fixed(Real L, Real dLoL, Real dT,
+		 int n, const Real Q[], Real dQ[]);
 
 void
-resolution_varying(double L, double dLoL, double dToT,
-		   int n, const double Q[], double dQ[]);
+resolution_varying(Real L, Real dLoL, Real dToT,
+		   int n, const Real Q[], Real dQ[]);
 
 void
-resolution_dQoQ(double dQoQ, int n, const double Q[], double dQ[]);
+resolution_dQoQ(Real dQoQ, int n, const Real Q[], Real dQ[]);
 
 int
-resolution_padding(double dQ, double step);
+resolution_padding(Real dQ, Real step);
 
 
 #ifdef __cplusplus

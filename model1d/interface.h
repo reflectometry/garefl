@@ -32,49 +32,49 @@ extern "C" {
  * tanh_interface
  * erf_interface
  *   Predefined interface functions
- * interface_steps(int n, double z[])
+ * interface_steps(int n, Real z[])
  *   convert from depths at z to widths of slices whose edges fall between z
  * interface_create(interface*, const char *name, interface_fn fn, int n)
  *   create an interface vector and populate it with n steps.  Name
  *   must refer to persistent memory.
  * interface_destroy(interface*)
  *   free memory for the interface vector
- * double interface_value(interface*, double z)
+ * Real interface_value(interface*, Real z)
  *   compute the value of the interface at z (either by interpolation
  *   or by calling to the interface function directly if that is not
  *   too slow).
- * double interface_average(double v1, v2, r)
+ * Real interface_average(Real v1, v2, r)
  *   given an interface value f(z)=r and values v1 and v2 on either
  *   side of the interface, compute the diffuse value at z.
- * double interface_overlap(double r1, r2, v1, v, v2)
+ * Real interface_overlap(Real r1, r2, v1, v, v2)
  *   given overlapping interfaces at point z, we have z1 as the distance
  *   from the first interface to z and z2 as the distance from the second
  *   interface to z.  With f1(z1)=r1 and f2(z2)=r2, and with v1 the value
  *   before the first interface, v the nominal value between the interfaces
  *   and v2 the value at the second interface, compute the diffuse value at z.
  */
-typedef void (*interface_fn)(int n, double dz[], double r[]);
+typedef void (*interface_fn)(int n, Real dz[], Real r[]);
 typedef struct interface_struct {
   int n;
-  double depth;
-  double *value;
-  double *step;
+  Real depth;
+  Real *value;
+  Real *step;
   interface_fn fn;
   const char *name;
 } interface;
-void tanh_interface(int n, double dz[], double r[]);
-void erf_interface(int n, double dz[], double r[]);
-void interface_steps(int n, double dz[]);
+void tanh_interface(int n, Real dz[], Real r[]);
+void erf_interface(int n, Real dz[], Real r[]);
+void interface_steps(int n, Real dz[]);
 void interface_init(interface *rm);
 int interface_create(interface *rm, const char *name,
 		     interface_fn f, int n);
 int interface_set(interface *rm, const char *name,
-		  int n, const double z[], const double v[]);
+		  int n, const Real z[], const Real v[]);
 void interface_destroy(interface *rm);
-double interface_value(const interface *rm, double v);
-double interface_average(double above, double below, double weight);
-double interface_overlap(double weight_above, double weight_below,
-			 double v_above, double v, double v_below);
+Real interface_value(const interface *rm, Real v);
+Real interface_average(Real above, Real below, Real weight);
+Real interface_overlap(Real weight_above, Real weight_below,
+			 Real v_above, Real v, Real v_below);
 void interface_print(interface *fm);
 
 #ifdef __cplusplus

@@ -26,7 +26,7 @@ count_data(void)
 }
 
 static void 
-copy_all(int n, const double y[], const double dy[], double target[])
+copy_all(int n, const Real y[], const Real dy[], Real target[])
 {
   int k;
   if (n==0) return;
@@ -35,9 +35,9 @@ copy_all(int n, const double y[], const double dy[], double target[])
 }
 
 static void
-copy_matching(int ny, const double Qy[], const double y[],
-	      int ndy, const double Qdy[], const double dy[],
-	      double target[])
+copy_matching(int ny, const Real Qy[], const Real y[],
+	      int ndy, const Real Qdy[], const Real dy[],
+	      Real target[])
 {
   int iy, idy, match;
 
@@ -63,7 +63,7 @@ copy_matching(int ny, const double Qy[], const double y[],
 }
 
 static void 
-copy_normalized_data(double *target)
+copy_normalized_data(Real *target)
 {
   int k, nQ;
 
@@ -86,7 +86,7 @@ copy_normalized_data(double *target)
 }
 
 static void 
-copy_normalized_theory(double *target)
+copy_normalized_theory(Real *target)
 {
   int k, nQ;
 
@@ -117,7 +117,7 @@ copy_normalized_theory(double *target)
 }
 
 static void 
-step_nlls(const double p[], double fx[], int n, int k, void *user_data)
+step_nlls(const Real p[], Real fx[], int n, int k, void *user_data)
 {
   step_fn01(n,p,user_data);
 
@@ -125,7 +125,7 @@ step_nlls(const double p[], double fx[], int n, int k, void *user_data)
   copy_normalized_theory(fx);
 }
 
-static void print_covar(int ndim, double covar[])
+static void print_covar(int ndim, Real covar[])
 {
   int i,j;
   FILE *file;
@@ -143,13 +143,13 @@ static void print_covar(int ndim, double covar[])
 
 void cmd_nlls()
 {
-  double *work, *y, *bounds, *covar, *p;
+  Real *work, *y, *bounds, *covar, *p;
   int nQ = count_data();
   int ndim = fit[0].pars.n;
   int i;
 
   /* Allocate storage: y, covar, bounds, p */
-  work = (double *)malloc(sizeof(double)*(nQ + ndim*ndim + 3*ndim));
+  work = (Real *)malloc(sizeof(Real)*(nQ + ndim*ndim + 3*ndim));
   assert(work != NULL);
 
   y = work;
@@ -181,9 +181,9 @@ void cmd_nlls()
   /* Call nlls */
   tic();
 #if 1
-  box_nlls(step_nlls, ndim, nQ, (double *)fit, y, bounds, p, covar);
+  box_nlls(step_nlls, ndim, nQ, (Real *)fit, y, bounds, p, covar);
 #else
-  nlls(step_nlls, ndim, nQ, (double *)fit, y, p, covar);
+  nlls(step_nlls, ndim, nQ, (Real *)fit, y, p, covar);
 #endif
   printf("Done LM\n");fflush(stdout);
   toc();

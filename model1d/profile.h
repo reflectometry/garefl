@@ -15,14 +15,14 @@ extern "C" {
  * The following fields are part of a profile structure:
  *
  *    int length            - number of slices
- *    double vacuum_offset  - depth before the first interface
- *    double *d             - depth of each slice in Angstroms
- *    double *rho           - scattering length density of each slice in Nb
- *    double *mu            - absorption coefficient of each slice
+ *    Real vacuum_offset  - depth before the first interface
+ *    Real *d             - depth of each slice in Angstroms
+ *    Real *rho           - scattering length density of each slice in Nb
+ *    Real *mu            - absorption coefficient of each slice
  * #ifdef HAVE_MAGNETIC
- *    double *P             - magnetic scattering in Nb
- *    double *theta         - magnetic direction in degrees
- *    double *expth         - magnetic direction in rectangular coordinates
+ *    Real *P             - magnetic scattering in Nb
+ *    Real *theta         - magnetic direction in degrees
+ *    Real *expth         - magnetic direction in rectangular coordinates
  * #endif
  *
  * Other fields may be present and the order may be different.
@@ -47,11 +47,11 @@ extern "C" {
  *   Return true if the profile is good, or false if there was a
  *   memory allocation error.  profile_reset resets the 'good' state.
  *
- * double profile_depth(profile*)
+ * Real profile_depth(profile*)
  *   Return the total depth of all slices in the profile, including
  *   slices in the vacuum interface.
  *
- * profile_slice(profile*,double d, double rho, double mu)
+ * profile_slice(profile*,Real d, Real rho, Real mu)
  *   Add a slice to the end of the profile. If HAVE_MAGNETIC, there
  *   are an additional two paramters: P and theta.
  *
@@ -96,14 +96,14 @@ extern "C" {
 typedef struct profile_struct {
   int capacity; /* private---don't use it directly */
   int n;
-  double vacuum_offset;
-  double *rho;
-  double *mu;
-  double *d;
+  Real vacuum_offset;
+  Real *rho;
+  Real *mu;
+  Real *d;
 #ifdef HAVE_MAGNETIC
-  double *P;
-  double *theta;
-  double *expth;
+  Real *P;
+  Real *theta;
+  Real *expth;
 #endif
 } profile;
 
@@ -112,12 +112,12 @@ void profile_reset(profile *p);
 void profile_destroy(profile *p);
 int profile_extend(profile *p, int n);
 int profile_good(profile *p);
-double profile_depth(profile *p);
+Real profile_depth(profile *p);
 void profile_copy(profile *p, int start, int length);
 void profile_expth(profile *p);
-void profile_slice(profile *p, double d, double rho, double mu
+void profile_slice(profile *p, Real d, Real rho, Real mu
 #ifdef HAVE_MAGNETIC
-		   , double P, double theta
+		   , Real P, Real theta
 #endif
 		   );
 void profile_print(profile *p, char *file);

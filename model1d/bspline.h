@@ -1,6 +1,14 @@
 #ifndef _BSPLINE_H
 #define _BSPLINE_H
 
+#ifndef Real
+# ifdef USE_SINGLE
+#  define Real float
+# else
+#  define Real double
+# endif
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -19,26 +27,26 @@ extern "C" {
  */
 void
 bspline3(const int N_knots,
-	 const double knot[], const double control[],
-	 const double t_vals[],
-	 const int n, double t[], double v[]);
+	 const Real knot[], const Real control[],
+	 const Real t_vals[],
+	 const int n, Real t[], Real v[]);
 void
-bspline3_refine(int n, const double control[],
-		double control_output[]);
+bspline3_refine(int n, const Real control[],
+		Real control_output[]);
 
 void
-bspline3_eval_derivs(const int N_knots, const double knot[],
-	    const double control[], const double currT,
-	    double result[]);
+bspline3_eval_derivs(const int N_knots, const Real knot[],
+	    const Real control[], const Real currT,
+	    Real result[]);
 
 void
 bspline3_eval_all_derivs(const int N_knots,
-			 const double knot[], const double control[],
-			 double t, double derivs[]);
+			 const Real knot[], const Real control[],
+			 Real t, Real derivs[]);
 
 int
-bspline3_interpolate(const int N_data, double data[],
-		     double result[], double work[]);
+bspline3_interpolate(const int N_data, Real data[],
+		     Real result[], Real work[]);
 
 
 #ifdef __cplusplus

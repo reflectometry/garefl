@@ -1,4 +1,4 @@
-sinclude ../../reflectometry/Makeconf
+sinclude ../Makeconf
 CFLAGS?=-O2
 
 %.o: %.c ; $(CC) $(CFLAGS) -c  $< -o $@

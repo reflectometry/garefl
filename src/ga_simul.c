@@ -1074,6 +1074,7 @@ void print_usage(void)
   printf("  -S         use approximate roughness\n");
   printf("  -s         seed value for random number generator\n");
   printf("  -T         trace period for writing pop_bak.dat (0 for none)\n");
+  printf("  -v n       set population size\n");
   printf("  -w         force unweighted fit\n");
   printf("  -W         force weighted fit\n");
   printf("  -x <n:lo:hi:steps> print chisq landscape of parameter Pn\n");

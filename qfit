@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Determine next job id
+test -f .job || echo 0 > .job
+jobid=$((`cat .job`+1))
+
+# Generate the job name
+jobname=`pwd | sed -e "s,^.*/,,;s,^\(.......\).*$,\\1,"`-$jobid
+
+# Create the working directory for the job to run.
+# Copy the entire context so that the run can be reproduced.
+outdir=output.$jobid
+mkdir $outdir
+for f in *; do
+  test -f $f && cp -a $f $outdir
+done
+
+# Try building the new setup.c, removing the working
+# directory if this fails.
+cd $outdir
+if make; then
+  # If build succeeded then increment the job id
+  echo $jobid >../.job
+else
+  # If build failed, then remove the working directory
+  cd .. && rm -r $outdir && echo "Build failed" && exit
+fi
+
+
+# Construct the job queue request
+cat >$jobname <<END
+#$ -S /bin/bash
+#$ -j y
+#$ -cwd
+LD_LIBRARY_PATH=/opt/intel/current/lib/intel64 ./fit -n 1000 $*
+END
+
+# Submit the job 
+qsub -o queue.out $jobname
+qstat
+echo "Job output will be in $outdir"

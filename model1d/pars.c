@@ -106,6 +106,7 @@ void pars_poke(const fitpars *pars, int i, Real v)
   const Real max = min + range;
   v = v < min ? min : (v > max ? max : v);
   *(pars->address[i])  = v;
+  pars->value[i] = v;
 }
 void pars_poke01(const fitpars *pars, int i, Real v)
 {

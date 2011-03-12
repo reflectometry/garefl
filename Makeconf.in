@@ -35,7 +35,7 @@ RANLIB=@RANLIB@
 EXE=@EXEEXT@
 DLL=.so
 LN_S=@LN_S@
-SVN2CL=@SVN2CL@ 
+SVN2CL=@SVN2CL@
 ENABLE_MAGNETIC=@ENABLE_MAGNETIC@
 
 COPY=cp
@@ -48,7 +48,7 @@ RM=rm -f
 # PKGDEP = dependency line for makefile on PKG
 # PKGINC = include statements for compiling against PKG
 # PKGLIB = library statements for linking against PKG
-#          
+#
 # Example C application based on library:
 #     app: app.o $(PKG1DEP) $(PKG2DEP)
 #             $(CC) $(LDFLAGS) app.o $(PKG1LIB) $(PKG2LIB) $(FLIBS) $(LIBS)
@@ -90,6 +90,8 @@ GAREFL_WINCDIR=$(WSOURCEDIR)/src
 GAREFLDEP=$(GAREFL_LIBDIR)/ga_simul.o $(GAREFL_LIBDIR)/ga.o
 GAREFLLIB=$(GAREFL_WLIBDIR)/ga_simul.o $(GAREFL_WLIBDIR)/ga.o
 GAREFLINC=-I$(GAREFL_WINCDIR)
+
+REFL1D_BINDER=$(GAREFL_WLIBDIR)/refl1d.o
 
 # Since the header files are no longer gathered in one place
 # we need to encode the whole path to each on our dependency

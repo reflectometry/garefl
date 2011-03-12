@@ -3,7 +3,7 @@ include @abs_top_builddir@/Makeconf
 # Files produced by the fit programs
 LOGFILES=profile*.dat fit*.dat* fit.log par.dat pop.dat gmon.out
 
-all: fit$(EXE) gaplot
+all: fit$(EXE) gaplot model$(DLL)
 
 fit$(EXE): setup.o $(GAREFLDEP) $(MODEL1DDEP) $(FITDEP)
 	$(CXX) $(LDFLAGS) -o $@ $< $(GAREFLLIB) $(MODEL1DLIB) $(FITLIB) $(FLIBS) $(LIBS)
@@ -20,8 +20,8 @@ builddeps:
 
 #setup.o: setup.c $(FITDEPS)
 
-#setup$(DLL): setup.o
-#	$(CXX) -shared -o $@ $< $(MODEL1DLIB) $(FLIBS) $(LIBS)
+model$(DLL): setup.o $(REFL1D_BINDER)
+	$(CXX) -shared -o $@ $< $(REFL1D_BINDER) $(MODEL1DLIB) $(FLIBS) $(LIBS)
 
 clean: ; -$(RM) setup.o
 

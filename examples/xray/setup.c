@@ -32,9 +32,9 @@ fitinfo* setup_models(int *models)
                                             /* Pt55Fe45 */
   model_layer(&fit->m, 22.9417, 0.000110403595642, 4.241e-05, 20.7193);
                                             /* Seed */
-  model_layer(&fit->m, 100.0, 1.50856405415e-05, 1.552e-06, 17.5265); 
+  model_layer(&fit->m, 100.0, 1.50856405415e-05, 1.552e-06, 17.5265);
                                             /* Glass */
-  
+
   /* fit parameters */
 # if 1
   pars_add(pars, "d_Pt", &(fit->m.d[1]), 0., 1000.);

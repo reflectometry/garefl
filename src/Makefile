@@ -1,12 +1,14 @@
 include ../Makeconf
 
-TARGETS=ga_simul.o ga.o
+TARGETS=ga_simul.o ga.o refl1d.o
 
 all: $(TARGETS)
 
 ga_simul.o: ga_simul.c cmd_nlls.c ga.h $(MODEL1DHEADERS) $(FITHEADERS)
 
 ga.o: ga.c ga.h
+
+refl1d.o: refl1d.c
 
 $(FITDEP):
 	cd $(FIT_LIBDIR) && $(MAKE)

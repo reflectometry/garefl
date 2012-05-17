@@ -1394,8 +1394,14 @@ int main(int argc, char *argv[])
 
   case PRINT_PROFILE:
     /* Print the initial profile and fit to file */
-    update_models(fit);
-    save_models(fit);
+    {
+      double overall_chisq = update_models(fit);
+      save_models(fit);
+      if (MODELS>1) {
+        for (k=0; k<MODELS; k++) printf("chisq_%d = %g\n", k, fit[k].chisq_est);
+      }
+      printf("chisq = %g\n", overall_chisq);
+    }
     break;
 
   case CHISQ:

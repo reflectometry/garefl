@@ -125,20 +125,20 @@ fitinfo* setup_models(int *models)
    * to be the same in all datasets by default
    */
   pars_add(pars, "d_oxide", &(fit[0].m.d[1]), 8., 30.);
-  pars_add(pars, "d_chromium", &(fit[0].m.d[2]), 5., 30.);
-  pars_add(pars, "rho_chromium", &(fit[0].m.rho[2]), 3.0e-6, 4.5e-6);
-  pars_add(pars, "rough_cr_au", &(fit[0].m.rough[3]), 5.,30.);
+  pars_add(pars, "d_chromium", &(fit[0].m.d[2]), 5., 40.);
+  pars_add(pars, "rho_chromium", &(fit[0].m.rho[2]), 2.8e-6, 4.5e-6);
+  pars_add(pars, "rough_cr_au", &(fit[0].m.rough[3]), 3.,30.);
   pars_add(pars, "d_gold", &(fit[0].m.d[3]), 40., 150.);
-  pars_add(pars, "rho_gold", &(fit[0].m.rho[3]), 4.0e-6, 4.5e-6);
+  pars_add(pars, "rho_gold", &(fit[0].m.rho[3]), 4.0e-6, 4.6e-6);
   pars_add(pars, "d_spacer", &(fit[0].m.d[4]), 10., 30.);
   pars_add(pars, "rho_spacer", &(rho_spacer), 0e-6, 0.5e-6);
   pars_add(pars, "vol_fract_spacer", &(vol_fract_spacer), 0., 1.);
-  pars_add(pars, "d_alkyl", &(fit[0].m.d[5]), 10., 17.);
+  pars_add(pars, "d_alkyl", &(fit[0].m.d[5]), 10., 40.);
   pars_add(pars, "rho_alkyl", &(rho_alkyl), -0.5e-6, 0.0e-6);
   pars_add(pars, "vol_fract_alkyl", &(vol_fract_alkyl), 0., 1.);
   pars_add(pars, "rho_solv_0", &(fit[0].m.rho[fit[0].m.n-1]), 6.0e-6, 6.35e-6);
   pars_add(pars, "rho_solv_1", &(fit[1].m.rho[fit[1].m.n-1]), 3.0e-6, 4.5e-6);
-  pars_add(pars, "global_rough", &(global_rough), 8.0, 15.0);
+  pars_add(pars, "global_rough", &(global_rough), 7.0, 15.0);
 
   /* Build a list of 'free parameters' in fit[1].pars. These are
    * parameters for which the values are aloowed to differ from those

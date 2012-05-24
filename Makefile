@@ -3,7 +3,7 @@
 sinclude Makeconf
 SUBDIRS=boxmin model1d src examples
 
-REPO = svn://danse.us/reflectometry/trunk/garefl
+REPO = git://github.com/reflectometry/garefl.git
 VERSION = $(shell date +%Y.%m.%d)
 DISTDIR=garefl-$(VERSION)-src
 DIST=release/$(DISTDIR).tar.gz
@@ -41,10 +41,14 @@ release/garefl-$(VERSION)-notes: RELEASE-NOTES
 	cp $< $@
 
 $(DIST): configure ChangeLog release/garefl.html release/garefl-$(VERSION)-notes
-	svn export $(REPO) $(DISTDIR) >/dev/null
+	git archive --remote $(REPO) | tar -x -C $(DISTDIR) >/dev/null
 	-cp ChangeLog $(DISTDIR)
 	tar cf - $(DISTDIR) | gzip > $(DIST)
 	rm -rf $(DISTDIR)
+REPO = git://github.com/reflectometry/garefl.git
+VERSION = $(shell date +%Y.%m.%d)
+DISTDIR=garefl-$(VERSION)-src
+DIST=release/$(DISTDIR).tar.gz
 
 dist: release $(DIST)
 

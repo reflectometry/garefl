@@ -5,9 +5,9 @@
 
        http://www.ncnr.nist.gov/reflpak
 
-  or directly from the svn repository:
+  or directly from the github repository:
 
-	$ svn svn://danse.us/reflectometry/branches/garefl garefl
+       http://github.com/reflectometry/garefl
 
   Once you have downloaded the particular version you are
   interested in and extracted the files, change to the

@@ -62,8 +62,10 @@ ex_update_models(fitinfo fit[], int num_models,
   int i;
 
   MODELS = num_models;
-  for (i=0; i < num_models; i++) fit[i].penalty = 0.;
+  fit[0].penalty = 0.;
   if (*constraints) (*constraints)(fit);
+  sumsq = fit[0].penalty;
+  if (sumsq >= FIT_REJECT_PENALTY) return sumsq;
   for (i=0; i < num_models; i++) {
     int n_i = 0;
     Real sumsq_i = 0.;
@@ -72,7 +74,7 @@ ex_update_models(fitinfo fit[], int num_models,
     else fit_sumsq(&fit[i],&n_i,&sumsq_i);
     fit[i].chisq_est = sumsq_i/n_i;
     n += n_i;
-    sumsq += sumsq_i + fit[i].penalty;
+    sumsq += sumsq_i;
   }
   /* printf("sumsq=%10g, n=%4d, pars=%d\n",sumsq,n,fit[0].pars.n); */
   return n < fit[0].pars.n ? sumsq : sumsq / (n - fit[0].pars.n) ;

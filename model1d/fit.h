@@ -13,6 +13,8 @@
 extern "C" {
 #endif
 
+#define FIT_REJECT_PENALTY 1e6
+
 typedef struct beaminfo_struct {
   Real lambda;         /* Wavelength */
   Real intensity;      /* Beam intensity (usually 1) */

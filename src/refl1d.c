@@ -80,6 +80,12 @@ ex_update_models(fitinfo fit[], int num_models,
   return n < fit[0].pars.n ? sumsq : sumsq / (n - fit[0].pars.n) ;
 }
 
+double
+ex_penalty(fitinfo fit[])
+{
+  return fit[0].penalty;
+}
+
 int
 ex_npars(fitinfo fit[])
 {

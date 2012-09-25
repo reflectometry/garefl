@@ -49,9 +49,9 @@ void constr_models(fitinfo *fit)
    * to limit total thickness to some range without introducing negative
    * widths on some layers.
    */
-  double d_gold_thickness= (pars_peek(&fit[0].pars, 4) - 50)/5;
-  double reject = fabs(d_gold_thickness) > 1 ? FIT_REJECT_PENALTY: 0;
-  fit[0].penalty = d_gold_thickness*d_gold_thickness + reject;
+  double d_gold_resid = (pars_peek(&fit[0].pars, 4) - 50)/5;
+  double reject = fabs(d_gold_resid) > 1 ? FIT_REJECT_PENALTY: 0;
+  fit[0].penalty = d_gold_resid*d_gold_resid + reject;
 #endif
 
   //if (fit[0].m.d[1] > 10.) {

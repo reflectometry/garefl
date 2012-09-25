@@ -40,6 +40,20 @@ void constr_models(fitinfo *fit)
     fit[i].m.rho[5]= vol_fract_alkyl*rho_alkyl+(1-vol_fract_alkyl)*fit[i].m.rho[fit[i].m.n-1];
   }    
 
+#if 0
+  /* Play with penalty functions.  The following constrains gold thickness
+   * to 50 +/- 5, using a gaussian cost function when it is within the
+   * range, and quickly rejecting it if it is out of the range.  This is
+   * only for demonstration purposes, because rejection would be better
+   * achieved with bounds constraints.  A more practical use would be
+   * to limit total thickness to some range without introducing negative
+   * widths on some layers.
+   */
+  double d_gold_thickness= (pars_peek(&fit[0].pars, 4) - 50)/5;
+  double reject = fabs(d_gold_thickness) > 1 ? FIT_REJECT_PENALTY: 0;
+  fit[0].penalty = d_gold_thickness*d_gold_thickness + reject;
+#endif
+
   //if (fit[0].m.d[1] > 10.) {
   //  printf("fit[0].m.d[1] = %g->%g\n",fit[0].m.d[1],10.);
   //  fit[0].m.d[1] = 10.;

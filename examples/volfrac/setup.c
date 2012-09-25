@@ -124,6 +124,8 @@ fitinfo* setup_models(int *models)
   /* Specify which parameters are your fit parameters. Parameters are fitted
    * to be the same in all datasets by default
    */
+  pars_add(pars, "background 0", &(fit[0].beam.background), 1e-10, 1e-5);
+  pars_add(pars, "background 1", &(fit[1].beam.background), 1e-10, 1e-5);
   pars_add(pars, "d_oxide", &(fit[0].m.d[1]), 8., 30.);
   pars_add(pars, "d_chromium", &(fit[0].m.d[2]), 5., 40.);
   pars_add(pars, "rho_chromium", &(fit[0].m.rho[2]), 2.8e-6, 4.5e-6);

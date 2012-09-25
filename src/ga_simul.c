@@ -78,8 +78,9 @@ void set_signal_handlers(void)
   // pesky dialog. XXX FIXME XXX should this be user configurable?
   SetProcessShutdownParameters(0x280, SHUTDOWN_NORETRY);
 #ifdef HAVE_NICE
-  nice(10);
+  if (nice(10)<0) {} // Don't care if nice fails
 #endif
+  }
 }
 
 #else /* !USE_WIN32_SIGINT */
@@ -109,7 +110,7 @@ void  TERMhandler(int sig) {
 void set_signal_handlers(void)
 {
 #ifdef HAVE_NICE
-  nice(10);
+  if (nice(10)<0) {} // Don't care if nice fails
 #endif
 #ifdef SIGXCPU
   signal(SIGXCPU, TERMhandler);
@@ -775,6 +776,7 @@ Real update_models(fitinfo *fit)
   Real sumsq = 0.;
   int i;
 
+  for (i=0; i < MODELS; i++) fit[i].penalty = 0.;
   if (*constraints) (*constraints)(fit);
   for (i=0; i < MODELS; i++) {
     int n_i = 0;
@@ -784,7 +786,7 @@ Real update_models(fitinfo *fit)
     else fit_sumsq(&fit[i],&n_i,&sumsq_i);
     fit[i].chisq_est = sumsq_i/n_i;
     n += n_i;
-    sumsq += sumsq_i;
+    sumsq += sumsq_i + fit[i].penalty;
   }		   
   /* printf("sumsq=%10g, n=%4d, pars=%d\n",sumsq,n,fit[0].pars.n); */
   return n < fit[0].pars.n ? sumsq : sumsq / (n - fit[0].pars.n) ;

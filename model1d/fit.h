@@ -56,6 +56,7 @@ typedef struct fitinfo_struct {
   /* Fitness value */
   Real chisq_est;  /* Current chisq */
   Real weight;     /* Scale factor for chisq (default 1) */
+  Real penalty;    /* Penalty factor for current model, set by constraints */
 
 	/* Working storage */
   int worksize;      /* Working storage */

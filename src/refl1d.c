@@ -15,8 +15,8 @@ fit_output *output_model = NULL;
 fit_constraints *constraints = NULL;
 int MODELS;
 
-/* Copy parameters between models. */
 /* Note: duplicated from ga_simul.c because it relies on global MODELS */
+/* Copy parameters between models. */
 void
 tied_parameters(fitinfo fit[])
 {

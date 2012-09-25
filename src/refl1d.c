@@ -8,7 +8,6 @@
 
 /* Application control parameters */
 // FIXME: shouldn't be using globals here
-//int MODELS;
 //int approximate_roughness = 0;
 //int weighted = 1;
 //fitinfo *fit;
@@ -17,6 +16,7 @@ fit_constraints *constraints = NULL;
 int MODELS;
 
 /* Copy parameters between models. */
+/* Note: duplicated from ga_simul.c because it relies on global MODELS */
 void
 tied_parameters(fitinfo fit[])
 {
@@ -24,7 +24,7 @@ tied_parameters(fitinfo fit[])
 
   /* Rescue the free parameters from the model. */
   for (i=0; i < fit[1].pars.n; i++)
-    fit[1].pars.value[i] = *(fit[1].pars.address[i]);
+    fit[1].pars.value[i] = pars_peek(&fit[1].pars,i);
 
   /* Go through all layers copying parameters from model 0
    * to the other models. This is more work than we strictly
@@ -50,7 +50,7 @@ tied_parameters(fitinfo fit[])
 
   /* Restore the free parameters to the model. */
   for (i=0; i < fit[1].pars.n; i++)
-    *(fit[1].pars.address[i]) = fit[1].pars.value[i];
+    pars_poke(&fit[1].pars, i, fit[1].pars.value[i]);
 }
 
 Real

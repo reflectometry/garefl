@@ -55,7 +55,8 @@ tied_parameters(fitinfo fit[])
 
 Real
 ex_update_models(fitinfo fit[], int num_models,
-              int weighted, int approximate_roughness)
+              int weighted, int approximate_roughness,
+              int forced)
 {
   int n = 0;
   Real sumsq = 0.;
@@ -65,7 +66,7 @@ ex_update_models(fitinfo fit[], int num_models,
   fit[0].penalty = 0.;
   if (*constraints) (*constraints)(fit);
   sumsq = fit[0].penalty;
-  if (sumsq >= FIT_REJECT_PENALTY) return sumsq;
+  if (!forced && sumsq >= FIT_REJECT_PENALTY) return sumsq;
   for (i=0; i < num_models; i++) {
     int n_i = 0;
     Real sumsq_i = 0.;
@@ -80,8 +81,9 @@ ex_update_models(fitinfo fit[], int num_models,
   return n < fit[0].pars.n ? sumsq : sumsq / (n - fit[0].pars.n) ;
 }
 
+
 double
-ex_penalty(fitinfo fit[])
+ex_get_penalty(fitinfo fit[])
 {
   return fit[0].penalty;
 }

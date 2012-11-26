@@ -44,6 +44,24 @@ void constr_models(fitinfo *fit)
   //  printf("fit[0].m.d[1] = %g->%g\n",fit[0].m.d[1],10.);
   //  fit[0].m.d[1] = 10.;
   //}
+
+#if 1
+  /* Play with penalty functions.  The following constrains the total
+   * thickness to be 200 +/- 20, using a gaussian cost function when 
+   * it is within the range, and quickly rejecting it if it is out of 
+   * the range.
+   */
+  double thickness = 0.;
+  for (k=1; k+1 < fit[0].m.n; k++) thickness += fit[0].m.d[k];
+
+  double resid = (thickness - 140)/0.01;
+  double reject = fabs(resid) > 1 ? resid*resid*FIT_REJECT_PENALTY: 0;
+  static int counter=0;
+  if ((++counter%1000)/100==1)
+  //printf("thickness=%g, resid=%g, reject=%g\n",thickness,resid,reject);
+  fit[0].penalty = resid*resid + reject;
+#endif
+
 }
 
 void save(fitinfo *fit)
@@ -143,7 +161,7 @@ fitinfo* setup_models(int *models)
   pars_add(pars, "global_rough", &(global_rough), 7.0, 15.0);
 
   /* Build a list of 'free parameters' in fit[1].pars. These are
-   * parameters for which the values are aloowed to differ from those
+   * parameters for which the values are allowed to differ from those
    * in model 0.  By default all values in all models are the same unless
    * specified here. The range data is not useful, so set it to [0,1].
    */

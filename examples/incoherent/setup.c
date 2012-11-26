@@ -104,7 +104,7 @@ fitinfo* setup_models(int *models)
     model_layer(&fit[i].m, 5.800, 3.8e-6, 0.0e-8, 10.00); /* 2 chromium */
     model_layer(&fit[i].m, 90.70, 4.50e-6, 0.0e-8, 10.00); /* 3 gold */
     model_layer(&fit[i].m, 18.00, 1.00e-6, 0.0e-8, 10.00); /* 4 spacer */
-    model_layer(&fit[i].m, 28.00, -0.2e-6, 0.0e-8, 10.00); /* 5 alkyl tails */
+    model_layer(&fit[i].m, 14.00, -0.2e-6, 0.0e-8, 10.00); /* 5 alkyl tails */
     model_layer(&fit[i].m, 100.0, 6.35e-6, 0.0e-8, 10.00); /* 6 solvent */
   }
   

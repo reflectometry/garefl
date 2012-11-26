@@ -23,8 +23,9 @@ tied_parameters(fitinfo fit[])
   int i,k;
 
   /* Rescue the free parameters from the model. */
-  for (i=0; i < fit[1].pars.n; i++)
+  for (i=0; i < fit[1].pars.n; i++) {
     fit[1].pars.value[i] = pars_peek(&fit[1].pars,i);
+  }
 
   /* Go through all layers copying parameters from model 0
    * to the other models. This is more work than we strictly
@@ -49,8 +50,10 @@ tied_parameters(fitinfo fit[])
   }
 
   /* Restore the free parameters to the model. */
-  for (i=0; i < fit[1].pars.n; i++)
-    pars_poke(&fit[1].pars, i, fit[1].pars.value[i]);
+  for (i=0; i < fit[1].pars.n; i++) {
+    // Don't use pars_poke since it does bounds checking.
+    *(fit[1].pars.address[i]) = fit[1].pars.value[i];
+  }
 }
 
 Real

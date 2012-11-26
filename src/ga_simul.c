@@ -947,8 +947,9 @@ void tied_parameters(fitinfo fit[])
   int i,k;
 
   /* Rescue the free parameters from the model. */
-  for (i=0; i < fit[1].pars.n; i++)
+  for (i=0; i < fit[1].pars.n; i++) {
     fit[1].pars.value[i] = pars_peek(&fit[1].pars,i);
+  }
 
   /* Go through all layers copying parameters from model 0
    * to the other models. This is more work than we strictly
@@ -973,8 +974,10 @@ void tied_parameters(fitinfo fit[])
   }
 
   /* Restore the free parameters to the model. */
-  for (i=0; i < fit[1].pars.n; i++)
-    pars_poke(&fit[1].pars, i, fit[1].pars.value[i]);
+  for (i=0; i < fit[1].pars.n; i++) {
+    // Don't use pars_poke since it does bounds checking.
+    *(fit[1].pars.address[i]) = fit[1].pars.value[i];
+  }
 }
 
 Real step_ga(int n, const Real *p, void *user_data)
@@ -1059,6 +1062,7 @@ void print_usage(void)
   printf("  -H         max CPU hours (default 18)\n");
 #endif
   printf("  -i         keep initial parameters in initial population\n");
+  printf("  -I <file>  load initial parameters from file\n");
   printf("  -j         save models as staj file\n");
 #ifdef USE_NLLS_FIT
   printf("  -l         Levenberg-Marquardt optimizer\n");
@@ -1116,12 +1120,50 @@ static void explode(fitpars *p, Real g)
   }
 }
 
+void load_initial_pars(fitinfo *fit, char *filename)
+{
+  fitpars *pars = &fit[0].pars;
+  char line[256];
+  int i;
+  FILE *f = fopen(filename, "r");
+
+  if (!f) {
+    fprintf(stderr, "could not open par file %s\n", filename);
+    exit(1);
+  }
+
+  for (i=0; i < fit->pars.n; i++) {
+    double v;
+    const char *parname = pars_name(pars,i);
+    int parnamelen = strlen(parname);
+    if (fgets(line, sizeof(line), f) == NULL) {
+      fprintf(stderr, "not enough parameters in %s\n", filename);
+      fclose(f);
+      exit(1);
+    }
+    if (strncmp(parname, line, parnamelen) != 0) {
+      fprintf(stderr, "parameter %s not found on line %d\n", parname, i+1);
+      fclose(f);
+      exit(1);
+    }
+    if (sscanf(line+parnamelen, "%lg", &v) != 1) {
+      fprintf(stderr, "bad parameter value for %s on line %d\n", parname, i+1);
+      fclose(f);
+      exit(1);
+    }
+    pars_poke(pars,i,v);
+  }
+  // don't care if there are too many parameters.
+  fclose(f);
+}
+
 int main(int argc, char *argv[])
 {
   enum { 
     GA, AMOEBA, NLLS, QUADFIT, 
     CHISQ, PRINT_MODEL, PRINT_PROFILE, SAVE_STAJ, OUTPUT_MODEL
   } action;
+  char *initial_pars = NULL;
   int nth=0, n1=0, xdims=0, k, steps=20;
   int generations = 1000000000;
   int ch;
@@ -1142,7 +1184,7 @@ int main(int argc, char *argv[])
   set.initOption = 0;
   set.iElite = 0;
   action = GA;
-  while((ch = getopt(argc, argv, "A:f:x:n:T:r:s:t:c:v:X:H:opeSFLmgijwWNalQz?")) != -1) {
+  while((ch = getopt(argc, argv, "A:f:x:n:T:r:s:t:c:v:X:H:I:opeSFLmgijwWNalQz?")) != -1) {
     switch(ch) {
     case 'e':
       set.iElite = 1;
@@ -1203,6 +1245,10 @@ int main(int argc, char *argv[])
       if (k < 1) portion = 0.01;
       else if (k > 100) portion = 1.0;
       else portion = k/100.;
+      break;
+
+    case 'I':
+      initial_pars = optarg;
       break;
 
     case 'S':
@@ -1334,6 +1380,10 @@ int main(int argc, char *argv[])
     init_ga_fit(fit);
     getChromosome(&set,fittest(&set),bestpars);
     pars_set01(&fit[0].pars, bestpars); 
+  }
+
+  if (initial_pars) {
+    load_initial_pars(fit, initial_pars);
   }
 
   /* Apply constraints given new limits */

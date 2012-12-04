@@ -36,15 +36,17 @@ fitinfo* setup_models(int *models)
                                             /* Glass */
 
   /* fit parameters */
+#if 0 /* unknown parameters */
 # if 1
-  pars_add(pars, "d_Pt", &(fit->m.d[1]), 0., 1000.);
+  pars_add(pars, "d_Pt_cap", &(fit->m.d[1]), 0., 1000.);
   pars_add(pars, "d_NiFe", &(fit->m.d[2]), 0., 1000.);
   pars_add(pars, "d_PtFe", &(fit->m.d[3]), 0., 1000.);
-  pars_add(pars, "d_Seed", &(fit->m.d[4]), 0., 1000.);
+  pars_add(pars, "d_Pt_seed", &(fit->m.d[4]), 0., 1000.);
 # endif
 
 # if 1
-  pars_add(pars, "Pt:Air", &(fit->m.rough[1]), 0., 50.);
+  pars_add(pars, "Cap:Air", &(fit->m.rough[0]), 0., 50.);
+  pars_add(pars, "NiFe:Cap", &(fit->m.rough[1]), 0., 50.);
   pars_add(pars, "PtFe:NiFe", &(fit->m.rough[2]), 0., 50.);
   pars_add(pars, "Seed:PtFe", &(fit->m.rough[3]), 0., 50.);
   pars_add(pars, "Glass:Seed", &(fit->m.rough[4]), 0., 50.);
@@ -55,6 +57,7 @@ fitinfo* setup_models(int *models)
   pars_add(pars, "rho_NiFe", &(fit->m.rho[2]), 0., 3e-4);
   pars_add(pars, "rho_PtFe", &(fit->m.rho[3]), 0., 3e-4);
   pars_add(pars, "rho_Seed", &(fit->m.rho[4]), 0., 3e-4);
+  pars_add(pars, "rho_glass", &(fit->m.rho[5]), 0., 3e-4);
 # endif
 
 # if 1
@@ -62,7 +65,42 @@ fitinfo* setup_models(int *models)
   pars_add(pars, "mu_NiFe", &(fit->m.mu[2]), 0., 3e-4);
   pars_add(pars, "mu_PtFe", &(fit->m.mu[3]), 0., 3e-4);
   pars_add(pars, "mu_Seed", &(fit->m.mu[4]), 0., 3e-4);
+  pars_add(pars, "mu_glass", &(fit->m.mu[5]), 0., 3e-4);
 # endif
+
+#elif 1 /* grower values */
+
+# if 1
+  pars_add(pars, "d_Pt_cap", &(fit->m.d[1]), 10., 50.);
+  pars_add(pars, "d_NiFe", &(fit->m.d[2]), 300., 700.);
+  pars_add(pars, "d_PtFe", &(fit->m.d[3]), 50., 250.);
+  pars_add(pars, "d_Pt_seed", &(fit->m.d[4]), 10., 50.);
+# endif
+
+# if 1
+  pars_add(pars, "Cap:Air", &(fit->m.rough[0]), 0., 50.);
+  pars_add(pars, "NiFe:Cap", &(fit->m.rough[1]), 0., 50.);
+  pars_add(pars, "PtFe:NiFe", &(fit->m.rough[2]), 0., 50.);
+  pars_add(pars, "Seed:PtFe", &(fit->m.rough[3]), 0., 50.);
+  pars_add(pars, "Glass:Seed", &(fit->m.rough[4]), 0., 50.);
+# endif
+
+# if 1
+  pars_add(pars, "rho_Pt_cap", &(fit->m.rho[1]), 70e-6, 105e-6);
+  pars_add(pars, "rho_NiFe", &(fit->m.rho[2]), 50e-6,75e-6);
+  pars_add(pars, "rho_PtFe", &(fit->m.rho[3]), 75e-6, 120e-6);
+  pars_add(pars, "rho_Pt_seed", &(fit->m.rho[4]), 90e-6, 130e-6);
+  pars_add(pars, "rho_glass", &(fit->m.rho[5]), 12e-6, 18e-6);
+# endif
+
+# if 1
+  pars_add(pars, "mu_Pt_cap", &(fit->m.mu[1]), 10e-6*3, 15e-6*3);
+  pars_add(pars, "mu_NiFe", &(fit->m.mu[2]), 2e-6*3, 3e-6*3);
+  pars_add(pars, "mu_PtFe", &(fit->m.mu[3]), 8e-6*3, 12e-6*3);
+  pars_add(pars, "mu_Pt_seed", &(fit->m.mu[4]), 10e-6*3, 15e-6*3);
+  pars_add(pars, "mu_glass", &(fit->m.mu[5]), 0.4e-6*3, 0.6e-6*3);
+# endif
+#endif
 
   return fit;
 }

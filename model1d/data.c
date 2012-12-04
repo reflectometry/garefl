@@ -55,7 +55,7 @@ static void log2lin(int n, Real *y, Real *dy)
   int i;
   for (i=0; i < n; i++) {
     y[i] = exp(LN10 * y[i]);
-    dy[i] = y[i] * dy[i] / LN10;
+    dy[i] = y[i] * dy[i] * LN10;
   }
 }
 

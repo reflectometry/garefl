@@ -45,11 +45,11 @@ fitinfo* setup_models(int *models)
 # endif
 
 # if 1
-  pars_add(pars, "Cap:Air", &(fit->m.rough[0]), 0., 50.);
-  pars_add(pars, "NiFe:Cap", &(fit->m.rough[1]), 0., 50.);
-  pars_add(pars, "PtFe:NiFe", &(fit->m.rough[2]), 0., 50.);
-  pars_add(pars, "Seed:PtFe", &(fit->m.rough[3]), 0., 50.);
-  pars_add(pars, "Glass:Seed", &(fit->m.rough[4]), 0., 50.);
+  pars_add(pars, "Cap:Air", &(fit->m.rough[1]), 0., 50.);
+  pars_add(pars, "NiFe:Cap", &(fit->m.rough[2]), 0., 50.);
+  pars_add(pars, "PtFe:NiFe", &(fit->m.rough[3]), 0., 50.);
+  pars_add(pars, "Seed:PtFe", &(fit->m.rough[4]), 0., 50.);
+  pars_add(pars, "Glass:Seed", &(fit->m.rough[5]), 0., 50.);
 # endif
 
 # if 1
@@ -78,11 +78,11 @@ fitinfo* setup_models(int *models)
 # endif
 
 # if 1
-  pars_add(pars, "Cap:Air", &(fit->m.rough[0]), 0., 50.);
-  pars_add(pars, "NiFe:Cap", &(fit->m.rough[1]), 0., 50.);
-  pars_add(pars, "PtFe:NiFe", &(fit->m.rough[2]), 0., 50.);
-  pars_add(pars, "Seed:PtFe", &(fit->m.rough[3]), 0., 50.);
-  pars_add(pars, "Glass:Seed", &(fit->m.rough[4]), 0., 50.);
+  pars_add(pars, "Cap:Air", &(fit->m.rough[1]), 0., 50.);
+  pars_add(pars, "NiFe:Cap", &(fit->m.rough[2]), 0., 50.);
+  pars_add(pars, "PtFe:NiFe", &(fit->m.rough[3]), 0., 50.);
+  pars_add(pars, "Seed:PtFe", &(fit->m.rough[4]), 0., 50.);
+  pars_add(pars, "Glass:Seed", &(fit->m.rough[5]), 0., 50.);
 # endif
 
 # if 1

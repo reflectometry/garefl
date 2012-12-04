@@ -64,7 +64,7 @@ ex_update_models(fitinfo fit[], int num_models,
   int n = 0;
   Real sumsq = 0.;
   int i;
-
+  // printf("calling update\n");
   MODELS = num_models;
   fit[0].penalty = 0.;
   if (*constraints) (*constraints)(fit);
@@ -80,7 +80,7 @@ ex_update_models(fitinfo fit[], int num_models,
     n += n_i;
     sumsq += sumsq_i;
   }
-  /* printf("sumsq=%10g, n=%4d, pars=%d\n",sumsq,n,fit[0].pars.n); */
+  // printf("sumsq=%10g, n=%4d, pars=%d\n",sumsq,n,fit[0].pars.n);
   return n < fit[0].pars.n ? sumsq : sumsq / (n - fit[0].pars.n) ;
 }
 
@@ -88,6 +88,7 @@ ex_update_models(fitinfo fit[], int num_models,
 double
 ex_get_penalty(fitinfo fit[])
 {
+  // printf("returning %.2f from penalty\n",fit[0].penalty);
   return fit[0].penalty;
 }
 

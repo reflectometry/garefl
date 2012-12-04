@@ -65,6 +65,7 @@ fit_init(fitinfo *fit)
   fit->worksize = 0;
   fit->datatype = FIT_MAGNITUDE;
   fit->weight = 1.;
+  fit->penalty = 0.;
 
   /* Parameters to support incoherent sum of models */
   fit->number_incoherent = 0;

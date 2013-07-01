@@ -80,7 +80,6 @@ void set_signal_handlers(void)
 #ifdef HAVE_NICE
   if (nice(10)<0) {} // Don't care if nice fails
 #endif
-  }
 }
 
 #else /* !USE_WIN32_SIGINT */

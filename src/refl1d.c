@@ -57,6 +57,13 @@ tied_parameters(fitinfo fit[])
 }
 
 Real
+ex_output_model(fitinfo fit[])
+{
+  if (*constraints) (*constraints)(fit);
+  (*output_model)(fit);
+}
+
+Real
 ex_update_models(fitinfo fit[], int num_models,
               int weighted, int approximate_roughness,
               int forced)

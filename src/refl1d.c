@@ -56,6 +56,7 @@ tied_parameters(fitinfo fit[])
   }
 }
 
+/* Call output_model function */
 Real
 ex_output_model(fitinfo fit[])
 {

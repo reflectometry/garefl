@@ -613,7 +613,6 @@ static void incoherent_unpolarized_theory(fitinfo *fit)
 
 static void calc_magnitude(fitinfo *fit)
 {
-	int k;
   /* _write_profile(fit,"prof.out"); */
 
   if (fit->datatype == FIT_POLARIZED) {
@@ -641,6 +640,7 @@ static void calc_magnitude(fitinfo *fit)
 		/* Generate reflectivity amplitude from the profile */
   	if (fit->m.is_magnetic) {
 #ifdef HAVE_MAGNETIC
+	    int k;
 	    magnetic_reflectivity(fit->p.n, fit->p.d, fit->p.rho,
 				  fit->p.mu,fit->beam.lambda, fit->beam.alignment,
 				  fit->p.P, fit->p.expth,
@@ -907,7 +907,7 @@ fit_partial(fitinfo *fit, int approx, Real portion, Real best,
     int k= (int)floor(frandom()*nQ);
     partial_point(fit,k,Q,A,B,C,D,weighted,&df,&sumsq);
   }
-  samples = ceil(portion*nQ);
+  samples = (int)ceil(portion*nQ);
   while (i++ < samples) {
     int k= (int)floor(frandom()*nQ);
     partial_point(fit,k,Q,A,B,C,D,weighted,&df,&sumsq);

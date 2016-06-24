@@ -11,6 +11,10 @@
 #include <stdio.h>
 #include "interface.h"
 
+#ifdef NEED_ERF
+double erf(double);
+#endif
+
 void interface_print(interface *rm)
 {
   int i;

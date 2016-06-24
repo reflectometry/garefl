@@ -138,7 +138,7 @@ void sort_data(fitdata *data)
  * Return the number of data columns:
  *   2: Q, R
  *   3: Q, R, dR
- *   4: Q, dQ, R, dR
+ *   4: Q, R, dR, dQ
  *   dQ and dR default to 0.
  */
 int data_load(fitdata *data, const char *file)
@@ -212,10 +212,10 @@ int data_load(fitdata *data, const char *file)
 	  return BAD_RESOLUTION_VALUE;
 	}
 	data->Q[n] = c1;
-	data->dQ[n] = c2;
+	data->dQ[n] = c4;
 	/* dQ is in sigma units. Multiply by sqrt (8 ln(2)) for FWHM */
-	data->R[n] = c3;
-	data->dR[n] = c4;
+	data->R[n] = c2;
+	data->dR[n] = c3;
 	n++;
 	break;
       }

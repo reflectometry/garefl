@@ -197,10 +197,12 @@ ex_get_profile(fitinfo fit[], int k,
     w[i] = fit[k].p.d[i];
     rho[i] = fit[k].p.rho[i];
     irho[i] = fit[k].p.mu[i]/2/fit[k].beam.lambda;
+#ifdef HAVE_MAGNETIC
     if (fit[k].m.is_magnetic == 4) {
       rhoM[i] = fit[k].p.P[i];
       thetaM[i] = fit[k].p.theta[i];
     }
+#endif
   }
 }
 

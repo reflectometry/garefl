@@ -13,6 +13,7 @@
 /*=========== CONSTRAINTS =====================*/
 void constr_models(fitinfo *fit)
 {
+#ifdef HAVE_MAGNETIC
   int l;
 
   // Constraints on first data set
@@ -26,7 +27,7 @@ void constr_models(fitinfo *fit)
 
   fit[0].m.theta[0]      = fit[0].m.theta[1];
   fit[0].m.theta[4]      = fit[0].m.theta[3];
-  
+
   // Copy constrained parameters 
   for (l=1; l < MODELS; l++) {
     fit[l].m.d[1]            = fit[0].m.d[1];
@@ -44,7 +45,7 @@ void constr_models(fitinfo *fit)
     fit[l].m.rough[2]      = fit[0].m.rough[2];
     fit[l].m.rough[3]      = fit[0].m.rough[3];
     fit[l].m.rough[4]      = fit[0].m.rough[4];
-  
+
     fit[l].m.thetarough[1] = fit[0].m.thetarough[1];
     fit[l].m.thetarough[4] = fit[0].m.thetarough[4];
   
@@ -57,11 +58,13 @@ void constr_models(fitinfo *fit)
     fit[l].m.theta[4]      = fit[l].m.theta[3];
   }
   
+#endif /* HAVE_MAGNETIC */
 }
 
 fitinfo* setup_models(int *models)
 {
   static fitinfo fit[MODELS];
+#ifdef HAVE_MAGNETIC
   int i;
   char fa[64], fb[64], fc[64], fd[64];
   fitpars *pars = &fit[0].pars;
@@ -311,7 +314,8 @@ fitinfo* setup_models(int *models)
   pars_add(pars,"th3-35G",&(fit[4].m.theta[3]),0,360);
 #endif
   
-  
+#endif  /* HAVE_MAGNETIC */
+
   constraints = constr_models;
 
   return fit;

@@ -994,6 +994,8 @@ void init_ga_fit(fitinfo *fit)
   // Fitness function
   set.function  = step_ga;
   set.funcParms = fit;
+  set.par_min = fit->pars.min;
+  set.par_range = fit->pars.range;
   // Backup population file
   strncpy(set.popFile,"pop.dat",sizeof(set.popFile));
   set.popFile[sizeof(set.popFile)-1]='\0';

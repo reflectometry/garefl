@@ -994,6 +994,13 @@ void init_ga_fit(fitinfo *fit)
   // Fitness function
   set.function  = step_ga;
   set.funcParms = fit;
+  if (save_zero_one) {
+    // Force pop.dat to be [0,1]
+    set.par_min = set.par_range = NULL;
+  } else {
+    set.par_min = fit->pars.min;
+    set.par_range = fit->pars.range;
+  }
   // Backup population file
   strncpy(set.popFile,"pop.dat",sizeof(set.popFile));
   set.popFile[sizeof(set.popFile)-1]='\0';
@@ -1086,7 +1093,7 @@ void print_usage(void)
   printf("  -W         force weighted fit\n");
   printf("  -x <n:lo:hi:steps> print chisq landscape of parameter Pn\n");
   printf("             or of the Pm-Pn surface if -x is repeated\n");
-  printf("  -z         write par.dat file in [0-1] rather real space\n");
+  printf("  -z         write pop.data/par.dat file in [0-1] rather real space\n");
   printf("Output\n");
   printf("  model#.dat    : best model   (d rho mu P theta)\n");
   printf("  fit#.dat[ABCD]: best fit     (Q R dR fit)\n");

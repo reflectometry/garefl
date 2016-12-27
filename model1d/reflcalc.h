@@ -101,11 +101,20 @@ Q of a given step size in order to reach 0.001 on a gaussian of width dQ
 #ifdef __cplusplus
 #include <complex>
 #include <cmath>
+
 extern "C" {
   typedef std::complex<Real> refl_complex;
 #else
 #include <math.h>
   typedef Real refl_complex;
+#endif
+
+#ifdef NEED_ERF
+double erf(double);
+#endif
+
+#ifndef M_PI
+# define M_PI 3.141592653589793
 #endif
 
 Real

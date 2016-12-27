@@ -66,7 +66,7 @@ refl(const int layers, const Real d[], const Real sigma[],
   for (int i=2; i < layers; i++) {
     n += step; r += step;
     f = sqrt(refl_complex(Qsqrel-pi16*rho[n],pi8olambda*mu[n]));
-    F = (f - f_next) / (f + f_next) * Real(exp(-0.5*Qsq*sigma[r]*sigma[r]/log(256)));
+    F = (f - f_next) / (f + f_next) * Real(exp(-0.5*Qsq*sigma[r]*sigma[r]/log(256.)));
     R = exp(d[n]*J*f) * (R + F) / (R*F + Real(1));
     f_next = f;
   }
@@ -76,7 +76,7 @@ refl(const int layers, const Real d[], const Real sigma[],
   // S is 0 and the exponential is 1.
   r += step;
   f = fabs(Q);
-  F = (f-f_next) / (f+f_next) * Real(exp(-0.5*Qsq*sigma[r]*sigma[r]/log(256)));
+  F = (f-f_next) / (f+f_next) * Real(exp(-0.5*Qsq*sigma[r]*sigma[r]/log(256.)));
   R = (R + F) / (R*F + Real(1));
 }
 

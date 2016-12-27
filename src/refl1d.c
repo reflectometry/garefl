@@ -56,6 +56,14 @@ tied_parameters(fitinfo fit[])
   }
 }
 
+/* Call output_model function */
+void
+ex_output_model(fitinfo fit[])
+{
+  if (*constraints) (*constraints)(fit);
+  (*output_model)(fit);
+}
+
 Real
 ex_update_models(fitinfo fit[], int num_models,
               int weighted, int approximate_roughness,
@@ -209,6 +217,7 @@ ex_get_profile(fitinfo fit[], int k,
 int
 ex_ncalc(fitinfo fit[], int k)
 {
+  //return fit[k].dataA.n;
   return fit[k].nQ;
 }
 
@@ -216,15 +225,16 @@ void
 ex_get_reflectivity(fitinfo fit[], int k, int xs, Real Q[], Real R[])
 {
   int i;
-  for (i=0; i < fit[k].nQ; i++) Q[i] = fit[k].fitQ[i];
+  int nQ = ex_ncalc(fit, k);
+  for (i=0; i < nQ; i++) Q[i] = fit[k].fitQ[i];
   if (xs == 0) {
-    for (i=0; i < fit[k].nQ; i++) R[i] = fit[k].fitA[i];
+    for (i=0; i < nQ; i++) R[i] = fit[k].fitA[i];
   } else if (xs==1) {
-    for (i=0; i < fit[k].nQ; i++) R[i] = fit[k].fitB[i];
+    for (i=0; i < nQ; i++) R[i] = fit[k].fitB[i];
   } else if (xs==2) {
-    for (i=0; i < fit[k].nQ; i++) R[i] = fit[k].fitC[i];
+    for (i=0; i < nQ; i++) R[i] = fit[k].fitC[i];
   } else if (xs==3) {
-    for (i=0; i < fit[k].nQ; i++) R[i] = fit[k].fitD[i];
+    for (i=0; i < nQ; i++) R[i] = fit[k].fitD[i];
   }
 }
 

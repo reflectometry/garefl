@@ -1169,7 +1169,7 @@ int main(int argc, char *argv[])
     GA, AMOEBA, NLLS, QUADFIT, 
     CHISQ, PRINT_MODEL, PRINT_PROFILE, SAVE_STAJ, OUTPUT_MODEL
   } action;
-  char *initial_pars = NULL;
+  char *initial_pars_filename = NULL;
   int nth=0, n1=0, xdims=0, k, steps=20;
   int generations = 1000000000;
   int ch;
@@ -1254,7 +1254,7 @@ int main(int argc, char *argv[])
       break;
 
     case 'I':
-      initial_pars = optarg;
+      initial_pars_filename = optarg;
       break;
 
     case 'S':
@@ -1387,12 +1387,13 @@ int main(int argc, char *argv[])
     getChromosome(&set,fittest(&set),bestpars);
     pars_set01(&fit[0].pars, bestpars);
     // Get pars as true values rather than values in [0,1]
-    pars_get(&fit[0].pars, bestpars);
   }
 
-  if (initial_pars) {
-    load_initial_pars(fit, initial_pars);
+  if (initial_pars_filename) {
+    load_initial_pars(fit, initial_pars_filename);
   }
+
+  pars_get(&fit[0].pars, bestpars);
 
   /* Apply constraints given new limits */
   if (constraints != NULL) (*constraints)(fit);

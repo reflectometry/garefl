@@ -16,19 +16,22 @@
   The next step(s) are operating system specific.
 
   MacOSX
-    For OS X 10.4 you will need to have a fortran compiler to fit
-    magnetic systems.  E.g., the following version of the gfortran 
-    compiler builds universal binaries:
+
+    Without magnetism (no fortran compiler required):
+
+	./configure --disable-magnetic
+
+    With magnetism (requires fortran compiler):
+
+	./configure FLIBS=-lg2c         # g77 fortran compiler
+        ./configure FLIBS=/usr/local/lib/libgfortran.a  # gfortran compiler
+
+    You can install a fortran compiler from brew or ports, or download it from:
 
         http://r.research.att.com/tools
 
-    Install gnuplot and aquaterm.
+    Install gnuplot and aquaterm if you need plotting.
 
-    On Mac OS X you may need to use one of the following:
-
-	./configure --disable-magnetic  # No fortran compiler
-	./configure FLIBS=-lg2c         # g77 fortran compiler
-        ./configure FLIBS=/usr/local/lib/libgfortran.a  # gfortran compiler
 
   Windows
     
@@ -63,5 +66,5 @@
   and fitting with them.
 
 Paul Kienzle
-2008-02-26
+2016-12-28
 

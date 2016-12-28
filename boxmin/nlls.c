@@ -15,7 +15,8 @@
 # define levmar_bc_dif dlevmar_bc_dif
 #endif
 
-typedef void (*lmfn)(Real *p, Real *hx, int m, int n, void *adata);
+// like nlls_fn without the const qualifiers
+typedef void (*lmfn)(Real *p, Real *hx, int m, int n, void *data);
 
 
 void nlls_printstop(Real info[])
@@ -37,25 +38,25 @@ int nlls_worksize(int n, int k)
 }
 
 void nlls(nlls_fn f, int n, int k, 
-	  const Real x[], const Real y[], Real p[], Real covar[])
+	  void *data, const Real y[], Real p[], Real covar[])
 {
   Real info[LM_INFO_SZ];
   Real opts[LM_OPTS_SZ];
   opts[0]=LM_INIT_MU; /* Initial scale */
   opts[1]=opts[2]=opts[3]=1e-4; /* Stopping threshhold */
   opts[4]=LM_DIFF_DELTA; /* dx for numerical differentiation */
-  levmar_dif((lmfn)f, \
-	      p, (Real *)y, n, k, \
-	      500,  /* itmax */ \
-	      opts, /* opts[5] = { mu, e1, e2, e3, delta } */ \
-	      info, /* info[LM_INFO_SZ] */ \
-	      NULL, /* work vector of size LM_DIF_WORKSZ(3,k) */ \
-	      covar, (void *)x);
+  levmar_dif((lmfn)f,
+	      p, (Real *)y, n, k,
+	      500,  /* itmax */
+	      opts, /* opts[5] = { mu, e1, e2, e3, delta } */
+	      info, /* info[LM_INFO_SZ] */
+	      NULL, /* work vector of size LM_DIF_WORKSZ(3,k) */
+	      covar, data);
   nlls_printstop(info);
 }
 
 void box_nlls(nlls_fn f, int n, int k, 
-	      const Real x[], const Real y[],
+	      void *data, const Real y[],
 	      const Real bounds[], Real p[], Real covar[])
 {
   Real info[LM_INFO_SZ];
@@ -63,13 +64,13 @@ void box_nlls(nlls_fn f, int n, int k,
   opts[0]=LM_INIT_MU; /* Initial scale */
   opts[1]=opts[2]=opts[3]=1e-4; /* Stopping threshhold */
   opts[4]=LM_DIFF_DELTA; /* dx for numerical differentiation */
-  levmar_bc_dif((lmfn)f, \
-		 p, (Real *)y, n, k, \
-		 (Real *)bounds, (Real *)bounds+n, \
-		 500,  /* itmax */ \
-		 opts, /* opts[5] = { mu, e1, e2, e3, delta } */ \
-		 info, /* info[LM_INFO_SZ] */ \
-		 NULL, /* work vector of size LM_DIF_WORKSZ(3,k) */ \
-		 covar, (void *)x);
+  levmar_bc_dif((lmfn)f,
+		 p, (Real *)y, n, k,
+		 (Real *)bounds, (Real *)bounds+n,
+		 500,  /* itmax */
+		 opts, /* opts[5] = { mu, e1, e2, e3, delta } */
+		 info, /* info[LM_INFO_SZ] */
+		 NULL, /* work vector of size LM_DIF_WORKSZ(3,k) */
+		 covar, data);
   nlls_printstop(info);
 }

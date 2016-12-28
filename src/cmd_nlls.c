@@ -181,9 +181,9 @@ void cmd_nlls()
   /* Call nlls */
   tic();
 #if 1
-  box_nlls(step_nlls, ndim, nQ, (Real *)fit, y, bounds, p, covar);
+  box_nlls(step_nlls, ndim, nQ, fit, y, bounds, p, covar);
 #else
-  nlls(step_nlls, ndim, nQ, (Real *)fit, y, p, covar);
+  nlls(step_nlls, ndim, nQ, fit, y, p, covar);
 #endif
   printf("Done LM\n");fflush(stdout);
   toc();

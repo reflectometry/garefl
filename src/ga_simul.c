@@ -1385,7 +1385,9 @@ int main(int argc, char *argv[])
   if (set.popOption == 1)  {
     init_ga_fit(fit);
     getChromosome(&set,fittest(&set),bestpars);
-    pars_set01(&fit[0].pars, bestpars); 
+    pars_set01(&fit[0].pars, bestpars);
+    // Get pars as true values rather than values in [0,1]
+    pars_get(&fit[0].pars, bestpars);
   }
 
   if (initial_pars) {
@@ -1394,7 +1396,7 @@ int main(int argc, char *argv[])
 
   /* Apply constraints given new limits */
   if (constraints != NULL) (*constraints)(fit);
-  
+
   switch (action) {
   case GA:
     if (set.popOption != 1) init_ga_fit(fit);
@@ -1425,6 +1427,8 @@ int main(int argc, char *argv[])
     cmd_nlls();
     printf("LM completed...\n");fflush(stdout);
     final_ga_fit();
+#else
+    printf("Levenberg-Marquardt fit is not available\n");
 #endif
     break;
 
@@ -1435,6 +1439,8 @@ int main(int argc, char *argv[])
     prep_par_file(fit, argc, argv);
     cmd_quadfit();
     final_ga_fit();
+#else
+    printf("Powell's NEWUOA fit is not available\n");
 #endif
     break;
 

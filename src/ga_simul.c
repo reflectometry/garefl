@@ -994,6 +994,13 @@ void init_ga_fit(fitinfo *fit)
   // Fitness function
   set.function  = step_ga;
   set.funcParms = fit;
+  if (save_zero_one) {
+    // Force pop.dat to be [0,1]
+    set.par_min = set.par_range = NULL;
+  } else {
+    set.par_min = fit->pars.min;
+    set.par_range = fit->pars.range;
+  }
   // Backup population file
   strncpy(set.popFile,"pop.dat",sizeof(set.popFile));
   set.popFile[sizeof(set.popFile)-1]='\0';
@@ -1086,7 +1093,7 @@ void print_usage(void)
   printf("  -W         force weighted fit\n");
   printf("  -x <n:lo:hi:steps> print chisq landscape of parameter Pn\n");
   printf("             or of the Pm-Pn surface if -x is repeated\n");
-  printf("  -z         write par.dat file in [0-1] rather real space\n");
+  printf("  -z         write pop.data/par.dat file in [0-1] rather real space\n");
   printf("Output\n");
   printf("  model#.dat    : best model   (d rho mu P theta)\n");
   printf("  fit#.dat[ABCD]: best fit     (Q R dR fit)\n");
@@ -1162,7 +1169,7 @@ int main(int argc, char *argv[])
     GA, AMOEBA, NLLS, QUADFIT, 
     CHISQ, PRINT_MODEL, PRINT_PROFILE, SAVE_STAJ, OUTPUT_MODEL
   } action;
-  char *initial_pars = NULL;
+  char *initial_pars_filename = NULL;
   int nth=0, n1=0, xdims=0, k, steps=20;
   int generations = 1000000000;
   int ch;
@@ -1247,7 +1254,7 @@ int main(int argc, char *argv[])
       break;
 
     case 'I':
-      initial_pars = optarg;
+      initial_pars_filename = optarg;
       break;
 
     case 'S':
@@ -1378,16 +1385,19 @@ int main(int argc, char *argv[])
   if (set.popOption == 1)  {
     init_ga_fit(fit);
     getChromosome(&set,fittest(&set),bestpars);
-    pars_set01(&fit[0].pars, bestpars); 
+    pars_set01(&fit[0].pars, bestpars);
+    // Get pars as true values rather than values in [0,1]
   }
 
-  if (initial_pars) {
-    load_initial_pars(fit, initial_pars);
+  if (initial_pars_filename) {
+    load_initial_pars(fit, initial_pars_filename);
   }
+
+  pars_get(&fit[0].pars, bestpars);
 
   /* Apply constraints given new limits */
   if (constraints != NULL) (*constraints)(fit);
-  
+
   switch (action) {
   case GA:
     if (set.popOption != 1) init_ga_fit(fit);
@@ -1418,6 +1428,8 @@ int main(int argc, char *argv[])
     cmd_nlls();
     printf("LM completed...\n");fflush(stdout);
     final_ga_fit();
+#else
+    printf("Levenberg-Marquardt fit is not available\n");
 #endif
     break;
 
@@ -1428,6 +1440,8 @@ int main(int argc, char *argv[])
     prep_par_file(fit, argc, argv);
     cmd_quadfit();
     final_ga_fit();
+#else
+    printf("Powell's NEWUOA fit is not available\n");
 #endif
     break;
 

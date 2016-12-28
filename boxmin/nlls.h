@@ -22,10 +22,10 @@ typedef void (*nlls_fn)(const Real *p, Real *y,
 int nlls_worksize(int n, int k);
 
 void nlls(nlls_fn f, int n, int k, 
-	  const Real x[], const Real y[], Real p[], Real covar[]);
+	  void *data, const Real y[], Real p[], Real covar[]);
 
 void box_nlls(nlls_fn f, int n, int k, 
-	      const Real x[], const Real y[],
+	      void *data, const Real y[],
 	      const Real bounds[], Real p[], Real covar[]);
 
 #ifdef __cplusplus

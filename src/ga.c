@@ -256,6 +256,27 @@ static Real adjmut( Settings *set ){
 }
 
 //-------------------------------------------------------------
+// Rescale parameters to/from [0,1]
+static Real _convert_to_limited( Settings *set, int par, Real value)
+{
+    if (set->par_min != NULL) {
+        Real limited = (value - set->par_min[par])/set->par_range[par];
+        return (limited < 0. ? 0. : limited > 1. ? 1. : limited);
+    } else {
+        return value;
+    }
+}
+
+static Real _convert_from_limited( Settings *set, int par, Real value)
+{
+    if (set->par_min != NULL) {
+
+        return value*set->par_range[par] + set->par_min[par];
+    } else {
+        return value;
+    }
+}
+
 // Internal function to write the population to a file
 static int _write_pop( const char *filename, Settings *set) {
   int ip,k;
@@ -273,7 +294,7 @@ static int _write_pop( const char *filename, Settings *set) {
   fprintf(file,"%i\n",GetGen(set));
   for(ip=0; ip<set->np; ip++) {
     for(k=0; k<set->nParams; k++) 
-      fprintf(file,"%15g ",set->pop->indiv[ip].value[k]);
+      fprintf(file,"%15g ", _convert_from_limited(set, k, set->pop->indiv[ip].value[k]));
     fprintf(file,"\n");
   }
   fclose(file);
@@ -321,7 +342,7 @@ int read_pop( Settings *set, const char *filename ) {
     } else {
       k++;
     }
-    set->pop->indiv[ip].value[k] = (Real)buffer;
+    set->pop->indiv[ip].value[k] = _convert_to_limited(set, k, (Real)buffer);
   }
   fclose(file);
   if (ip != set->np-1 || k != set->nParams-1) {
@@ -438,6 +459,8 @@ void initSettings( Settings *set ) {
   set->trace_period = 20;
   set->trace_overwrite = 1;
   set->print_stats = 0;
+  set->par_min = NULL;
+  set->par_range = NULL;
 }
 
 //-------------------------------------------------------------

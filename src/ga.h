@@ -63,6 +63,8 @@ typedef struct {
   int trace_overwrite;
   // Add to the report every generation. 
   int print_stats;
+  Real *par_min;
+  Real *par_range;
 } Settings;
 
 /** Random number generator */

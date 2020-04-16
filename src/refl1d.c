@@ -165,6 +165,28 @@ ex_get_data(fitinfo fit[], int k, int xs, Real out[][4])
   return data->file;
 }
 
+int
+ex_set_data(fitinfo fit[], int k, int xs, int n, Real val[][4])
+{
+  fitdata *data;
+  int i;
+
+  if (xs == 0) data = &(fit[k].dataA);
+  else if (xs == 1) data = &(fit[k].dataB);
+  else if (xs == 2) data = &(fit[k].dataC);
+  else if (xs == 3) data = &(fit[k].dataD);
+  else return -1; // ERROR
+
+  if (!data_create(data, n)) return -1;
+  for (i=0; i<data->n; i++) {
+    data->Q[i] = val[i][0];
+    data->dQ[i] = val[i][1];
+    data->R[i] = val[i][2];
+    data->dR[i] = val[i][3];
+  }
+  return 0;
+}
+
 
 void
 ex_get_beam(fitinfo fit[], int k, Real values[])
